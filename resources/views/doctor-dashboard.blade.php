@@ -220,7 +220,7 @@
                                         <form id="meeting-link-form" method="POST" action="{{ route('api.doctors.update-meeting-link', $doctor->id) }}">
                                             @csrf
                                             <div class="input-group mb-3">
-                                                <span class="input-group-text">meet.ketiai.com/</span>
+                                                <span class="input-group-text">meet.jit.si/</span>
                                                 <input type="text" 
                                                        class="form-control" 
                                                        name="meeting_slug" 
