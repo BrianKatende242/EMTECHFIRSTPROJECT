@@ -213,7 +213,7 @@
                                     <div class="card-body">
                                         <p>Your permanent meeting link:</p>
                                         <div class="meeting-link mb-3">
-                                            meet.ketiai.com/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}
+                                            meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}
                                         </div>
                                         <p class="text-muted">This link will be shared with patients when they book appointments with you.</p>
                                         
