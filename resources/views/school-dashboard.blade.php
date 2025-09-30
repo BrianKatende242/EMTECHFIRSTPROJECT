@@ -156,124 +156,124 @@
                         @if($appointments->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Date</th>
-            <th>Student</th>
-            <th>Doctor</th>
-            <th>Duration</th>
-            <th>Amount</th>
-            <th>Reason</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($appointments as $appointment)
-        <tr>
-            <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-            <td>{{ $appointment->student->name }}</td>
-            <td>Dr. {{ $appointment->doctor->name }}</td>
-            <td>{{ $appointment->duration }} mins</td>
-            <td>{{ number_format($appointment->amount) }} UGX</td>
-            <td>{{ $appointment->reason }}</td>
-            <td>
-                <span class="badge bg-{{ 
-                    $appointment->status == 'confirmed' ? 'success' : 
-                    ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
-                }}">
-                    {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
-                </span>
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Student</th>
+                                <th>Doctor</th>
+                                <th>Duration</th>
+                                <th>Amount</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($appointments as $appointment)
+                            <tr>
+                                <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
+                                <td>{{ $appointment->student->name }}</td>
+                                <td>Dr. {{ $appointment->doctor->name }}</td>
+                                <td>{{ $appointment->duration }} mins</td>
+                                <td>{{ number_format($appointment->amount) }} UGX</td>
+                                <td>{{ $appointment->reason }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 
+                                        $appointment->status == 'confirmed' ? 'success' : 
+                                        ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
+                                    }}">
+                                        {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                         </div>
                         @else
                         <div class="alert alert-info">
                             No appointments found.
                         </div>
                         @endif
-<!-- School Appointment Modal -->
-<div class="modal fade" id="newAppointmentModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Book Doctor Appointment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="appointment-form" action="{{ route('payment.appointment.checkout') }}" method="POST">
-                @csrf
-                <input type="hidden" name="school_id" value="{{ $school->id }}">
-                
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Student</label>
-                        <select name="student_id" class="form-select" required>
-                            <option value="">Select Student</option>
-                            @foreach($students as $student)
-                            <option value="{{ $student->id }}">{{ $student->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <!-- School Appointment Modal -->
+                        <div class="modal fade" id="newAppointmentModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Book Doctor Appointment</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form id="appointment-form" action="{{ route('payment.appointment.checkout') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="school_id" value="{{ $school->id }}">
+                                        
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Student</label>
+                                                <select name="student_id" class="form-select" required>
+                                                    <option value="">Select Student</option>
+                                                    @foreach($students as $student)
+                                                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Doctor</label>
-                        <select name="doctor_id" id="doctor-select" class="form-select" required>
-                            <option value="">Select Doctor</option>
-                            @foreach($doctors as $doctor)
-                            <option value="{{ $doctor->id }}" data-specialization="{{ $doctor->specialization }}">
-                                Dr. {{ $doctor->name }} ({{ $doctor->specialization }})
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Doctor</label>
+                                                <select name="doctor_id" id="doctor-select" class="form-select" required>
+                                                    <option value="">Select Doctor</option>
+                                                    @foreach($doctors as $doctor)
+                                                    <option value="{{ $doctor->id }}" data-specialization="{{ $doctor->specialization }}">
+                                                        Dr. {{ $doctor->name }} ({{ $doctor->specialization }})
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Duration (minutes)</label>
-                        <select name="duration" id="duration-select" class="form-select" required>
-                            <option value="">Select Duration</option>
-                            <option value="15">15 minutes</option>
-                            <option value="20">20 minutes</option>
-                            <option value="30">30 minutes</option>
-                            <option value="45">45 minutes</option>
-                            <option value="60">60 minutes</option>
-                        </select>
-                    </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Duration (minutes)</label>
+                                                <select name="duration" id="duration-select" class="form-select" required>
+                                                    <option value="">Select Duration</option>
+                                                    <option value="15">15 minutes</option>
+                                                    <option value="20">20 minutes</option>
+                                                    <option value="30">30 minutes</option>
+                                                    <option value="45">45 minutes</option>
+                                                    <option value="60">60 minutes</option>
+                                                </select>
+                                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Date & Time</label>
-                        <input type="datetime-local" name="appointment_time" class="form-control" required>
-                    </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Date & Time</label>
+                                                <input type="datetime-local" name="appointment_time" class="form-control" required>
+                                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <textarea name="reason" class="form-control" rows="3" required></textarea>
-                    </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Reason</label>
+                                                <textarea name="reason" class="form-control" rows="3" required></textarea>
+                                            </div>
 
-                    <!-- Display payment summary -->
-                    <div class="alert alert-info d-none" id="payment-info">
-                        <h5><i class="fas fa-credit-card me-2"></i>Payment Details</h5>
-                        <p>Doctor: <span id="doctor-name-display"></span></p>
-                        <p>Duration: <span id="duration-display"></span> minutes</p>
-                        <p>Amount to Pay: <strong><span id="amount-display"></span> UGX</strong></p>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            You will be redirected to Stripe for secure payment processing.
-                        </small>
-                    </div>
-                </div>
+                                            <!-- Display payment summary -->
+                                            <div class="alert alert-info d-none" id="payment-info">
+                                                <h5><i class="fas fa-credit-card me-2"></i>Payment Details</h5>
+                                                <p>Doctor: <span id="doctor-name-display"></span></p>
+                                                <p>Duration: <span id="duration-display"></span> minutes</p>
+                                                <p>Amount to Pay: <strong><span id="amount-display"></span> UGX</strong></p>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    You will be redirected to Stripe for secure payment processing.
+                                                </small>
+                                            </div>
+                                        </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="book-appointment-btn" disabled>
-                        <i class="fas fa-credit-card me-2"></i> Proceed to Payment
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary" id="book-appointment-btn" disabled>
+                                                <i class="fas fa-credit-card me-2"></i> Proceed to Payment
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
 
                     <!-- Lab Tests Tab -->
                     <div class="tab-pane fade" id="lab-tests">

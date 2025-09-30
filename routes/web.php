@@ -85,7 +85,7 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
-    return view('school-dashboard', [
+    return view('school', [
         'school' => $school,
         'students' => $school->students()->latest()->get(), // Removed with()
         'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
@@ -93,6 +93,23 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'doctors' => Doctor::latest()->get()
     ]);
 })->name('school.dashboard');
+
+
+Route::get('/students/{school}', function (App\Models\School $school) {
+    return view('students', [
+        'school' => $school,
+        'students' => $school->students()->latest()->get()
+    ]);
+})->name('students');
+
+
+Route::get('/lab-tests/{school}', function (App\Models\School $school) {
+    return view('lab-tests', [
+        'school' => $school,
+        'labTests' => $school->labTests()->with('student')->latest()->get(),
+        'students' => $school->students()->latest()->get()
+    ]);
+})->name('lab-tests');
 
 
 // Doctor Dashboard Route
