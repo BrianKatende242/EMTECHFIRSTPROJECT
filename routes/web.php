@@ -31,7 +31,7 @@ use App\Http\Controllers\PaymentController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('https://ketiai.com');
 });
 
 // Home Route (Fixed Controller Reference)
