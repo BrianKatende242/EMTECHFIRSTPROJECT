@@ -13,7 +13,7 @@
         </a>
     </li>
     <li>
-        <a class="" href="javascript:void()" aria-expanded="false">
+        <a class="" href="{{ route('book-doctor', ['school' => $school])}}" aria-expanded="false">
             <i class="fa fa-user-md"></i>
             <span class="nav-text">Book Doctor</span>
         </a>

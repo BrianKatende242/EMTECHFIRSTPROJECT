@@ -136,6 +136,16 @@ Route::get('/lab-tests/{school}', function (App\Models\School $school) {
 })->name('lab-tests');
 
 
+Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
+    return view('book-doctor', [
+        'school' => $school,
+        'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
+        'patients' => [],
+        'doctors' => Doctor::latest()->get()
+    ]);
+})->name('book-doctor');
+
+
 // Doctor Dashboard Route
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
