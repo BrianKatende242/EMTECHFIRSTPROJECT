@@ -165,6 +165,7 @@ Route::post('/patients', [PatientController::class, 'store'])->name('patients.st
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])
     ->name('patient.maternal');
+    
 Route::post('/patients/create', function (Request $request) {
     try {
         $validated = $request->validate([
