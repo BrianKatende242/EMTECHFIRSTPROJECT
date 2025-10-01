@@ -140,7 +140,7 @@ Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
         'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
-        'patients' => [],
+        'patients' => $school->students()->latest()->get(),
         'doctors' => Doctor::latest()->get()
     ]);
 })->name('book-doctor');
