@@ -14,39 +14,54 @@
                         </div>
                         <div class="modal-body">
                             <form action="{{ route('appointments.store') }}" method="POST">
-                                @csrf
-                                <div class="mb-3">
-                                    <label for="patient_id" class="form-label">Patient</label>
-                                    <select class="form-control form-select" name="patient_id" required>
-                                        <option value="">Select patient</option>
-                                        @foreach($patients as $patient)
-                                        <option value="{{ $patient->id }}">{{ $patient->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="doctor_id" class="form-label">Doctor</label>
-                                    <select class="form-control form-select" name="doctor_id" required>
-                                        <option value="">Select doctor</option>
-                                        @foreach($doctors as $doctor)
-                                        <option value="{{ $doctor->id }}">{{ $doctor->name }} - {{ $doctor->specialty }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="appointment_time" class="form-label">Appointment Time</label>
-                                    <input type="datetime-local" class="form-control" name="appointment_time" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="duration" class="form-label">Duration (mins)</label>
-                                    <input type="number" class="form-control" name="duration" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="reason" class="form-label">Reason</label>
-                                    <textarea class="form-control" name="reason" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Book Appointment</button>
-                            </form>
+    @csrf
+    <input type="hidden" name="school_id" value="{{ $school->id }}">
+
+    <div class="mb-3">
+        <label for="patient_id" class="form-label">Patient</label>
+        <select class="form-control form-select" name="patient_id" required>
+            <option value="">Select patient</option>
+            @foreach($patients as $patient)
+            <option value="{{ $patient->id }}">{{ $patient->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="doctor_id" class="form-label">Doctor</label>
+        <select class="form-control form-select" name="doctor_id" required>
+            <option value="">Select doctor</option>
+            @foreach($doctors as $doctor)
+            <option value="{{ $doctor->id }}">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="appointment_time" class="form-label">Appointment Time</label>
+        <input type="datetime-local" class="form-control" name="appointment_time" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="duration" class="form-label">Duration (mins)</label>
+        <select class="form-control form-select" name="duration" required>
+            <option value="">Select Duration</option>
+            <option value="15">15 minutes</option>
+            <option value="20">20 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60">60 minutes</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="reason" class="form-label">Reason</label>
+        <textarea class="form-control" name="reason" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Book Appointment</button>
+                        </form>
+
                         </div>
                     </div>
                 </div>
