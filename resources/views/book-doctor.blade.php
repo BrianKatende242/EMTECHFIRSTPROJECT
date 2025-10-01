@@ -10,7 +10,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="newAppointmentModalLabel">New Doctor Appointment</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
                         </div>
                         <div class="modal-body">
                             <form action="{{ route('appointments.store') }}" method="POST">
@@ -29,7 +29,7 @@
                                     <select class="form-control form-select" name="doctor_id" required>
                                         <option value="">Select doctor</option>
                                         @foreach($doctors as $doctor)
-                                        <option value="{{ $doctor->id }}">{{ $doctor->name }}</option>
+                                        <option value="{{ $doctor->id }}">{{ $doctor->name }} - {{ $doctor->specialty }}</option>
                                         @endforeach
                                     </select>
                                 </div>
