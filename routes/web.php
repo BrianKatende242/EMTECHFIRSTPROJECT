@@ -31,7 +31,7 @@ use App\Http\Controllers\PaymentController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('https://ketiai.com');
 });
 
 // Home Route (Fixed Controller Reference)
@@ -85,7 +85,7 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
-    return view('school-dashboard', [
+    return view('school', [
         'school' => $school,
         'students' => $school->students()->latest()->get(), // Removed with()
         'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
@@ -93,6 +93,57 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'doctors' => Doctor::latest()->get()
     ]);
 })->name('school.dashboard');
+
+
+Route::get('/students/{school}', function (App\Models\School $school) {
+    return view('students', [
+        'school' => $school,
+        'students' => $school->students()->latest()->get()
+    ]);
+})->name('students');
+
+
+Route::post('/students/create', function (Request $request) {
+    try {
+        $validated = $request->validate([
+            'name' => 'required',
+            'grade' => 'required',
+            'age' => 'required',
+            'parent_contact' => 'required',
+            'birth_date' => 'required',
+            'school_id' => 'required',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'errors' => $e->errors(),
+        ], 422);
+    }
+
+    $student = App\Models\Student::create($validated);
+
+    return redirect()->route('students', ['school' => $student->school_id]);
+})->name('students.create');
+
+
+Route::get('/lab-tests/{school}', function (App\Models\School $school) {
+    return view('lab-tests', [
+        'school' => $school,
+        'labTests' => $school->labTests()->with('student')->latest()->get(),
+        'students' => $school->students()->latest()->get()
+    ]);
+})->name('lab-tests');
+
+
+Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
+    return view('book-doctor', [
+        'school' => $school,
+        'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
+        'patients' => [],
+        'doctors' => Doctor::latest()->get()
+    ]);
+})->name('book-doctor');
 
 
 // Doctor Dashboard Route

@@ -13,12 +13,19 @@ class SchoolController extends Controller
      */
     public function registerSchool(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:schools',
-            'contact' => 'required|string|max:20',
-            'file_url' => 'nullable|string'
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:schools',
+                'contact' => 'required|string|max:20',
+                'file_url' => 'nullable|string'
+            ]);
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return response()->json([
+                'message' => 'Error validating school data'
+            ], 422);
+        }
 
         $school = School::create($validated);
 
