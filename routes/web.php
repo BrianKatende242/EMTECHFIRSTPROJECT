@@ -104,21 +104,26 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 
 
 Route::post('/students/create', function (Request $request) {
-    $validated = $request->validate([
-        'name' => 'required',
-        'grade' => 'required',
-        'age' => 'required',
-        'parent_contact' => 'required',
-        'birth_date' => 'required',
-        'school_id' => 'required',
-    ]);
+    try {
+        $validated = $request->validate([
+            'name' => 'required',
+            'grade' => 'required',
+            'age' => 'required',
+            'parent_contact' => 'required',
+            'birth_date' => 'required',
+            'school_id' => 'required',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'errors' => $e->errors(),
+        ], 422);
+    }
 
     $student = App\Models\Student::create($validated);
 
-    return response()->json([
-        'message' => 'Student created successfully',
-        'student' => $student
-    ]);
+    return redirect()->route('students', ['school' => $student->school_id]);
 })->name('students.create');
 
 

@@ -20,16 +20,25 @@
                             @csrf
                             <div class="form-group">
                                 <label for="name">Name:</label>
-                                <input type="text" class="form-control" id="name" name="name">
+                                <input type="text" required class="form-control" id="name" name="name">
                             </div>
                             <div class="form-group">
                                 <label for="grade">Grade:</label>
-                                <input type="text" class="form-control" id="grade" name="grade">
+                                <input type="text" required class="form-control" id="grade" name="grade">
                             </div>
                             <div class="form-group">
                                 <label for="age">Age:</label>
-                                <input type="number" class="form-control" id="age" name="age">
+                                <input type="number" required class="form-control" id="age" name="age">
                             </div>
+                            <div class="form-group">
+                                <label for="parent_contact">Parent Contact:</label>
+                                <input type="text" required class="form-control" id="parent_contact" name="parent_contact">
+                            </div>
+                            <div class="form-group">
+                                <label for="birth_date">Birth Date:</label>
+                                <input type="date" required class="form-control" id="birth_date" name="birth_date">
+                            </div>
+                            <input type="text" name="school_id" value="{{ $school->id }}" hidden>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
@@ -39,8 +48,8 @@
 
         @if($students->count() > 0)
         <div class="table-responsive mt-4">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
+            <table class="table table-hover text-dark">
+                <thead class="table-primary">
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
@@ -60,10 +69,10 @@
                         <td>{{ $student->parent_contact ?? 'N/A' }}</td>
                         <td>
                             <button class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i>
+                                <i class="fa fa-edit"></i>
                             </button>
                             <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
+                                <i class="fa fa-trash"></i>
                             </button>
                         </td>
                     </tr>
