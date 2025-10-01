@@ -19,7 +19,7 @@
 
     <div class="mb-3">
         <label for="patient_id" class="form-label">Patient</label>
-        <select class="form-control form-select" name="patient_id" required>
+        <select class="form-control form-select" name="student_id" required>
             <option value="">Select patient</option>
             @foreach($patients as $patient)
             <option value="{{ $patient->id }}">{{ $patient->name }}</option>
