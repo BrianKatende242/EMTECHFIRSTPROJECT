@@ -151,10 +151,7 @@ Route::get('/health-facilities-dashboard', function () {
 });
 
 
-
-Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 'showDashboard']);
-
-
+Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 'showDashboard'])->name('health-facility.dashboard');
 
 Route::put('/health-facilities/{id}', [HealthFacilityController::class, 'updateHealthFacility'])->name('health-facilities.update');
 Route::post('/health-facilities/{id}/change-password', [HealthFacilityController::class, 'changePassword'])->name('health-facilities.change-password');
@@ -179,7 +176,7 @@ Route::post('/patients/create', function (Request $request) {
 
         $patient = App\Models\Patient::create($validated);
 
-        return redirect()->route('patient.maternal', ['patient' => $patient->id]);
+        return redirect()->route('health-facility.dashboard', ['id' => $validated['health_facility_id']]);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
