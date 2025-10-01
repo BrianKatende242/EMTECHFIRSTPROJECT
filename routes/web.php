@@ -103,6 +103,25 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 })->name('students');
 
 
+Route::post('/students/create', function (Request $request) {
+    $validated = $request->validate([
+        'name' => 'required',
+        'grade' => 'required',
+        'age' => 'required',
+        'parent_contact' => 'required',
+        'birth_date' => 'required',
+        'school_id' => 'required',
+    ]);
+
+    $student = App\Models\Student::create($validated);
+
+    return response()->json([
+        'message' => 'Student created successfully',
+        'student' => $student
+    ]);
+})->name('students.create');
+
+
 Route::get('/lab-tests/{school}', function (App\Models\School $school) {
     return view('lab-tests', [
         'school' => $school,

@@ -58,7 +58,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Request Lab Test</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn" data-bs-dismiss="modal"><i class="fa fa-times"></i></button>
                 </div>
                 <form id="labtest-form" action="{{ url('/api/lab-tests') }}" method="POST">
                     @csrf
@@ -67,7 +67,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Student</label>
-                            <select name="student_id" class="form-select" required>
+                            <select name="student_id" class="form-control form-select" required>
                                 <option value="">Select Student</option>
                                 @foreach($students as $student)
                                 <option value="{{ $student->id }}">{{ $student->name }}</option>
@@ -77,7 +77,7 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Test Type</label>
-                            <select name="test_type" class="form-select" required>
+                            <select name="test_type" class="form-control form-select" required>
                                 <option value="">Select Test</option>
                                 <option value="Blood Test">Blood Test</option>
                                 <option value="Urine Test">Urine Test</option>
