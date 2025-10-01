@@ -151,10 +151,7 @@ Route::get('/health-facilities-dashboard', function () {
 });
 
 
-
-Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 'showDashboard']);
-
-
+Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 'showDashboard'])->name('health-facility.dashboard');
 
 Route::put('/health-facilities/{id}', [HealthFacilityController::class, 'updateHealthFacility'])->name('health-facilities.update');
 Route::post('/health-facilities/{id}/change-password', [HealthFacilityController::class, 'changePassword'])->name('health-facilities.change-password');
@@ -165,9 +162,28 @@ Route::post('/patients', [PatientController::class, 'store'])->name('patients.st
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])
     ->name('patient.maternal');
+    
+Route::post('/patients/create', function (Request $request) {
+    try {
+        $validated = $request->validate([
+            'health_facility_id' => 'required|exists:health_facilities,id',
+            'name' => 'required|string|max:255',
+            'gender' => 'required|string|in:male,female,other',
+            'birth_date' => 'required|date',
+            'contact_number' => 'nullable|string',
+            'medical_history' => 'nullable|string'
+        ]);
 
+        $patient = App\Models\Patient::create($validated);
 
-
+        return redirect()->route('health-facility.dashboard', ['id' => $validated['health_facility_id']]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+})->name('patients.create');
 
    
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');

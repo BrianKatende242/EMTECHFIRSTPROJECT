@@ -130,7 +130,7 @@
                     <!-- Add Patient Tab -->
                     <div class="tab-pane fade" id="add-patient">
                         <h2 class="mb-4">Add New Patient</h2>
-                        <form id="patient-form" method="POST" action="{{ url('/api/patients') }}">
+                        <form id="patient-form" method="POST" action="{{ route('patients.create') }}">
                             @csrf
                             <input type="hidden" name="health_facility_id" value="{{ $healthFacility->id }}">
                             
