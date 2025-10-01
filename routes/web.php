@@ -165,9 +165,27 @@ Route::post('/patients', [PatientController::class, 'store'])->name('patients.st
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])
     ->name('patient.maternal');
+Route::post('/patients/create', function (Request $request) {
+    try {
+        $validated = $request->validate([
+            'health_facility_id' => 'required|exists:health_facilities,id',
+            'name' => 'required|string|max:255',
+            'gender' => 'required|string|in:male,female,other',
+            'birth_date' => 'required|date',
+            'contact_number' => 'nullable|string',
+            'medical_history' => 'nullable|string'
+        ]);
 
+        $patient = App\Models\Patient::create($validated);
 
-
+        return redirect()->route('patient.maternal', ['patient' => $patient->id]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+})->name('patients.create');
 
    
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');

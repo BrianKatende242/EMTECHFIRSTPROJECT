@@ -18,12 +18,20 @@ class HealthFacilityController extends Controller
      */
     public function registerHealthFacility(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:health_facilities',
-            'contact' => 'required|string|max:20',
-            'file_url' => 'nullable|string'
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:health_facilities',
+                'contact' => 'required|string|max:20',
+                'file_url' => 'nullable|string'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error validating health facility: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error validating health facility data',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         $healthFacility = HealthFacility::create($validated);
 
