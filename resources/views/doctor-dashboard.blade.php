@@ -636,7 +636,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Message (Optional)</label>
-                            <textarea name="message" class="form-control" rows="3">Here is my meeting link for our appointments: meet.ketiai.com/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}</textarea>
+                            <textarea name="message" class="form-control" rows="3">Here is my meeting link for our appointments: meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
