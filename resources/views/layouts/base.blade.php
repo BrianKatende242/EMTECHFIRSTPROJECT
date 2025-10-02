@@ -43,8 +43,8 @@
             Nav header start
         ***********************************-->
         <div class="nav-header">
-            <a href="/" class="brand-logo">
-                <img class="logo-abbr" src="" alt="">
+            <a href="/" class="brand-logo d-flex justify-content-center align-items-center" style="height:120px;">
+                <img class="profile-pic sidebar-profile" src="{{ $user->profile_picture_url ?? asset('images/profile.png') }}" alt="User Profile" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border: 4px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-right:16px;">
             </a>
 
             <div class="nav-control">
@@ -122,11 +122,9 @@
             Sidebar start
         ***********************************-->
         <div class="quixnav">
-            <div class="quixnav-scroll">
+            <div class="quixnav-scroll mt-4">
                 @include('layouts.sidebar')
             </div>
-
-
         </div>
         <!--**********************************
             Sidebar end
@@ -187,6 +185,24 @@
 
     <script src="{{ asset('js/dashboard/dashboard.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        .sidebar-collapsed .sidebar-profile {
+            display: none !important;
+        }
+    </style>
+    <script>
+        // Example: toggling sidebar-collapsed class on #main-wrapper
+        document.addEventListener('DOMContentLoaded', function() {
+            var mainWrapper = document.getElementById('main-wrapper');
+            var navControl = document.querySelector('.nav-control');
+            if (mainWrapper && navControl) {
+                navControl.addEventListener('click', function() {
+                    mainWrapper.classList.toggle('sidebar-collapsed');
+                });
+            }
+        });
+    </script>
 
 </body>
 
