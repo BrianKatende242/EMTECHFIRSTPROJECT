@@ -2,9 +2,58 @@
 
 
 @section('content')
-        <div class="d-flex justify-content-between mb-4">
-            <h2>Doctor Appointments</h2>
-            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newAppointmentModal"><i class="fa fa-plus"></i> New Appointment</button>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">Doctor Appointments</h2>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAppointmentModal"><i class="fa fa-plus"></i> New Appointment</button>
+                </div>
+                <!-- Modal and form remain unchanged -->
+                <div>
+                    @if($appointments->count() > 0)
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-hover align-middle text-dark">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Doctor</th>
+                                        <th>Duration</th>
+                                        <th>Amount</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($appointments as $appointment)
+                                    <tr>
+                                        <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
+                                        <td>{{ $appointment->student->name }}</td>
+                                        <td>Dr. {{ $appointment->doctor->name }}</td>
+                                        <td>{{ $appointment->duration }} mins</td>
+                                        <td>{{ number_format($appointment->amount) }} UGX</td>
+                                        <td>{{ $appointment->reason }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 
+                                                $appointment->status == 'confirmed' ? 'success' : 
+                                                ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
+                                            }}">
+                                                {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info text-dark">
+                            No appointments found.
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
             <div class="modal fade" id="newAppointmentModal" tabindex="-1" aria-labelledby="newAppointmentModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -82,46 +131,4 @@
                 </div>
         </div>
         </div>
-
-        @if($appointments->count() > 0)
-        <div class="table-responsive">
-            <table class="table table-striped">
-        <thead class="table-primary text-dark">
-            <tr>
-                <th>Date</th>
-                <th>Student</th>
-                <th>Doctor</th>
-                <th>Duration</th>
-                <th>Amount</th>
-                <th>Reason</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider text-dark">
-            @foreach($appointments as $appointment)
-            <tr>
-                <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-                <td>{{ $appointment->student->name }}</td>
-                <td>Dr. {{ $appointment->doctor->name }}</td>
-                <td>{{ $appointment->duration }} mins</td>
-                <td>{{ number_format($appointment->amount) }} UGX</td>
-                <td>{{ $appointment->reason }}</td>
-                <td>
-                    <span class="badge bg-{{ 
-                        $appointment->status == 'confirmed' ? 'success' : 
-                        ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
-                    }}">
-                        {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
-                    </span>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-        </div>
-        @else
-        <div class="alert alert-info text-dark">
-            No appointments found.
-        </div>
-        @endif
 @endsection

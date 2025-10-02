@@ -107,6 +107,17 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 })->name('students');
 
 
+Route::delete('/students/{student}/delete', function ($studentId) {
+    $student = App\Models\Student::findOrFail($studentId);
+    $schoolId = $student->school_id;
+    if ($student->appointments()->count() > 0) {
+        return redirect()->route('students', ['school' => $schoolId])
+            ->with('error', 'Cannot delete student with existing appointments.');
+    }
+    $student->delete();
+    return redirect()->route('students', ['school' => $schoolId])->with('success', 'Student deleted successfully.');
+})->name('students.delete');
+
 Route::post('/students/create', function (Request $request) {
     try {
         $validated = $request->validate([

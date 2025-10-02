@@ -59,43 +59,45 @@
     <div class="row mt-4">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-primary text-white">Recent Appointments</div>
+                <div class="card-header bg-primary text-white">Weekly Activity</div>
                 <div class="card-body">
-                    @if(isset($appointments) && count($appointments) > 0)
-                    <div class="table-responsive">
-                        <table class="table table-striped text-dark">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Student</th>
-                                    <th>Doctor</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($appointments->take(5) as $appointment)
-                                <tr>
-                                    <td>{{ $appointment->appointment_time ? $appointment->appointment_time->format('M d, Y h:i A') : '' }}</td>
-                                    <td>{{ $appointment->student->name ?? '' }}</td>
-                                    <td>{{ $appointment->doctor->name ?? '' }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ 
-                                            $appointment->status == 'confirmed' ? 'success' : 
-                                            ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
-                                        }}">
-                                            {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @else
-                        <div class="alert alert-info">No recent appointments found.</div>
-                    @endif
+                    <canvas id="weeklyActivityChart" height="120"></canvas>
                 </div>
             </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [
+                                {
+                                    label: 'Appointments',
+                                    backgroundColor: '#007bff',
+                                    data: [3, 5, 2, 4, 6, 1, 0] // Replace with dynamic data
+                                },
+                                {
+                                    label: 'Lab Tests',
+                                    backgroundColor: '#28a745',
+                                    data: [2, 3, 1, 2, 4, 0, 0] // Replace with dynamic data
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: false }
+                            },
+                            scales: {
+                                x: { stacked: true },
+                                y: { stacked: true, beginAtZero: true }
+                            }
+                        }
+                    });
+                });
+            </script>
         </div>
         <div class="col-lg-4">
             <div class="card text-dark">
