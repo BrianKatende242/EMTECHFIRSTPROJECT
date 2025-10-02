@@ -71,7 +71,7 @@
         @if($appointments->count() > 0)
         <div class="table-responsive">
             <table class="table table-striped">
-        <thead class="table-dark">
+        <thead class="table-primary text-dark">
             <tr>
                 <th>Date</th>
                 <th>Student</th>
