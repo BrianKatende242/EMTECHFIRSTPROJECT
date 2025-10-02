@@ -48,13 +48,25 @@ class DoctorController extends Controller
      */
     public function registerDoctor(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctors',
-            'contact' => 'required|string|max:20',
-            'specialization' => 'nullable|string|max:255',
-            'file_url' => 'nullable|string'
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:doctors',
+                'contact' => 'required|string|max:20',
+                'specialization' => 'required|string|max:255',
+                'file_url' => 'nullable|string'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed for doctor registration', [
+                'errors' => $e->errors()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         $doctor = Doctor::create($validated);
 
