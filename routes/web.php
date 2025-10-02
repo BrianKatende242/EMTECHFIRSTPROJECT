@@ -87,7 +87,11 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
     return view('school', [
         'school' => $school,
-        'students' => $school->students()->latest()->get(), // Removed with()
+        'studentsCount' => $school->students()->count(),
+        'appointmentsCount' => $school->appointments()->count(),
+        'labTestsCount' => $school->labTests()->count(),
+        'doctorsCount' => $school->doctors()->count(),
+        'students' => $school->students()->latest()->get(),
         'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
         'labTests' => $school->labTests()->with('student')->latest()->get(),
         'doctors' => Doctor::latest()->get()
@@ -247,15 +251,7 @@ Route::get('/success', function () {
     })->name('payment.cancel');
 
 
-// Existing payment routes
-Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');
-Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
-Route::get('/success', function () {
-    return "Payment Successful!";
-})->name('payment.success');
-Route::get('/cancel', function () {
-    return "Payment Canceled!";
-})->name('payment.cancel');
+// ...existing code...
 
 // New appointment payment routes
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
