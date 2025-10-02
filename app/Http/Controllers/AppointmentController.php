@@ -76,16 +76,14 @@ class AppointmentController extends Controller
             'student_id' => $request->student_id
         ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $appointment
-        ], 201);
+        return redirect()->route('book-doctor', ['school' => $request->school_id]);
 
     } catch (\Exception $e) {
         \Log::error('Appointment creation failed: '.$e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Appointment creation failed'
+            'message' => 'Appointment creation failed',
+            'error' => $e->getMessage()
         ], 500);
     }
 }

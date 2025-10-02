@@ -82,7 +82,7 @@
                 <th>Status</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider text-dark">
             @foreach($appointments as $appointment)
             <tr>
                 <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
