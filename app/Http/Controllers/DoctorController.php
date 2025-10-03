@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use App\Models\Appointment;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -74,6 +75,26 @@ class DoctorController extends Controller
             'message' => 'Doctor registered successfully',
             'doctor' => $doctor
         ], 201);
+    }
+
+    /**
+     * Get all appointments for a doctor (API endpoint)
+     */
+    public function getDoctorAppointments(Request $request)
+    {
+        $doctorId = $request->route('doctorId');
+
+        $doctor = Doctor::findOrFail($doctorId);
+
+        $appointments = Appointment::where('doctor_id', $doctorId)
+            ->with(['student', 'doctor'])
+            ->latest()
+            ->get();
+
+        return view('doctor-appointments', [
+            'appointments' => $appointments,
+            'doctor' => $doctor
+        ]);
     }
 
     /**

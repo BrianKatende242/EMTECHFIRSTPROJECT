@@ -161,6 +161,19 @@ Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
 })->name('book-doctor');
 
 
+Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+
+Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
+    $doctor = Doctor::findOrFail($doctorId);
+    return view('meeting-link', [
+        'appointments' => $doctor->appointments()->with(['student', 'school', 'healthFacility'])->latest()->get(),
+        'doctor' => $doctor
+    ]);
+})->name('doctor.meeting-link');
+
+Route::get('/doctor-dashboard/{doctorId}/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
+
+
 // Doctor Dashboard Route
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
