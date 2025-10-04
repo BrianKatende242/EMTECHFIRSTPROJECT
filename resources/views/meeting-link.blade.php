@@ -21,7 +21,7 @@
                 </div>
                 <p class="text-muted">This link will be shared with patients when they book appointments with you.</p>
                 
-                <form id="meeting-link-form" method="POST" action="{{ route('api.doctors.update-meeting-link', $doctor->id) }}">
+                <form id="meeting-link-form" method="POST" action="{{ route('doctor.update-meeting-link', $doctor->id) }}">
                     @csrf
                     <div class="input-group mb-3">
                         <span class="input-group-text">meet.jit.si/</span>
@@ -81,6 +81,35 @@
                 <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#sendLinkModal">
                     <i class="fa fa-envelope me-2"></i> Send Link to School/Health Facility
                 </button>
+            </div>
+        </div>
+
+        <!-- Send Link Modal -->
+        <div class="modal fade" id="sendLinkModal" tabindex="-1" aria-labelledby="sendLinkModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('doctor.send-link', ['doctor' => $doctor->id]) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="sendLinkModalLabel">Send Meeting Link</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="recipient_email" class="form-label">Recipient email</label>
+                                <input type="email" class="form-control" id="recipient_email" name="recipient_email" required placeholder="example@school.edu">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message (optional)</label>
+                                <textarea class="form-control" id="message" name="message" rows="3">Hi, here is my meeting link: {{ $doctor->meeting_slug ? 'https://meet.jit.si/'.$doctor->meeting_slug : 'https://meet.jit.si/dr-'.strtolower(str_replace(' ', '-', $doctor->name)) }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Send Link</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
         

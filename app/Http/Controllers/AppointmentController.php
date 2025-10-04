@@ -126,6 +126,36 @@ class AppointmentController extends Controller
         ]);
     }
 
+    /**
+     * Mark an appointment as cancelled
+     */
+    public function cancel(Request $request, Appointment $appointment)
+    {
+        $appointment->status = 'cancelled';
+        $appointment->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'cancelled']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment cancelled');
+    }
+
+    /**
+     * Mark an appointment as completed
+     */
+    public function complete(Request $request, Appointment $appointment)
+    {
+        $appointment->status = 'completed';
+        $appointment->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'completed']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment marked completed');
+    }
+
     protected function sendAppointmentConfirmation(Appointment $appointment)
     {
         $user = $appointment->student ?? $appointment->patient;

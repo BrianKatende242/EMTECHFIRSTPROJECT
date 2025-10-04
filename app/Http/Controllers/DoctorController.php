@@ -244,6 +244,18 @@ public function showDoctorDashboard($doctorId)
     ]);
 }
 
+    /**
+     * Show availability management page for a doctor
+     */
+    public function availability($doctorId)
+    {
+        $doctor = Doctor::with('availabilities')->findOrFail($doctorId);
+
+        return view('doctor-availability', [
+            'doctor' => $doctor
+        ]);
+    }
+
 
 public function update(Request $request, Doctor $doctor)
 {
