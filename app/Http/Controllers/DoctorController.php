@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\MeetingLinkMail;
 
 
 class DoctorController extends Controller
@@ -358,23 +359,23 @@ public function uploadImage(Request $request, Doctor $doctor)
 }
 
 
-public function sendLink(Request $request, Doctor $doctor)
-{
-    $request->validate([
-        'recipient_email' => 'required|email',
-        'message' => 'nullable|string',
-    ]);
+    public function sendLink(Request $request, Doctor $doctor)
+    {
+        $request->validate([
+            'recipient_email' => 'required|email',
+            'message' => 'nullable|string',
+        ]);
 
-    $link = 'https://meet.ketiai.com/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
-    $messageContent = $request->input('message') ?? "Here is my meeting link: $link";
+    // Use Jitsi Meet as the meeting provider
+    $link = 'https://meet.jit.si/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
+        $messageContent = $request->input('message') ?? "You have a meeting invitation. Click the button below to join.";
 
-    Mail::raw($messageContent, function ($message) use ($request) {
-        $message->to($request->recipient_email)
-                ->subject('Meeting Link from Your Doctor');
-    });
+        // Use a Mailable with a nice HTML template
+        Mail::to($request->recipient_email)
+            ->send(new MeetingLinkMail($doctor, $messageContent, $link));
 
-    return back()->with('success', 'Meeting link sent successfully.');
-}
+        return back()->with('success', 'Meeting link sent successfully.');
+    }
 
 public function updateOnlineStatus(Request $request, Doctor $doctor)
 {
