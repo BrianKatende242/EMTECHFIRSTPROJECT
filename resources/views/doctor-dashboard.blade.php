@@ -6,40 +6,11 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    {{-- Header: doctor info and meeting link --}}
-    <div class="row mb-3">
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-body d-flex align-items-center">
-                    <img src="{{ $doctor->profile_picture_url ?? asset('images/doctor.png') }}" alt="Dr profile" style="width:84px;height:84px;border-radius:50%;object-fit:cover;margin-right:16px;">
-                    <div>
-                        <h3 class="mb-1">Dr. {{ $doctor->name }}</h3>
-                        <p class="mb-1 text-muted">{{ $doctor->specialization ?? 'General' }}</p>
-                        @php
-                            $meetingSlug = $doctor->meeting_slug ?? null;
-                            $meetingLink = $meetingSlug ? ('https://meet.jit.si/' . $meetingSlug) : ('https://meet.jit.si/dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
-                        @endphp
-                        <div class="d-flex gap-2 align-items-center">
-                            <div class="small text-muted">Meeting link:</div>
-                            <div class="fw-medium me-2">{{ $meetingLink }}</div>
-                            <button class="btn btn-sm btn-outline-primary" onclick="copyMeetingLink()">Copy</button>
-                            <a href="{{ $meetingLink }}" target="_blank" class="btn btn-sm btn-success ms-2">Test</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h6 class="mb-2">Availability</h6>
-                    <p class="text-muted">Manage your weekly availability and max appointments.</p>
-                    <a href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}" class="btn btn-primary">Open Availability Settings</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Header: doctor info and prominent meeting card --}}
+    @php
+        $meetingSlug = $doctor->meeting_slug ?? null;
+        $meetingLink = $meetingSlug ? ('https://meet.jit.si/' . $meetingSlug) : ('https://meet.jit.si/dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
+    @endphp
 
     {{-- compute small aggregates from appointments passed by controller --}}
     @php
@@ -168,7 +139,7 @@
                 <div class="card-body">
                     <button class="btn btn-primary w-100 mb-2" onclick="copyMeetingLink()">Copy Meeting Link</button>
                     <a href="{{ $meetingLink }}" target="_blank" class="btn btn-success w-100 mb-2">Test Meeting Room</a>
-                    <a href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}" class="btn btn-outline-secondary w-100">Edit Meeting Link</a>
+                    <!-- Edit Meeting Link removed: permanent meeting link is displayed above -->
                 </div>
             </div>
 

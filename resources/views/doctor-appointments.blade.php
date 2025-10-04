@@ -20,10 +20,7 @@
             </select>
         </div>
         <div class="col-md-3">
-            <input id="filter-from" type="date" class="form-control form-control-sm" placeholder="From">
-        </div>
-        <div class="col-md-3">
-            <input id="filter-to" type="date" class="form-control form-control-sm" placeholder="To">
+            <input id="filter-date" type="date" class="form-control form-control-sm" placeholder="Date">
         </div>
         <div class="col-md-3 text-end">
             <button id="clear-filters" class="btn btn-sm btn-outline-secondary">Clear</button>
@@ -89,9 +86,8 @@
     (function(){
         const table = document.getElementById('appointments-table');
         const search = document.getElementById('search');
-        const filterStatus = document.getElementById('filter-status');
-        const filterFrom = document.getElementById('filter-from');
-        const filterTo = document.getElementById('filter-to');
+    const filterStatus = document.getElementById('filter-status');
+    const filterDate = document.getElementById('filter-date');
         const clearBtn = document.getElementById('clear-filters');
 
         function matchesFilters(row){
@@ -106,14 +102,10 @@
                 const q = search.value.toLowerCase();
                 if (!patient.includes(q) && !school.includes(q)) return false;
             }
-            if (filterFrom.value){
-                const from = new Date(filterFrom.value);
-                if (time < from) return false;
-            }
-            if (filterTo.value){
-                const to = new Date(filterTo.value);
-                to.setHours(23,59,59,999);
-                if (time > to) return false;
+            if (filterDate && filterDate.value){
+                const d = new Date(filterDate.value);
+                // Compare only the date portion
+                if (!(time.getFullYear() === d.getFullYear() && time.getMonth() === d.getMonth() && time.getDate() === d.getDate())) return false;
             }
             return true;
         }
@@ -126,8 +118,8 @@
             });
         }
 
-        [search, filterStatus, filterFrom, filterTo].forEach(el => el && el.addEventListener('input', applyFilters));
-        if (clearBtn) clearBtn.addEventListener('click', function(){ search.value=''; filterStatus.value=''; filterFrom.value=''; filterTo.value=''; applyFilters(); });
+    [search, filterStatus, filterDate].forEach(el => el && el.addEventListener('input', applyFilters));
+    if (clearBtn) clearBtn.addEventListener('click', function(){ search.value=''; filterStatus.value=''; if(filterDate) filterDate.value=''; applyFilters(); });
 
         // AJAX appointment actions
         async function sendAction(url, method='PATCH'){

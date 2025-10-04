@@ -17,22 +17,14 @@
             <div class="card-body text-dark">
                 <p>Your permanent meeting link:</p>
                 <div class="meeting-link mb-3">
-                    meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}
+                    <strong>https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}</strong>
                 </div>
-                <p class="text-muted">This link will be shared with patients when they book appointments with you.</p>
-                
-                <form id="meeting-link-form" method="POST" action="{{ route('doctor.update-meeting-link', $doctor->id) }}">
-                    @csrf
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">meet.jit.si/</span>
-                        <input type="text" 
-                                class="form-control" 
-                                name="meeting_slug" 
-                                value="{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}"
-                                placeholder="custom-link">
-                        <button class="btn btn-primary" type="submit">Update</button>
-                    </div>
-                </form>
+                <p class="text-muted">This link is permanent and will be shared with patients when they book appointments with you.</p>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-outline-primary" onclick="copyMeetingLink()">Copy Link</button>
+                    <a href="https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}" target="_blank" class="btn btn-success">Open Meeting Room</a>
+                </div>
             </div>
         </div>
         
@@ -150,3 +142,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function copyMeetingLink() {
+    const text = 'https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}';
+    navigator.clipboard?.writeText(text).then(function(){
+        alert('Meeting link copied to clipboard');
+    }).catch(function(){
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('Meeting link copied to clipboard');
+    });
+}
+</script>
+@endpush
