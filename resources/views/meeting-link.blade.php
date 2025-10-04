@@ -65,7 +65,7 @@
                 <button class="btn btn-primary w-100 mb-2" onclick="copyMeetingLink()">
                     <i class="fa fa-copy me-2"></i> Copy Meeting Link
                 </button>
-                <a href="{{ $doctor->meeting_link }}" 
+                <a href="https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}" 
                     target="_blank" 
                     class="btn btn-success w-100 mb-2">
                     <i class="fas fa-video me-2"></i> Test Meeting Room
