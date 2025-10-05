@@ -87,10 +87,11 @@ class DoctorController extends Controller
 
         $doctor = Doctor::findOrFail($doctorId);
 
+        // Paginate appointments 10 per page for the doctor's appointments list
         $appointments = Appointment::where('doctor_id', $doctorId)
             ->with(['student', 'doctor'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('doctor-appointments', [
             'appointments' => $appointments,

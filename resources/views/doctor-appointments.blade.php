@@ -75,6 +75,9 @@
                 </tbody>
             </table>
         </div>
+        <div class="mt-3">
+            {{ $appointments->links() }}
+        </div>
     @else
         <div class="alert alert-info mt-4">No appointments found.</div>
     @endif
