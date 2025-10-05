@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MeetingLinkMail;
+use Illuminate\Support\Facades\Auth;
 
 
 class DoctorController extends Controller
@@ -43,6 +44,19 @@ class DoctorController extends Controller
             'doctors' => $doctors,
             'error' => $error
         ]);
+    }
+
+    /**
+     * Authenticated doctor dashboard (uses doctor guard)
+     */
+    public function authDashboard()
+    {
+        $doctor = Auth::guard('doctor')->user();
+        if (!$doctor) {
+            return redirect()->route('login');
+        }
+
+        return $this->showDoctorDashboard($doctor->id);
     }
 
     /**

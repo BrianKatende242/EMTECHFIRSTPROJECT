@@ -251,6 +251,9 @@ Route::get('/doctor-dashboard/{doctorId}', [DoctorController::class, 'showDoctor
 // One-time login link consume route (public)
 Route::get('/one-time-login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('one-time-login.consume');
 
+// Centralized profile route (optional doctor id to preserve doctor context)
+Route::get('/profile/{doctor?}', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+
 
 // In your web.php routes file, add this route
 

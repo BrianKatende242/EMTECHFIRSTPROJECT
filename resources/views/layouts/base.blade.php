@@ -112,19 +112,32 @@
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     <i class="mdi mdi-account"></i>
                                 </a>
+                                @php
+                                    // Centralized profile route: controllers will render the correct profile page
+                                    if (isset($doctor) && $doctor) {
+                                        $profileUrl = route('profile.show', ['doctor' => $doctor->id]);
+                                    } else {
+                                        $profileUrl = route('profile.show');
+                                    }
+                                    $isActiveProfile = request()->routeIs('profile*');
+                                @endphp
+
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="" class="dropdown-item">
+                                    <a href="{{ $profileUrl }}" class="dropdown-item {{ $isActiveProfile ? 'active' : '' }}">
                                         <i class="icon-user"></i>
-                                        <span class="ml-2">Profile </span>
+                                        <span class="ml-2">Profile</span>
                                     </a>
                                     <a href="" class="dropdown-item">
                                         <i class="icon-envelope-open"></i>
                                         <span class="ml-2">Inbox </span>
                                     </a>
-                                    <a href="/" class="dropdown-item">
-                                        <i class="icon-key"></i>
-                                        <span class="ml-2">Logout </span>
-                                    </a>
+                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item" style="border:0; background:none; padding:0; text-align:left;">
+                                            <i class="icon-key"></i>
+                                            <span class="ml-2">Logout</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </li>
                         </ul>

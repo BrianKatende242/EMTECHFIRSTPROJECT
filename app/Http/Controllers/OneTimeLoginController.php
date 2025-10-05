@@ -55,15 +55,16 @@ class OneTimeLoginController extends Controller
             // ignore
         }
 
-        // Log the doctor in using the default guard
-        Auth::loginUsingId($doctor->id);
-        $request->session()->regenerate();
+    // Log the doctor in using the doctor guard so views/middleware detect the doctor
+    Auth::guard('doctor')->loginUsingId($doctor->id);
+    // Regenerate session to prevent fixation
+    $request->session()->regenerate();
 
     // mark token used
     DB::table('one_time_logins')->where('id', $record->id)->update(['used' => true, 'updated_at' => now()]);
 
-        // redirect to doctor's dashboard (route expects doctorId)
-        return redirect()->route('doctor.dashboard', ['doctorId' => $doctor->id]);
+    // redirect to authenticated doctor dashboard path
+    return redirect(url('/doctor/dashboard'));
     }
 
     protected function flushSessionsForDoctor($doctor)
