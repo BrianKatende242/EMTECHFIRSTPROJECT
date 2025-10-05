@@ -55,7 +55,14 @@
                                 -
                             @endif
                         </td>
-                        <td class="appt-facility">{{ $appointment->healthFacility->name ?? 'N/A' }}</td>
+                        <td class="appt-facility">
+                            @if($appointment->healthFacility)
+                                {{ $appointment->healthFacility->name }}<br>
+                                <small class="text-muted">{{ $appointment->healthFacility->email ?? '-' }}</small>
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td>{{ $appointment->duration }} mins</td>
                         <td class="appt-status">
                             <span class="badge bg-{{ $appointment->status == 'confirmed' ? 'success' : ($appointment->status == 'cancelled' ? 'danger' : ($appointment->status=='completed' ? 'secondary' : 'warning')) }}">{{ ucfirst($appointment->status) }}</span>
