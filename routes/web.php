@@ -162,6 +162,9 @@ Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
 
 
 Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+// Appointment actions
+Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
+Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
 
 Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
     $doctor = Doctor::findOrFail($doctorId);
@@ -170,6 +173,18 @@ Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
         'doctor' => $doctor
     ]);
 })->name('doctor.meeting-link');
+
+// Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
+Route::post('/doctor/{id}/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
+    ->name('doctor.update-meeting-link');
+
+// Web route to send meeting link to an email (school/health facility)
+Route::post('/doctor/{doctor}/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
+    ->name('doctor.send-link');
+
+// Web route to update doctor availability (form submissions)
+Route::post('/doctor/{doctor}/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
+    ->name('doctor.update-availability');
 
 Route::get('/doctor-dashboard/{doctorId}/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
 

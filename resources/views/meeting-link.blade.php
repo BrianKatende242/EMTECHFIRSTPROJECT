@@ -17,22 +17,14 @@
             <div class="card-body text-dark">
                 <p>Your permanent meeting link:</p>
                 <div class="meeting-link mb-3">
-                    meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}
+                    <strong>https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}</strong>
                 </div>
-                <p class="text-muted">This link will be shared with patients when they book appointments with you.</p>
-                
-                <form id="meeting-link-form" method="POST" action="{{ route('api.doctors.update-meeting-link', $doctor->id) }}">
-                    @csrf
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">meet.jit.si/</span>
-                        <input type="text" 
-                                class="form-control" 
-                                name="meeting_slug" 
-                                value="{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}"
-                                placeholder="custom-link">
-                        <button class="btn btn-primary" type="submit">Update</button>
-                    </div>
-                </form>
+                <p class="text-muted">This link is permanent and will be shared with patients when they book appointments with you.</p>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-outline-primary" onclick="copyMeetingLink()">Copy Link</button>
+                    <a href="https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}" target="_blank" class="btn btn-success">Open Meeting Room</a>
+                </div>
             </div>
         </div>
         
@@ -73,7 +65,7 @@
                 <button class="btn btn-primary w-100 mb-2" onclick="copyMeetingLink()">
                     <i class="fa fa-copy me-2"></i> Copy Meeting Link
                 </button>
-                <a href="{{ $doctor->meeting_link }}" 
+                <a href="https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}" 
                     target="_blank" 
                     class="btn btn-success w-100 mb-2">
                     <i class="fas fa-video me-2"></i> Test Meeting Room
@@ -81,6 +73,35 @@
                 <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#sendLinkModal">
                     <i class="fa fa-envelope me-2"></i> Send Link to School/Health Facility
                 </button>
+            </div>
+        </div>
+
+        <!-- Send Link Modal -->
+        <div class="modal fade" id="sendLinkModal" tabindex="-1" aria-labelledby="sendLinkModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('doctor.send-link', ['doctor' => $doctor->id]) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="sendLinkModalLabel">Send Meeting Link</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="recipient_email" class="form-label">Recipient email</label>
+                                <input type="email" class="form-control" id="recipient_email" name="recipient_email" required placeholder="example@school.edu">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message (optional)</label>
+                                <textarea class="form-control" id="message" name="message" rows="3">Hi, here is my meeting link: {{ $doctor->meeting_slug ? 'https://meet.jit.si/'.$doctor->meeting_slug : 'https://meet.jit.si/dr-'.strtolower(str_replace(' ', '-', $doctor->name)) }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Send Link</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
         
@@ -121,3 +142,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function copyMeetingLink() {
+    const text = 'https://meet.jit.si/{{ $doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)) }}';
+    navigator.clipboard?.writeText(text).then(function(){
+        alert('Meeting link copied to clipboard');
+    }).catch(function(){
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('Meeting link copied to clipboard');
+    });
+}
+</script>
+@endpush

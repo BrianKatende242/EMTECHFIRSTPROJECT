@@ -222,6 +222,9 @@
         });
     </script>
 
+    {{-- Allow pages to push additional scripts (charts, inline JS) --}}
+    @stack('scripts')
+
 </body>
 
 </html>
