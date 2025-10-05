@@ -47,7 +47,14 @@
                     <tr data-id="{{ $appointment->id }}">
                         <td class="appt-time">{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                         <td class="appt-patient">{{ $appointment->student->name ?? $appointment->patient->name ?? '-' }}</td>
-                        <td class="appt-school">{{ $appointment->school->name ?? '-' }}</td>
+                        <td class="appt-school">
+                            @if($appointment->school)
+                                {{ $appointment->school->name }}<br>
+                                <small class="text-muted">{{ $appointment->school->email ?? '-' }}</small>
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td class="appt-facility">{{ $appointment->healthFacility->name ?? 'N/A' }}</td>
                         <td>{{ $appointment->duration }} mins</td>
                         <td class="appt-status">
