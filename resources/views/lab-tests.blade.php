@@ -10,14 +10,15 @@
 
     @if($labTests->count() > 0)
     <div class="table-responsive">
-        <table class="table table-striped">
-            <thead class="table-dark">
+    <table class="table table-striped table-hover text-dark">
+            <thead class="table-primary text-white">
                 <tr>
                     <th>Request Date</th>
                     <th>Student</th>
                     <th>Test Type</th>
-                    <th>Status</th>
-                    <th>Results</th>
+                        <th>Status</th>
+                        <th>Results</th>
+                        <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,16 +36,29 @@
                         </span>
                     </td>
                     <td>
-                        @if($labTest->results)
-                        <a href="#" class="btn btn-sm btn-info">View</a>
-                        @else
-                        <span class="text-muted">Pending</span>
-                        @endif
+                                        @if($labTest->results)
+                                            <a href="#" class="btn btn-sm btn-info">View</a>
+                                        @else
+                                            <span class="text-muted">Pending</span>
+                                        @endif
                     </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <form action="{{ route('lab-tests.destroy', ['labTest' => $labTest->id]) }}" method="POST" onsubmit="return confirm('Delete this lab test request?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
+        <div class="mt-3">
+            {{ $labTests->links() }}
+        </div>
     </div>
     @else
     <div class="alert alert-info text-dark">
@@ -60,7 +74,7 @@
                     <h5 class="modal-title">Request Lab Test</h5>
                     <button type="button" class="btn" data-bs-dismiss="modal"><i class="fa fa-times"></i></button>
                 </div>
-                <form id="labtest-form" action="{{ url('/api/lab-tests') }}" method="POST">
+                <form id="labtest-form" action="{{ route('lab-tests.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="school_id" value="{{ $school->id }}">
                     

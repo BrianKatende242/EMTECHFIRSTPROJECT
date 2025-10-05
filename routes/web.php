@@ -87,19 +87,9 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 
 
-Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
-    return view('school', [
-        'school' => $school,
-        'studentsCount' => $school->students()->count(),
-        'appointmentsCount' => $school->appointments()->count(),
-        'labTestsCount' => $school->labTests()->count(),
-        'doctorsCount' => $school->doctors()->count(),
-        'students' => $school->students()->latest()->get(),
-        'appointments' => $school->appointments()->with(['student', 'doctor'])->latest()->get(),
-        'labTests' => $school->labTests()->with('student')->latest()->get(),
-        'doctors' => Doctor::latest()->get()
-    ]);
-})->name('school.dashboard');
+use App\Http\Controllers\SchoolController;
+
+Route::get('/school-dashboard/{school}', [SchoolController::class, 'showDashboard'])->name('school.dashboard');
 
 
 Route::get('/students/{school}', function (App\Models\School $school) {
@@ -146,12 +136,42 @@ Route::post('/students/create', function (Request $request) {
 
 
 Route::get('/lab-tests/{school}', function (App\Models\School $school) {
+    // Paginate lab tests for the school (15 per page)
+    $labTests = $school->labTests()->with('student')->latest()->paginate(15);
+
     return view('lab-tests', [
         'school' => $school,
-        'labTests' => $school->labTests()->with('student')->latest()->get(),
+        'labTests' => $labTests,
         'students' => $school->students()->latest()->get()
     ]);
 })->name('lab-tests');
+
+// Handle lab test form submissions from web forms (redirect back to lab-tests page)
+Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'school_id' => 'required|exists:schools,id',
+        'student_id' => 'required|exists:students,id',
+        'test_type' => 'required|string',
+        'notes' => 'nullable|string'
+    ]);
+
+    $labTest = App\Models\LabTest::create(array_merge($validated, ['status' => 'pending']));
+
+    return redirect()->route('lab-tests', ['school' => $validated['school_id']])->with('success', 'Lab test requested successfully.');
+})->name('lab-tests.store');
+
+// Delete a lab test (web)
+Route::delete('/lab-tests/{labTest}', function (App\Models\LabTest $labTest) {
+    $schoolId = $labTest->school_id;
+    $labTest->delete();
+    return redirect()->route('lab-tests', ['school' => $schoolId])->with('success', 'Lab test deleted');
+})->name('lab-tests.destroy');
+
+// Mark a lab test as completed (web)
+Route::post('/lab-tests/{labTest}/complete', function (App\Models\LabTest $labTest) {
+    $labTest->update(['status' => 'completed']);
+    return redirect()->route('lab-tests', ['school' => $labTest->school_id])->with('success', 'Lab test marked completed');
+})->name('lab-tests.complete');
 
 
 Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
