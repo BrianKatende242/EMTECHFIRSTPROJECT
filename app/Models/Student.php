@@ -48,6 +48,11 @@ class Student extends Model
             $student->appointments()->get()->each(function ($appt) {
                 $appt->delete();
             });
+
+            // Delete related lab tests to prevent foreign key constraint errors
+            $student->labTests()->get()->each(function ($lab) {
+                $lab->delete();
+            });
         });
     }
 
