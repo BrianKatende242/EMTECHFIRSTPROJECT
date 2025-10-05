@@ -103,11 +103,10 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 Route::delete('/students/{student}/delete', function ($studentId) {
     $student = App\Models\Student::findOrFail($studentId);
     $schoolId = $student->school_id;
-    if ($student->appointments()->count() > 0) {
-        return redirect()->route('students', ['school' => $schoolId])
-            ->with('error', 'Cannot delete student with existing appointments.');
-    }
+
+    // Deleting the student will cascade and remove related appointments (handled in Student model)
     $student->delete();
+
     return redirect()->route('students', ['school' => $schoolId])->with('success', 'Student deleted successfully.');
 })->name('students.delete');
 
