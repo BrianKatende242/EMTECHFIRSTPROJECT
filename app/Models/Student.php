@@ -36,6 +36,21 @@ class Student extends Model
         return $this->hasMany(LabTest::class);
     }
 
+    /**
+     * Boot the model and add deleting handler to cascade-delete related records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function (Student $student) {
+            // Delete related appointments so model events on Appointment run
+            $student->appointments()->get()->each(function ($appt) {
+                $appt->delete();
+            });
+        });
+    }
+
    
 }
 
