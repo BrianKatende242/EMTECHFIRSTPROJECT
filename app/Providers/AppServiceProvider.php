@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(UrlGenerator $url)
     {
+        // Use Bootstrap markup for pagination links
+        Paginator::useBootstrap();
+
         if (env('APP_ENV') == 'production') {
             $url->forceScheme('https');
         }
