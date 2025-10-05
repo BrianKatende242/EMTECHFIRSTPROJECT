@@ -7,6 +7,9 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FinanceDashboardController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminModelController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthFacilityController;
 use App\Http\Controllers\ApiDashboardController;
 use App\Models\NewsletterSubscriber;
@@ -166,6 +169,26 @@ Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoct
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
 
+// Authentication routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Simple admin area (protected)
+Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/{modelKey}', [AdminModelController::class, 'index'])->name('admin.model.index');
+    Route::get('/{modelKey}/create', [AdminModelController::class, 'create'])->name('admin.model.create');
+    Route::post('/{modelKey}', [AdminModelController::class, 'store'])->name('admin.model.store');
+    // Appointments extras
+    Route::post('/appointments/bulk', [AdminModelController::class, 'bulkUpdateAppointments'])->name('admin.appointments.bulk');
+    Route::get('/appointments/export', [AdminModelController::class, 'exportAppointmentsCsv'])->name('admin.appointments.export');
+    Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
+    Route::get('/doctors/{id}', [AdminModelController::class, 'showDoctor'])->name('admin.doctors.show');
+    Route::post('/doctors/{id}/send-login-link', [AdminModelController::class, 'sendLoginLinkToDoctor'])->name('admin.doctors.send-login');
+    Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
+    Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
+});
 Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
     $doctor = Doctor::findOrFail($doctorId);
     return view('meeting-link', [
@@ -205,6 +228,9 @@ Route::get('/doctor-dashboard', function () {
 
 
 Route::get('/doctor-dashboard/{doctorId}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
+
+// One-time login link consume route (public)
+Route::get('/one-time-login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('one-time-login.consume');
 
 
 // In your web.php routes file, add this route
