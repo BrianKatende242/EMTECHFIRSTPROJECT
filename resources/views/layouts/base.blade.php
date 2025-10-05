@@ -131,9 +131,10 @@
                                         <i class="icon-envelope-open"></i>
                                         <span class="ml-2">Inbox </span>
                                     </a>
-                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                    <div class="dropdown-divider"></div>
+                                    <form method="POST" action="{{ route('logout') }}" class="m-0">
                                         @csrf
-                                        <button type="submit" class="dropdown-item" style="border:0; background:none; padding:0; text-align:left;">
+                                        <button type="submit" class="dropdown-item text-danger">
                                             <i class="icon-key"></i>
                                             <span class="ml-2">Logout</span>
                                         </button>

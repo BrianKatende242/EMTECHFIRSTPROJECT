@@ -29,9 +29,27 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Logout from default guard
+        try {
+            Auth::logout();
+        } catch (\Exception $e) {
+            // ignore
+        }
+
+        // Also attempt to logout doctor guard if present
+        try {
+            if (Auth::guard('doctor')->check()) {
+                Auth::guard('doctor')->logout();
+            }
+        } catch (\Exception $e) {
+            // ignore
+        }
+
+        // Invalidate session and regenerate CSRF token
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+
+        // Redirect to external site after logout
+        return redirect()->away('https://ketiai.com');
     }
 }
