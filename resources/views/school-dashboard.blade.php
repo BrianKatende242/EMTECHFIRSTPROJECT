@@ -1,7 +1,7 @@
 @extends('layouts.base')
 
 @section('content')
-    <div class="row">
+    <div class="row g-3 g-md-4">
         <div class="col-lg-3 col-sm-6">
             <div class="card stat-card stat-students">
                 <div class="card-body d-flex align-items-center">

@@ -27,7 +27,7 @@
                         }
                     @endphp
 
-                    <div class="row g-3">
+                    <div class="row g-3 g-md-4">
                         @foreach($days as $day)
                             @php $key = strtolower($day); $av = $avMap[$key] ?? null; @endphp
                             <div class="col-md-6">
