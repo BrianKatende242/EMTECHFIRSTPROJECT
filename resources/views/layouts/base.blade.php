@@ -53,7 +53,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="/" class="brand-logo d-flex justify-content-center align-items-center" style="height:80px;">
-                <img src="{{ asset('ketiai-logo.svg') }}" alt="KETI AI" style="height:48px; width:auto; display:block;">
+                <img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" style="height:48px; width:auto; display:block;">
             </a>
 
             <div class="nav-control">
