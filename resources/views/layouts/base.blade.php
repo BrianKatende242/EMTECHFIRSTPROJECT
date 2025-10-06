@@ -27,7 +27,9 @@
 </head>
 
 <body>
-    @php($currentUser = (isset($user) && $user) ? $user : (auth()->check() ? auth()->user() : null))
+    @php
+        $currentUser = (isset($user) && $user) ? $user : (auth()->check() ? auth()->user() : null);
+    @endphp
 
     <!--*******************
         Preloader start
