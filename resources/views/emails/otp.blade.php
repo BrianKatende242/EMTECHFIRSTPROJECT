@@ -24,11 +24,13 @@
                                                                     <tr>
                                                                         <td style="vertical-align:middle;">
                                                                             <a href="https://ketiai.com" target="_blank" style="text-decoration:none; color:#ffffff; display:inline-flex; align-items:center; gap:10px;">
-                                                                                                        @php
-                                                                                                            $publicPng = asset('ketiai-logo.png');
-                                                                                                            $publicSvg = asset('ketiai-logo.svg');
-                                                                                                        @endphp
-                                                                                                        <img src="{{ $logoCid ?? $publicPng }}" alt="KETI AI" width="36" height="36" style="display:block; border:0;">
+                                                                                                                                @php
+                                                                                                                                    $publicPng = asset('ketiai-logo.png');
+                                                                                                                                    $publicSvg = asset('ketiai-logo.svg');
+                                                                                                                                    $pngExists = file_exists(public_path('ketiai-logo.png'));
+                                                                                                                                    $logoSrc = $logoCid ?: ($pngExists ? $publicPng : $publicSvg);
+                                                                                                                                @endphp
+                                                                                                                                <img src="{{ $logoSrc }}" alt="KETI AI" width="36" height="36" style="display:block; border:0;">
                                                                                 <span style="font-size:18px; font-weight:700; letter-spacing:0.3px;">KETI AI</span>
                                                                             </a>
                                                                             <div style="opacity:0.9; font-size:13px; margin-top:4px;">Secure Sign-In</div>
