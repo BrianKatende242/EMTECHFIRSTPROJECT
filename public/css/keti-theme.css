@@ -87,9 +87,9 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .quixnav .metismenu > li.mm-active > a i,
 .quixnav .metismenu ul a.mm-active i { color: #FF00F8 !important; }
 
-/* Nav header (brand bar) set to black */
-.nav-header { background-color: #000 !important; }
-.nav-header .brand-logo { color: #fff !important; }
+/* Nav header (brand bar) set to white */
+.nav-header { background-color: #ffffff !important; }
+.nav-header .brand-logo { color: #000 !important; }
 .hamburger .line { background: #FF00F8 !important; }
 
 /* Optional: top header bar dark mode for cohesion (keeps white content) */
