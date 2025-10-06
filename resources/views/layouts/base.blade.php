@@ -113,8 +113,8 @@
                                         <i class="icon-envelope-open" style="color: #333"></i>
                                         <span class="ml-2">Inbox </span>
                                     </a>
-                                    <a href="/" class="dropdown-item" >
-                                        <i class="icon-key" style="color: #333"></i>
+                                    <a href="/" class="dropdown-item logout-item">
+                                        <i class="icon-key"></i>
                                         <span class="ml-2">Logout </span>
                                     </a>
                                 </div>

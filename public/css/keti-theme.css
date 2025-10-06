@@ -284,6 +284,21 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .header .header-profile .dropdown-menu .dropdown-item:focus i,
 .header .header-profile .dropdown-menu .dropdown-item.active i { color: #FF00F8 !important; }
 
+/* Make Logout red */
+.header .header-profile .dropdown-menu .dropdown-item.logout-item,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item i {
+  color: #dc3545 !important; /* Bootstrap danger red */
+}
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:hover,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:focus {
+  background-color: rgba(220, 53, 69, 0.08) !important;
+  color: #dc3545 !important;
+}
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:hover i,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:focus i {
+  color: #dc3545 !important;
+}
+
 /* Ensure profile avatar uses brand border */
 .header .header-profile img.rounded-circle {
   border-color: #FF00F8 !important;
