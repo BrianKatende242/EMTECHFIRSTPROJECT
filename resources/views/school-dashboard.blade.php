@@ -124,23 +124,96 @@
             </script>
         </div>
         <div class="col-lg-4">
-            <div class="card text-dark">
-                <div class="card-header bg-info">Lab Test Summary</div>
+            @php
+                $pendingLabTests = isset($labTests) ? $labTests->where('status', 'pending')->count() : 0;
+                $completedLabTests = isset($labTests) ? $labTests->where('status', 'completed')->count() : 0;
+                $totalLabTests = max($pendingLabTests + $completedLabTests, 1);
+                $completionRate = round(($completedLabTests / $totalLabTests) * 100);
+            @endphp
+            <div class="card stat-card stat-labtests">
                 <div class="card-body">
-                    @php
-                        $pendingLabTests = isset($labTests) ? $labTests->where('status', 'pending')->count() : 0;
-                        $completedLabTests = isset($labTests) ? $labTests->where('status', 'completed')->count() : 0;
-                    @endphp
-                    <div class="mb-3">
-                        <span class="fw-bold">Pending:</span>
-                        <span class="badge bg-warning text-dark">{{ $pendingLabTests }}</span>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon"><i class="fa fa-flask" aria-hidden="true"></i></div>
+                        <div class="stat-sep" aria-hidden="true"></div>
+                        <div>
+                            <div class="h5 mb-0">Lab Test Summary</div>
+                            <small class="text-muted">Overall completion</small>
+                        </div>
                     </div>
-                    <div>
-                        <span class="fw-bold">Completed:</span>
-                        <span class="badge bg-success">{{ $completedLabTests }}</span>
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <canvas id="labTestsDonut" height="140"></canvas>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="legend-dot me-2" style="background:#593bdb"></span>
+                                <span>Completed</span>
+                                <span class="ms-auto fw-bold">{{ $completedLabTests }}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="legend-dot me-2" style="background: rgba(0,0,0,0.65)"></span>
+                                <span>Pending</span>
+                                <span class="ms-auto fw-bold">{{ $pendingLabTests }}</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between mb-1 small text-muted">
+                                    <span>Completion</span>
+                                    <span>{{ $completionRate }}%</span>
+                                </div>
+                                <div class="progress" role="progressbar" aria-label="Lab test completion progress" aria-valuenow="{{ $completionRate }}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: {{ $completionRate }}%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var donutCtx = document.getElementById('labTestsDonut').getContext('2d');
+                    var completed = {{ $completedLabTests }};
+                    var pending = {{ $pendingLabTests }};
+                    var total = Math.max(completed + pending, 1);
+                    var pct = Math.round((completed / total) * 100);
+
+                    const centerText = {
+                        id: 'centerText',
+                        afterDraw(chart) {
+                            const {ctx, chartArea: {width, height}} = chart;
+                            ctx.save();
+                            ctx.font = '600 18px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif';
+                            ctx.fillStyle = '#1f1f1f';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(pct + '%', chart.getDatasetMeta(0).data[0].x, chart.getDatasetMeta(0).data[0].y);
+                            ctx.restore();
+                        }
+                    };
+
+                    new Chart(donutCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Completed', 'Pending'],
+                            datasets: [{
+                                data: [completed, pending],
+                                backgroundColor: ['#593bdb', 'rgba(0,0,0,0.65)'],
+                                borderColor: ['#593bdb', 'rgba(0,0,0,0.85)'],
+                                borderWidth: 2,
+                                hoverOffset: 6
+                            }]
+                        },
+                        options: {
+                            cutout: '65%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: true }
+                            }
+                        },
+                        plugins: [centerText]
+                    });
+                });
+            </script>
         </div>
     </div>
 @endsection
