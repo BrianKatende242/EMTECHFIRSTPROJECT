@@ -58,22 +58,31 @@
                 @php
                     // Prepare last 7 days labels and counts (including today) for School weekly activity
                     $schoolAppointments = ($appointments ?? collect());
+                    $labTestsCollection = ($labTests ?? collect());
                     $schoolChartLabels = [];
-                    $schoolChartData = [];
+                    $schoolAppointmentsData = [];
+                    $schoolLabTestsData = [];
                     for ($i = 6; $i >= 0; $i--) {
                         $d = \Carbon\Carbon::today()->subDays($i);
                         $schoolChartLabels[] = $d->format('M d');
-                        $count = $schoolAppointments->filter(function($a) use ($d) {
+                        // Appointments count per day
+                        $apptsCount = $schoolAppointments->filter(function($a) use ($d) {
                             try {
-                                $at = isset($a->appointment_time)
-                                    ? (\Carbon\Carbon::hasFormat($a->appointment_time, 'Y-m-d H:i:s') ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $a->appointment_time) : \Carbon\Carbon::parse($a->appointment_time))
-                                    : null;
+                                $raw = isset($a->appointment_time) ? $a->appointment_time : null;
+                                $at = $raw instanceof \Carbon\Carbon ? $raw : ($raw ? \Carbon\Carbon::parse($raw) : null);
                                 return $at ? $at->isSameDay($d) : false;
-                            } catch (\Exception $e) {
-                                return false;
-                            }
+                            } catch (\Exception $e) { return false; }
                         })->count();
-                        $schoolChartData[] = $count;
+                        $schoolAppointmentsData[] = $apptsCount;
+                        // Lab tests count per day
+                        $labCount = $labTestsCollection->filter(function($t) use ($d) {
+                            try {
+                                $raw = isset($t->created_at) ? $t->created_at : null;
+                                $ct = $raw instanceof \Carbon\Carbon ? $raw : ($raw ? \Carbon\Carbon::parse($raw) : null);
+                                return $ct ? $ct->isSameDay($d) : false;
+                            } catch (\Exception $e) { return false; }
+                        })->count();
+                        $schoolLabTestsData[] = $labCount;
                     }
                 @endphp
 
@@ -424,29 +433,46 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ctx || typeof Chart === 'undefined') return;
 
         var labels = {!! json_encode($schoolChartLabels ?? []) !!};
-        var data = {!! json_encode($schoolChartData ?? []) !!};
+        var appts = {!! json_encode($schoolAppointmentsData ?? []) !!};
+        var labs = {!! json_encode($schoolLabTestsData ?? []) !!};
 
         new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Appointments',
-                    data: data,
-                    backgroundColor: 'rgba(255, 0, 248, 0.12)', // KETI pink fill
-                    borderColor: '#000000', // black line
-                    pointBackgroundColor: '#FF00F8', // pink points
-                    pointBorderColor: '#000000', // black point border
-                    pointHoverBackgroundColor: '#000000',
-                    pointHoverBorderColor: '#FF00F8',
-                    fill: true,
-                    tension: 0.25
-                }]
+                datasets: [
+                    {
+                        label: 'Appointments',
+                        data: appts,
+                        backgroundColor: 'rgba(255, 0, 248, 0.12)', // pink fill
+                        borderColor: '#000000', // black line
+                        pointBackgroundColor: '#FF00F8', // pink points
+                        pointBorderColor: '#000000',
+                        pointHoverBackgroundColor: '#000000',
+                        pointHoverBorderColor: '#FF00F8',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.25
+                    },
+                    {
+                        label: 'Lab Tests',
+                        data: labs,
+                        backgroundColor: 'rgba(0, 0, 0, 0.08)', // subtle black tint
+                        borderColor: '#FF00F8', // pink line
+                        pointBackgroundColor: '#000000', // black points
+                        pointBorderColor: '#FF00F8',
+                        pointHoverBackgroundColor: '#FF00F8',
+                        pointHoverBorderColor: '#000000',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.25
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { display: true } },
                 scales: { y: { beginAtZero: true, precision: 0 } }
             }
         });
