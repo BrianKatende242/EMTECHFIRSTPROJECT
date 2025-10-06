@@ -278,3 +278,8 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   color: #FF00F8 !important;
   background-color: rgba(255, 0, 248, 0.08) !important;
 }
+
+/* Ensure profile avatar uses brand border */
+.header .header-profile img.rounded-circle {
+  border-color: #FF00F8 !important;
+}

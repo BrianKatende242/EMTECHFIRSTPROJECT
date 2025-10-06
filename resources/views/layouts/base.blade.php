@@ -102,19 +102,19 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #FF00F8; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-menu dropdown-menu-right text-dark">
                                     <a href="" class="dropdown-item">
-                                        <i class="icon-user"></i>
+                                        <i class="icon-user" style="color: #333"></i>
                                         <span class="ml-2">Profile </span>
                                     </a>
                                     <a href="" class="dropdown-item">
-                                        <i class="icon-envelope-open"></i>
+                                        <i class="icon-envelope-open" style="color: #333"></i>
                                         <span class="ml-2">Inbox </span>
                                     </a>
-                                    <a href="/" class="dropdown-item">
-                                        <i class="icon-key"></i>
+                                    <a href="/" class="dropdown-item" >
+                                        <i class="icon-key" style="color: #333"></i>
                                         <span class="ml-2">Logout </span>
                                     </a>
                                 </div>
