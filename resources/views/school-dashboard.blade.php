@@ -138,21 +138,24 @@
                             <small class="text-muted">Pending and completed</small>
                         </div>
                     </div>
-                    <div class="simple-stats">
-                        <div class="d-flex align-items-center justify-content-between py-2">
-                            <div class="d-flex align-items-center">
-                                <span class="legend-dot me-2" style="background:#593bdb"></span>
-                                <span class="fw-semibold">Completed</span>
+                    <div class="row g-2 simple-metrics">
+                        <div class="col-6">
+                            <div class="metric-badge completed">
+                                <div class="left d-flex align-items-center gap-2">
+                                    <div class="metric-icon"><i class="fa fa-check" aria-hidden="true"></i></div>
+                                    <div class="label">Completed</div>
+                                </div>
+                                <div class="value">{{ $completedLabTests }}</div>
                             </div>
-                            <div class="stat-value">{{ $completedLabTests }}</div>
                         </div>
-                        <hr class="soft-hr my-1">
-                        <div class="d-flex align-items-center justify-content-between py-2">
-                            <div class="d-flex align-items-center">
-                                <span class="legend-dot me-2" style="background: rgba(0,0,0,0.65)"></span>
-                                <span class="fw-semibold">Pending</span>
+                        <div class="col-6">
+                            <div class="metric-badge pending">
+                                <div class="left d-flex align-items-center gap-2">
+                                    <div class="metric-icon"><i class="fa fa-hourglass-half" aria-hidden="true"></i></div>
+                                    <div class="label">Pending</div>
+                                </div>
+                                <div class="value">{{ $pendingLabTests }}</div>
                             </div>
-                            <div class="stat-value">{{ $pendingLabTests }}</div>
                         </div>
                     </div>
                 </div>
