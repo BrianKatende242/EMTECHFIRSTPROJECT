@@ -303,3 +303,19 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .header .header-profile img.rounded-circle {
   border-color: #FF00F8 !important;
 }
+
+/* --- Doctor Availability Page --- */
+.availability-card .availability-header { background: linear-gradient(90deg, #000, #1a1a1a); color: #fff; }
+.availability-card .availability-header .btn { border-color: rgba(255,255,255,0.3); color: #fff; }
+.availability-card .availability-header .btn:hover { background: rgba(255,255,255,0.1); }
+
+.day-card { border: 0; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform .2s ease, box-shadow .2s ease; }
+.day-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.10); }
+.day-card .day-title { font-weight: 600; }
+.day-card .day-icon { width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-weight:700; background: rgba(255,0,248,0.12); color:#FF00F8; }
+.day-card.is-available { outline: 2px solid rgba(89,59,219,0.25); }
+.day-card.is-off { outline: 2px dashed rgba(0,0,0,0.18); }
+
+.status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; letter-spacing: .2px; }
+.pill-on { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
+.pill-off { background: rgba(0,0,0,0.06); color: #000; border: 1px solid rgba(0,0,0,0.18); }

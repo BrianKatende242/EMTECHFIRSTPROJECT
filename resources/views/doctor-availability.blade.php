@@ -3,8 +3,8 @@
 @section('content')
 <div class="row">
     <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card availability-card">
+            <div class="card-header d-flex justify-content-between align-items-center availability-header">
                 <div>
                     <h4 class="mb-0">Manage Availability</h4>
                     <small class="text-muted">Set which days you're available and the maximum appointments allowed.</small>
@@ -31,14 +31,23 @@
                         @foreach($days as $day)
                             @php $key = strtolower($day); $av = $avMap[$key] ?? null; @endphp
                             <div class="col-md-6">
-                                <div class="card h-100">
+                                <div class="card day-card h-100 {{ ($av && $av->available) ? 'is-available' : 'is-off' }}" data-day-card="{{ $day }}">
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="mb-1">{{ $day }}</h6>
-                                            <div class="small text-muted mb-2">Configure availability and capacity</div>
-                                            <div class="d-flex gap-2 align-items-center">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="day-icon" aria-hidden="true">{{ substr($day,0,2) }}</div>
+                                                    <div>
+                                                        <div class="day-title">{{ $day }}</div>
+                                                        <div class="small text-muted">Configure availability and capacity</div>
+                                                    </div>
+                                                </div>
+                                                @php $isOn = ($av && $av->available); @endphp
+                                                <span class="status-pill {{ $isOn ? 'pill-on' : 'pill-off' }}" data-status-pill="{{ $day }}">{{ $isOn ? 'Available' : 'Off' }}</span>
+                                            </div>
+                                            <div class="d-flex gap-2 align-items-center mt-2">
                                                 <label class="me-2 small">Max appointments</label>
-                                                <input type="number" min="0" class="form-control form-control-sm day-max" data-day="{{ $day }}" name="days[{{ $day }}][max_appointments]" value="{{ $av->max_appointments ?? 0 }}" style="width:120px;">
+                                                <input type="number" min="0" class="form-control form-control-sm day-max" data-day="{{ $day }}" name="days[{{ $day }}][max_appointments]" value="{{ $av->max_appointments ?? 0 }}" style="width:140px;">
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
@@ -145,6 +154,29 @@
                     max_appointments: parseInt(maxEl.value) || 0
                 };
                 await postDays(payload);
+            });
+        });
+
+        // Reflect UI changes when toggling availability
+        document.querySelectorAll('.day-available').forEach(function(sw){
+            sw.addEventListener('change', function(){
+                const day = sw.getAttribute('data-day');
+                const card = document.querySelector('[data-day-card="'+day+'"]');
+                const pill = document.querySelector('[data-status-pill="'+day+'"]');
+                if (!card || !pill) return;
+                if (sw.checked) {
+                    card.classList.remove('is-off');
+                    card.classList.add('is-available');
+                    pill.classList.remove('pill-off');
+                    pill.classList.add('pill-on');
+                    pill.textContent = 'Available';
+                } else {
+                    card.classList.remove('is-available');
+                    card.classList.add('is-off');
+                    pill.classList.remove('pill-on');
+                    pill.classList.add('pill-off');
+                    pill.textContent = 'Off';
+                }
             });
         });
 
