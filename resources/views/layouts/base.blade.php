@@ -52,18 +52,8 @@
             Nav header start
         ***********************************-->
         <div class="nav-header">
-            <a href="/" class="brand-logo d-flex justify-content-center align-items-center position-relative" style="height:120px;">
-                <img class="profile-pic sidebar-profile" src="{{ $user->profile_picture_url ?? (isset($doctor) ? asset('images/doctor.png') : asset('images/profile.png')) }}" alt="User Profile" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border: 4px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-right:16px;">
-                @if(isset($user) && $user->is_online)
-                    <span class="position-absolute" style="top:70px; right:100px; width:22px; height:22px; z-index:2;">
-                        <span class="bg-success border border-light rounded-circle d-block" style="width:100%; height:100%; box-shadow:0 0 0 2px #fff;"></span>
-                        <span class="visually-hidden">Active</span>
-                    </span>
-                @else
-                    <span class="position-absolute" style="top:90px; right:90px; width:22px; height:22px; z-index:2;">
-                        <span title="Offline" class="bg-danger border border-light rounded-circle d-block" style="width:100%; height:100%; box-shadow:0 0 0 2px #fff;"></span>
-                    </span>
-                @endif
+            <a href="/" class="brand-logo d-flex justify-content-center align-items-center" style="height:80px;">
+                <img src="{{ asset('ketiai-logo.svg') }}" alt="KETI AI" style="height:48px; width:auto; display:block;">
             </a>
 
             <div class="nav-control">
