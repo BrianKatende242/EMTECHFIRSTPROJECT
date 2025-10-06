@@ -43,3 +43,32 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Nav/active states (basic) */
 .nav-tabs .nav-link.active,
 .nav-pills .nav-link.active { background-color: #FF00F8; border-color: #FF00F8; }
+
+/* Sidebar (Quixnav) overrides */
+/* Active/hover parent items */
+.quixnav .metismenu > li:hover > a,
+.quixnav .metismenu > li:focus > a,
+.quixnav .metismenu > li.mm-active > a {
+  background-color: #FF00F8 !important;
+  color: #fff !important;
+}
+
+/* Submenu background + hover states */
+.quixnav .metismenu ul {
+  background-color: #2b0b2b !important; /* dark magenta tint */
+}
+.quixnav .metismenu > li.mm-active ul,
+.quixnav .metismenu > li.mm-active ul ul {
+  background-color: rgba(255, 0, 248, 0.06) !important;
+}
+.quixnav .metismenu ul a:hover,
+.quixnav .metismenu ul a:focus,
+.quixnav .metismenu ul a.mm-active {
+  background-color: rgba(255, 0, 248, 0.15) !important;
+  color: #fff !important;
+}
+
+/* Sidebar section labels */
+.nav-label {
+  color: #FF00F8 !important;
+}
