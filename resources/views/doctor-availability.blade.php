@@ -46,9 +46,9 @@
                                                 @php $isOn = ($av && $av->available); @endphp
                                                 <span class="status-pill {{ $isOn ? 'pill-on' : 'pill-off' }}" data-status-pill="{{ $day }}">{{ $isOn ? 'Available' : 'Off' }}</span>
                                             </div>
-                                            <div class="d-flex gap-2 align-items-center mt-2">
-                                                <label class="me-2 small">Max appointments</label>
-                                                <input type="number" min="0" class="form-control form-control-sm day-max" data-day="{{ $day }}" name="days[{{ $day }}][max_appointments]" value="{{ $av->max_appointments ?? 0 }}" style="width:140px;">
+                                            <div class="mt-2" style="max-width: 200px;">
+                                                <label class="small mb-1" for="max_{{ $key }}">Max appointments</label>
+                                                <input id="max_{{ $key }}" type="number" min="0" class="form-control form-control-sm day-max" data-day="{{ $day }}" name="days[{{ $day }}][max_appointments]" value="{{ $av->max_appointments ?? 0 }}">
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
