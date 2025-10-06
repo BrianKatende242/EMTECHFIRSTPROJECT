@@ -25,11 +25,9 @@
                                                                         <td style="vertical-align:middle;">
                                                                             <a href="https://ketiai.com" target="_blank" style="text-decoration:none; color:#ffffff; display:inline-flex; align-items:center; gap:10px;">
                                                                                                                                 @php
-                                                                                                                                    $baseUrl = rtrim(config('app.url') ?? '', '/');
-                                                                                                                                    $logoSrc = $baseUrl ? ($baseUrl . '/images/emoji-logo-white.svg') : asset('images/emoji-logo-white.svg');
+                                                                                                                                    $logoSrc = config('app.url') . '/images/emoji-logo-white.svg';
                                                                                                                                 @endphp
-                                                                                                                                <img src="{{ $logoSrc }}" alt="KETI AI" width="36" height="36" style="display:block; border:0;">
-                                                                                <span style="font-size:18px; font-weight:700; letter-spacing:0.3px;">KETI AI</span>
+                                                                                                                                <img src="{{ $logoSrc }}" alt="{{ config('app.name') }}" width="36" height="36" style="display:block; border:0;">
                                                                             </a>
                                                                             <div style="opacity:0.9; font-size:13px; margin-top:4px;">Secure Sign-In</div>
                                                                         </td>
