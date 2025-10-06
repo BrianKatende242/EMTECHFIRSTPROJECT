@@ -84,9 +84,6 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 //     ]);
 // })->name('school.dashboard');
 
-
-
-
 use App\Http\Controllers\SchoolController;
 
 Route::get('/school-dashboard/{school}', [SchoolController::class, 'showDashboard'])->name('school.dashboard');

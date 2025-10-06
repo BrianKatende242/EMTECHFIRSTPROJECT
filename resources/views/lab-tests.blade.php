@@ -10,8 +10,8 @@
 
     @if($labTests->count() > 0)
     <div class="table-responsive">
-    <table class="table table-striped table-hover text-dark">
-            <thead class="table-primary text-dark">
+        <table class="table table-striped text-dark">
+            <thead class="table-dark">
                 <tr>
                     <th>Request Date</th>
                     <th>Student</th>

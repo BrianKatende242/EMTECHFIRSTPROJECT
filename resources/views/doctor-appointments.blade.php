@@ -31,7 +31,7 @@
     @if($appointments->count())
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle text-dark" id="appointments-table">
-                <thead class="table-primary">
+                <thead class="table-dark">
                     <tr>
                         <th>Date & Time</th>
                         <th>Patient</th>
@@ -47,8 +47,22 @@
                     <tr data-id="{{ $appointment->id }}">
                         <td class="appt-time">{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                         <td class="appt-patient">{{ $appointment->student->name ?? $appointment->patient->name ?? '-' }}</td>
-                        <td class="appt-school">{{ $appointment->school->name ?? '-' }}</td>
-                        <td class="appt-facility">{{ $appointment->healthFacility->name ?? 'N/A' }}</td>
+                        <td class="appt-school">
+                            @if($appointment->school)
+                                {{ $appointment->school->name }}<br>
+                                <small class="text-muted">{{ $appointment->school->email ?? '-' }}</small>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="appt-facility">
+                            @if($appointment->healthFacility)
+                                {{ $appointment->healthFacility->name }}<br>
+                                <small class="text-muted">{{ $appointment->healthFacility->email ?? '-' }}</small>
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td>{{ $appointment->duration }} mins</td>
                         <td class="appt-status">
                             <span class="badge bg-{{ $appointment->status == 'confirmed' ? 'success' : ($appointment->status == 'cancelled' ? 'danger' : ($appointment->status=='completed' ? 'secondary' : 'warning')) }}">{{ ucfirst($appointment->status) }}</span>
