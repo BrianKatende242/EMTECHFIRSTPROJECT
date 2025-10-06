@@ -19,10 +19,19 @@
                 <td align="center">
                     <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px; width:100%; background:#ffffff; border-radius:12px; box-shadow:0 4px 16px rgba(2,6,23,0.06); overflow:hidden;">
                         <tr>
-                                              <td style="padding:20px 24px; background:#FF00F8; color:#ffffff;">
-                                                <div style="font-size:18px; font-weight:600;">KETI AI</div>
-                                <div style="opacity:0.9; font-size:13px; margin-top:4px;">Secure Sign-In</div>
-                            </td>
+                                                            <td style="padding:16px 24px; background:#FF00F8; color:#ffffff;">
+                                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="vertical-align:middle;">
+                                                                            <a href="https://ketiai.com" target="_blank" style="text-decoration:none; color:#ffffff; display:inline-flex; align-items:center; gap:10px;">
+                                                                                <img src="{{ asset('ketiai-logo.svg') }}" alt="KETI AI" width="36" height="36" style="display:block; border:0;">
+                                                                                <span style="font-size:18px; font-weight:700; letter-spacing:0.3px;">KETI AI</span>
+                                                                            </a>
+                                                                            <div style="opacity:0.9; font-size:13px; margin-top:4px;">Secure Sign-In</div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
                         </tr>
                         <tr>
                             <td style="padding:28px 24px 8px 24px;">
