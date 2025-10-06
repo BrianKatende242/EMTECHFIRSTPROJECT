@@ -142,13 +142,14 @@ class OtpController extends Controller
                 'required',
                 'email',
                 function ($attribute, $value, $fail) {
-                    $isInSchools = \App\Models\School::where('email', $value)->exists();
-                    $isInHealthFacilities = \App\Models\HealthFacility::where('email', $value)->exists();
-        
-                    if (!$isInSchools && !$isInHealthFacilities) {
-                        $fail("The selected email is invalid.");
-                    }
-                }
+                          $isInSchools = \App\Models\School::where('email', $value)->exists();
+                          $isInHealthFacilities = \App\Models\HealthFacility::where('email', $value)->exists();
+                          $isInDoctors = \App\Models\Doctor::where('email', $value)->exists();
+
+                              if (!$isInSchools && !$isInHealthFacilities && !$isInDoctors) {
+                             $fail("The selected email is invalid.");
+                                 }
+                           }
             ]
         ]);
         
