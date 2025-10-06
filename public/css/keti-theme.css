@@ -52,6 +52,19 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .quixnav .metismenu > li > a,
 .quixnav .metismenu ul a { color: #000 !important; }
 
+/* Give inactive links subtle light backgrounds for contrast on brand pink */
+.quixnav .metismenu > li > a {
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 10px rgba(0,0,0,0.06);
+}
+.quixnav .metismenu ul a {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+}
+
 /* Active/hover parent items with subtle contrast on brand bg */
 .quixnav .metismenu > li:hover > a,
 .quixnav .metismenu > li:focus > a,
@@ -103,7 +116,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Hover micro-interactions */
 .quixnav .metismenu > li > a:hover,
 .quixnav .metismenu > li > a:focus {
-  background-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.26) !important;
   transform: translateX(2px);
 }
 .quixnav .metismenu > li > a:hover i { transform: translateX(1px); }
@@ -112,6 +125,20 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .quixnav .metismenu ul a {
   margin: 3px 10px 3px 14px;
   border-radius: 8px;
+}
+
+/* Icon chips for better separation and readability */
+.quixnav .metismenu > li > a i,
+.quixnav .metismenu ul a i {
+  background: rgba(255,255,255,0.38);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+/* Ensure active item styles override icon chip to brand color */
+.quixnav .metismenu > li.mm-active > a i,
+.quixnav .metismenu ul a.mm-active i {
+  background: transparent;
 }
 
 /* Active indicator bar on the left for parent and submenu */
