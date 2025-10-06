@@ -147,7 +147,7 @@ class OtpController extends Controller
                           $isInDoctors = \App\Models\Doctor::where('email', $value)->exists();
 
                               if (!$isInSchools && !$isInHealthFacilities && !$isInDoctors) {
-                             $fail("The selected email is invalid.");
+                             $fail("The selected email is not associated with any school, health facility, or doctor.");
                                  }
                            }
             ]
@@ -282,11 +282,11 @@ class OtpController extends Controller
             'success' => true,
             'message' => 'OTP verified successfully. Access your dashboard below.',
             'dashboard_url' => 'https://laravelbackendchil.onrender.com/school-dashboard/'.$school->id,
-            // Optional: Add these for Voiceflow debugging
             'school_id' => $school->id,
             'school_name' => $school->name
         ]);
     }
+
     public function verifyDoctorOtp(Request $request)
     {
         \Log::info('Doctor OTP Verification Request', [
