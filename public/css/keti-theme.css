@@ -168,7 +168,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 
 /* --- School Dashboard Stat Cards --- */
 .stat-card {
-  border: 0;
+  border: 1px solid #e9ecef;
   border-radius: 14px;
   box-shadow: 0 10px 24px rgba(0,0,0,0.08);
   transition: transform .2s ease, box-shadow .2s ease;
@@ -310,7 +310,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .availability-card .availability-header .btn:hover { background: rgba(255,255,255,0.1); }
 .availability-card .availability-header h4 { color: #FF00F8 !important; }
 
-.day-card { border: 0; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform .2s ease, box-shadow .2s ease; }
+.day-card { border: 1px solid #e9ecef; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform .2s ease, box-shadow .2s ease; }
 .day-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.10); }
 .day-card .day-title { font-weight: 600; color: #000; }
 .day-card .day-icon { width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-weight:700; background: rgba(255,0,248,0.12); color:#FF00F8; }
