@@ -7,7 +7,7 @@
             <div class="card-header d-flex justify-content-between align-items-center availability-header">
                 <div>
                     <h4 class="mb-0">Manage Availability</h4>
-                    <small class="text-muted">Set which days you're available and the maximum appointments allowed.</small>
+                    <small class="text-white">Set which days you're available and the maximum appointments allowed.</small>
                 </div>
                 <div>
                     <a href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
