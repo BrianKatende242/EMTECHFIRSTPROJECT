@@ -55,26 +55,11 @@ class SchoolOtpMail extends Mailable
             default => 'Your School Login OTP',
         };
 
-        // Try to embed a PNG logo as CID for better email client support
-        $logoCid = null;
-        $pngPath = public_path('ketiai-logo.png');
-        $this->withSymfonyMessage(function ($message) use (&$logoCid, $pngPath) {
-            if (file_exists($pngPath)) {
-                // Symfony\Component\Mime\Email supports embedFromPath
-                try {
-                    $logoCid = $message->embedFromPath($pngPath, 'keti-ai-logo.png');
-                } catch (\Throwable $e) {
-                    // If embedding fails, leave $logoCid as null
-                }
-            }
-        });
-
         return $this->from(config('mail.from.address'), config('mail.from.name'))
             ->view('emails.otp')
             ->with([
                 'otp' => $this->otp,
                 'userType' => $this->userType,
-                'logoCid' => $logoCid,
             ])
             ->subject($subject);
     }
