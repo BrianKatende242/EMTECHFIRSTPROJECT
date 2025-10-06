@@ -5,9 +5,10 @@
         <div class="col-lg-3 col-sm-6">
             <div class="card stat-card stat-students">
                 <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon me-3">
+                    <div class="stat-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
+                    <div class="stat-sep" aria-hidden="true"></div>
                     <div class="flex-grow-1">
                         <div class="stat-label">Students</div>
                         <div class="stat-value">{{ $studentsCount }}</div>
@@ -21,9 +22,10 @@
         <div class="col-lg-3 col-sm-6">
             <div class="card stat-card stat-appointments">
                 <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon me-3">
+                    <div class="stat-icon">
                         <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
                     </div>
+                    <div class="stat-sep" aria-hidden="true"></div>
                     <div class="flex-grow-1">
                         <div class="stat-label">Appointments</div>
                         <div class="stat-value">{{ $appointmentsCount }}</div>
@@ -37,9 +39,10 @@
         <div class="col-lg-3 col-sm-6">
             <div class="card stat-card stat-labtests">
                 <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon me-3">
+                    <div class="stat-icon">
                         <i class="fa fa-flask" aria-hidden="true"></i>
                     </div>
+                    <div class="stat-sep" aria-hidden="true"></div>
                     <div class="flex-grow-1">
                         <div class="stat-label">Lab Tests</div>
                         <div class="stat-value">{{ $labTestsCount }}</div>
@@ -53,9 +56,10 @@
         <div class="col-lg-3 col-sm-6">
             <div class="card stat-card stat-doctors">
                 <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon me-3">
+                    <div class="stat-icon">
                         <i class="fa fa-user-md" aria-hidden="true"></i>
                     </div>
+                    <div class="stat-sep" aria-hidden="true"></div>
                     <div class="flex-grow-1">
                         <div class="stat-label">Doctors</div>
                         <div class="stat-value">{{ $doctorsCount }}</div>
