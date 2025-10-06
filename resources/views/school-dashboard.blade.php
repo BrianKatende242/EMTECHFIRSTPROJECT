@@ -55,6 +55,38 @@
 
             <!-- Main Content -->
             <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                @php
+                    // Prepare last 7 days labels and counts (including today) for School weekly activity
+                    $schoolAppointments = ($appointments ?? collect());
+                    $schoolChartLabels = [];
+                    $schoolChartData = [];
+                    for ($i = 6; $i >= 0; $i--) {
+                        $d = \Carbon\Carbon::today()->subDays($i);
+                        $schoolChartLabels[] = $d->format('M d');
+                        $count = $schoolAppointments->filter(function($a) use ($d) {
+                            try {
+                                $at = isset($a->appointment_time)
+                                    ? (\Carbon\Carbon::hasFormat($a->appointment_time, 'Y-m-d H:i:s') ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $a->appointment_time) : \Carbon\Carbon::parse($a->appointment_time))
+                                    : null;
+                                return $at ? $at->isSameDay($d) : false;
+                            } catch (\Exception $e) {
+                                return false;
+                            }
+                        })->count();
+                        $schoolChartData[] = $count;
+                    }
+                @endphp
+
+                <!-- Weekly Activity Chart -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Weekly Activity (Last 7 days)</h5>
+                        <div class="text-muted small">Updated: {{ now()->format('M d, Y') }}</div>
+                    </div>
+                    <div class="card-body" style="min-height:220px;">
+                        <canvas id="schoolActivityChart" height="160"></canvas>
+                    </div>
+                </div>
                 <div class="tab-content">
                     <!-- Students Tab -->
                     <div class="tab-pane fade show active" id="students">
@@ -381,10 +413,45 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 // Updated JavaScript for Stripe integration
 document.addEventListener('DOMContentLoaded', function() {
+    // Render Weekly Activity Chart for School
+    (function(){
+        var ctx = document.getElementById('schoolActivityChart');
+        if (!ctx || typeof Chart === 'undefined') return;
+
+        var labels = {!! json_encode($schoolChartLabels ?? []) !!};
+        var data = {!! json_encode($schoolChartData ?? []) !!};
+
+        new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Appointments',
+                    data: data,
+                    backgroundColor: 'rgba(255, 0, 248, 0.12)', // KETI pink fill
+                    borderColor: '#000000', // black line
+                    pointBackgroundColor: '#FF00F8', // pink points
+                    pointBorderColor: '#000000', // black point border
+                    pointHoverBackgroundColor: '#000000',
+                    pointHoverBorderColor: '#FF00F8',
+                    fill: true,
+                    tension: 0.25
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+            }
+        });
+    })();
+
     // Calculate appointment cost based on duration
     function calculateAppointmentCost() {
         const doctorSelect = document.getElementById('doctor-select');
