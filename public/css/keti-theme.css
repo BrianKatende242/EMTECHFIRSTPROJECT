@@ -86,3 +86,13 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Ensure icons within active links also reflect brand color */
 .quixnav .metismenu > li.mm-active > a i,
 .quixnav .metismenu ul a.mm-active i { color: #FF00F8 !important; }
+
+/* Nav header (brand bar) set to black */
+.nav-header { background-color: #000 !important; }
+.nav-header .brand-logo { color: #fff !important; }
+.hamburger .line { background: #FF00F8 !important; }
+
+/* Optional: top header bar dark mode for cohesion (keeps white content) */
+.header { background-color: #000 !important; }
+.header .navbar .nav-link, .header .navbar i, .header .navbar .dropdown-item { color: #fff !important; }
+.header .dropdown-menu { color: #000 !important; background-color: #fff !important; }
