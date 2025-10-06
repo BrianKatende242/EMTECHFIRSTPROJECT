@@ -278,6 +278,11 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   color: #FF00F8 !important;
   background-color: rgba(255, 0, 248, 0.08) !important;
 }
+/* Fix dropdown icons being white on white */
+.header .header-profile .dropdown-menu i { color: #000 !important; }
+.header .header-profile .dropdown-menu .dropdown-item:hover i,
+.header .header-profile .dropdown-menu .dropdown-item:focus i,
+.header .header-profile .dropdown-menu .dropdown-item.active i { color: #FF00F8 !important; }
 
 /* Ensure profile avatar uses brand border */
 .header .header-profile img.rounded-circle {
