@@ -312,7 +312,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 
 .day-card { border: 0; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform .2s ease, box-shadow .2s ease; }
 .day-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.10); }
-.day-card .day-title { font-weight: 600; }
+.day-card .day-title { font-weight: 600; color: #000; }
 .day-card .day-icon { width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-weight:700; background: rgba(255,0,248,0.12); color:#FF00F8; }
 .day-card .day-sep { width: 1px; height: 32px; margin: 0 10px; background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.16), rgba(0,0,0,0)); border-radius: 1px; }
 .day-card.is-available { outline: 2px solid rgba(89,59,219,0.25); }
@@ -321,29 +321,3 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; letter-spacing: .2px; }
 .pill-on { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
 .pill-off { background: rgba(0,0,0,0.06); color: #000; border: 1px solid rgba(0,0,0,0.18); }
-
-/* Brand toggle switch styling */
-.form-switch .form-check-input {
-  position: relative;
-  width: 44px; height: 24px;
-  background-color: rgba(0,0,0,0.15);
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 999px;
-  background-image: none !important; /* override defaults */
-  cursor: pointer;
-  transition: background-color .2s ease, border-color .2s ease;
-}
-.form-switch .form-check-input::after {
-  content: '';
-  position: absolute; top: 2px; left: 2px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  transition: transform .2s ease;
-}
-.form-switch .form-check-input:checked {
-  background-color: var(--primary);
-  border-color: var(--primary);
-}
-.form-switch .form-check-input:checked::after { transform: translateX(20px); }
-.form-switch .form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(255, 0, 248, 0.25); }
