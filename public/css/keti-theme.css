@@ -1,0 +1,45 @@
+/* KETI AI dashboard theme overrides */
+:root {
+  --primary: #FF00F8;
+}
+
+/* Buttons */
+.btn-primary {
+  color: #fff;
+  background-color: #FF00F8;
+  border-color: #FF00F8;
+}
+.btn-primary:hover {
+  color: #fff;
+  background-color: #e000dc;
+  border-color: #e000dc;
+}
+.btn-primary:focus, .btn-primary.focus {
+  color: #fff;
+  background-color: #e000dc;
+  border-color: #e000dc;
+  box-shadow: 0 0 0 .2rem rgba(255, 0, 248, 0.35);
+}
+.btn-primary.disabled, .btn-primary:disabled { background-color: #FF00F8; border-color: #FF00F8; }
+.btn-outline-primary { color: #FF00F8; border-color: #FF00F8; }
+.btn-outline-primary:hover { background-color: #FF00F8; border-color: #FF00F8; color: #fff; }
+
+/* Background / text helpers */
+.bg-primary { background-color: #FF00F8 !important; }
+a.bg-primary:hover, a.bg-primary:focus,
+button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !important; }
+.text-primary { color: #FF00F8 !important; }
+.border-primary { border-color: #FF00F8 !important; }
+
+/* Badges & pills */
+.badge-primary { background-color: #FF00F8; }
+
+/* Progress and other accents */
+.progress-bar.bg-primary { background-color: #FF00F8 !important; }
+
+/* Checkbox/radio focus accents (if used) */
+.form-check-input:checked { background-color: #FF00F8; border-color: #FF00F8; }
+
+/* Nav/active states (basic) */
+.nav-tabs .nav-link.active,
+.nav-pills .nav-link.active { background-color: #FF00F8; border-color: #FF00F8; }
