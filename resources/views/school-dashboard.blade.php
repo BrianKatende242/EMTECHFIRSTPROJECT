@@ -3,53 +3,65 @@
 @section('content')
     <div class="row">
         <div class="col-lg-3 col-sm-6">
-            <div class="card">
-                <div class="stat-widget-two card-body">
-                    <div class="stat-content">
-                        <div class="stat-text">Students</div>
-                        <div class="stat-digit">{{ $studentsCount }}</div>
+            <div class="card stat-card stat-students">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon me-3">
+                        <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-success w-85" role="progressbar" aria-valuenow="{{ $studentsCount }}" aria-valuemin="0" aria-valuemax="100" aria-label="Students progress"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card">
-                <div class="stat-widget-two card-body">
-                    <div class="stat-content">
-                        <div class="stat-text">Appointments</div>
-                        <div class="stat-digit">{{ $appointmentsCount }}</div>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-primary w-75" role="progressbar" aria-valuenow="{{ $appointmentsCount }}" aria-valuemin="0" aria-valuemax="100" aria-label="Appointments progress"></div>
+                    <div class="flex-grow-1">
+                        <div class="stat-label">Students</div>
+                        <div class="stat-value">{{ $studentsCount }}</div>
+                        <div class="progress mt-2" role="progressbar" aria-label="Students progress" aria-valuenow="{{ $studentsCount }}" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar w-85"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-sm-6">
-            <div class="card">
-                <div class="stat-widget-two card-body">
-                    <div class="stat-content">
-                        <div class="stat-text">Lab Tests</div>
-                        <div class="stat-digit">{{ $labTestsCount }}</div>
+            <div class="card stat-card stat-appointments">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon me-3">
+                        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-warning w-50" role="progressbar" aria-valuenow="{{ $labTestsCount }}" aria-valuemin="0" aria-valuemax="100" aria-label="Lab tests progress"></div>
+                    <div class="flex-grow-1">
+                        <div class="stat-label">Appointments</div>
+                        <div class="stat-value">{{ $appointmentsCount }}</div>
+                        <div class="progress mt-2" role="progressbar" aria-label="Appointments progress" aria-valuenow="{{ $appointmentsCount }}" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar w-75"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-sm-6">
-            <div class="card">
-                <div class="stat-widget-two card-body">
-                    <div class="stat-content">
-                        <div class="stat-text">Doctors</div>
-                        <div class="stat-digit">{{ $doctorsCount }}</div>
+            <div class="card stat-card stat-labtests">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon me-3">
+                        <i class="fa fa-flask" aria-hidden="true"></i>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="{{ $doctorsCount }}" aria-valuemin="0" aria-valuemax="100" aria-label="Doctors progress"></div>
+                    <div class="flex-grow-1">
+                        <div class="stat-label">Lab Tests</div>
+                        <div class="stat-value">{{ $labTestsCount }}</div>
+                        <div class="progress mt-2" role="progressbar" aria-label="Lab tests progress" aria-valuenow="{{ $labTestsCount }}" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar w-50"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="card stat-card stat-doctors">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon me-3">
+                        <i class="fa fa-user-md" aria-hidden="true"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="stat-label">Doctors</div>
+                        <div class="stat-value">{{ $doctorsCount }}</div>
+                        <div class="progress mt-2" role="progressbar" aria-label="Doctors progress" aria-valuenow="{{ $doctorsCount }}" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar w-65"></div>
+                        </div>
                     </div>
                 </div>
             </div>
