@@ -10,7 +10,7 @@
 
     @if($labTests->count() > 0)
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped text-dark">
             <thead class="table-dark">
                 <tr>
                     <th>Request Date</th>
@@ -30,7 +30,7 @@
                         <span class="badge bg-{{ 
                             $labTest->status == 'completed' ? 'success' : 
                             ($labTest->status == 'processing' ? 'warning' : 'secondary') 
-                        }}">
+                        }} text-white">
                             {{ ucfirst($labTest->status) }}
                         </span>
                     </td>

@@ -13,7 +13,7 @@
                     @if($appointments->count() > 0)
                         <div class="table-responsive mt-3">
                             <table class="table table-bordered table-hover align-middle text-dark">
-                                <thead class="table-primary">
+                                <thead class="table-dark">
                                     <tr>
                                         <th>Date</th>
                                         <th>Student</th>
