@@ -177,9 +177,14 @@ class OtpController extends Controller
                 ]
             );
 
-            $userType = \App\Models\HealthFacility::where('email', $request->email)->exists() 
-               ? 'health_facility' 
-              : 'school';
+            // Determine entity type by email
+            if (\App\Models\HealthFacility::where('email', $request->email)->exists()) {
+                $userType = 'health_facility';
+            } elseif (\App\Models\Doctor::where('email', $request->email)->exists()) {
+                $userType = 'doctor';
+            } else {
+                $userType = 'school';
+            }
 
             Mail::to($request->email)->send(new SchoolOtpMail($otp, $userType));
 
