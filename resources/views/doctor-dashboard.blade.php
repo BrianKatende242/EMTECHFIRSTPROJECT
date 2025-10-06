@@ -192,10 +192,10 @@
                     datasets: [{
                         label: 'Appointments',
                         data: data,
-                        backgroundColor: 'rgba(255, 0, 248, 0.12)', // pink fill
+                        backgroundColor: 'rgba(255, 0, 248, 0.12)', // KETI pink fill
                         borderColor: '#000000', // black line
                         pointBackgroundColor: '#FF00F8', // pink points
-                        pointBorderColor: '#000000', // black outline
+                        pointBorderColor: '#000000', // black point border
                         pointHoverBackgroundColor: '#000000',
                         pointHoverBorderColor: '#FF00F8',
                         fill: true,
