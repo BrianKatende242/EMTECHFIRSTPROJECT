@@ -78,15 +78,15 @@
                                     borderColor: '#000000',
                                     borderWidth: 2,
                                     hoverBackgroundColor: '#000000',
-                                    hoverBorderColor: '#FF00F8',
+                                    hoverBorderColor: '#593bdb',
                                     data: [3, 5, 2, 4, 6, 1, 0] // Replace with dynamic data
                                 },
                                 {
                                     label: 'Lab Tests',
-                                    backgroundColor: '#FF00F8',
-                                    borderColor: '#FF00F8',
+                                    backgroundColor: '#593bdb',
+                                    borderColor: '#593bdb',
                                     borderWidth: 2,
-                                    hoverBackgroundColor: 'rgba(255, 0, 248, 0.85)',
+                                    hoverBackgroundColor: 'rgba(89, 59, 219, 0.85)',
                                     hoverBorderColor: '#000000',
                                     data: [2, 3, 1, 2, 4, 0, 0] // Replace with dynamic data
                                 }
