@@ -27,7 +27,7 @@
                         }
                     @endphp
 
-                    <div class="row gy-0 gx-3 gx-md-4">
+                    <div class="row availability-grid">
                         @foreach($days as $day)
                             @php $key = strtolower($day); $av = $avMap[$key] ?? null; @endphp
                             <div class="col-md-6">

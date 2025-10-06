@@ -321,3 +321,8 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; letter-spacing: .2px; }
 .pill-on { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
 .pill-off { background: rgba(0,0,0,0.06); color: #000; border: 1px solid rgba(0,0,0,0.18); }
+
+/* Horizontal-only spacing for availability grid */
+.availability-grid { margin-left: -10px; margin-right: -10px; }
+.availability-grid > [class^="col-"],
+.availability-grid > [class*=" col-"] { padding-left: 10px; padding-right: 10px; }
