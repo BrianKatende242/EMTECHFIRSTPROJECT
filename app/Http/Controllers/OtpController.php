@@ -186,7 +186,7 @@ class OtpController extends Controller
                 $userType = 'school';
             } else {
                 // This should not happen due to earlier validation
-                throw new \Exception('Email not associated with any entity');
+                throw new \Exception('Email not associated with any entity'); 
             }
 
             Mail::to($request->email)->send(new SchoolOtpMail($otp, $userType));
