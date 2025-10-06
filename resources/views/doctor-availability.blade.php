@@ -37,6 +37,7 @@
                                             <div class="d-flex align-items-center justify-content-between mb-2">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <div class="day-icon" aria-hidden="true">{{ substr($day,0,2) }}</div>
+                                                    <div class="day-sep" aria-hidden="true"></div>
                                                     <div>
                                                         <div class="day-title">{{ $day }}</div>
                                                         <div class="small text-muted">Configure availability and capacity</div>
