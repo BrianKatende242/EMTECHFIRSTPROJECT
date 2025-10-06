@@ -31,7 +31,7 @@
     @if($appointments->count())
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle text-dark" id="appointments-table">
-                <thead class="table-primary">
+                <thead class="table-dark">
                     <tr>
                         <th>Date & Time</th>
                         <th>Patient</th>

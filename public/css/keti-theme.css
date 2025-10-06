@@ -1,0 +1,329 @@
+/* KETI AI dashboard theme overrides */
+:root {
+  --primary: #FF00F8;
+}
+
+/* Buttons */
+.btn-primary {
+  color: #fff;
+  background-color: #FF00F8;
+  border-color: #FF00F8;
+}
+.btn-primary:hover {
+  color: #fff;
+  background-color: #e000dc;
+  border-color: #e000dc;
+}
+.btn-primary:focus, .btn-primary.focus {
+  color: #fff;
+  background-color: #e000dc;
+  border-color: #e000dc;
+  box-shadow: 0 0 0 .2rem rgba(255, 0, 248, 0.35);
+}
+.btn-primary.disabled, .btn-primary:disabled { background-color: #FF00F8; border-color: #FF00F8; }
+.btn-outline-primary { color: #FF00F8; border-color: #FF00F8; }
+.btn-outline-primary:hover { background-color: #FF00F8; border-color: #FF00F8; color: #fff; }
+
+/* Background / text helpers */
+.bg-primary { background-color: #FF00F8 !important; }
+a.bg-primary:hover, a.bg-primary:focus,
+button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !important; }
+.text-primary { color: #FF00F8 !important; }
+.border-primary { border-color: #FF00F8 !important; }
+
+/* Badges & pills */
+.badge-primary { background-color: #FF00F8; }
+
+/* Progress and other accents */
+.progress-bar.bg-primary { background-color: #FF00F8 !important; }
+
+/* Checkbox/radio focus accents (if used) */
+.form-check-input:checked { background-color: #FF00F8; border-color: #FF00F8; }
+
+/* Nav/active states (basic) */
+.nav-tabs .nav-link.active,
+.nav-pills .nav-link.active { background-color: #FF00F8; border-color: #FF00F8; }
+
+/* Sidebar (Quixnav) overrides */
+/* Sidebar background */
+.quixnav { background-color: #FF00F8 !important; }
+
+/* Base link colors (parent + submenu) */
+.quixnav .metismenu > li > a,
+.quixnav .metismenu ul a { color: #000 !important; }
+
+/* Give inactive links subtle light backgrounds for contrast on brand pink */
+.quixnav .metismenu > li > a {
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 10px rgba(0,0,0,0.06);
+}
+.quixnav .metismenu ul a {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+}
+
+/* Active/hover parent items with subtle contrast on brand bg */
+.quixnav .metismenu > li:hover > a,
+.quixnav .metismenu > li:focus > a,
+.quixnav .metismenu > li.mm-active > a {
+  background-color: rgba(0, 0, 0, 0.10) !important;
+  color: #000 !important;
+}
+
+/* Submenu background aligns with sidebar bg */
+.quixnav .metismenu ul { background-color: #FF00F8 !important; }
+
+/* Submenu hover/active contrast */
+.quixnav .metismenu ul a:hover,
+.quixnav .metismenu ul a:focus,
+.quixnav .metismenu ul a.mm-active {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #000 !important;
+}
+
+/* Sidebar section labels use black for readability on brand bg */
+.nav-label { color: #000 !important; }
+
+/* ACTIVE states: black background with brand text */
+.quixnav .metismenu > li.mm-active > a {
+  background-color: #000 !important;
+  color: #FF00F8 !important;
+}
+.quixnav .metismenu ul a.mm-active {
+  background-color: #000 !important;
+  color: #FF00F8 !important;
+}
+/* Ensure icons within active links also reflect brand color */
+.quixnav .metismenu > li.mm-active > a i,
+.quixnav .metismenu ul a.mm-active i { color: #FF00F8 !important; }
+
+/* WOW styling for sidebar nav links */
+/* Rounded pill links, spacing, and smooth transitions */
+.quixnav .metismenu a {
+  border-radius: 10px;
+  margin: 4px 10px;
+  transition: background-color .2s ease, color .2s ease, box-shadow .25s ease, transform .2s ease;
+}
+.quixnav .metismenu > li > a i,
+.quixnav .metismenu ul a i {
+  margin-right: 8px;
+  transition: color .2s ease, transform .2s ease;
+}
+
+/* Hover micro-interactions */
+.quixnav .metismenu > li > a:hover,
+.quixnav .metismenu > li > a:focus {
+  background-color: rgba(255, 255, 255, 0.26) !important;
+  transform: translateX(2px);
+}
+.quixnav .metismenu > li > a:hover i { transform: translateX(1px); }
+
+/* Submenu items get slightly tighter margins */
+.quixnav .metismenu ul a {
+  margin: 3px 10px 3px 14px;
+  border-radius: 8px;
+}
+
+/* Icon chips for better separation and readability */
+.quixnav .metismenu > li > a i,
+.quixnav .metismenu ul a i {
+  background: rgba(255,255,255,0.38);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+/* Ensure active item styles override icon chip to brand color */
+.quixnav .metismenu > li.mm-active > a i,
+.quixnav .metismenu ul a.mm-active i {
+  background: transparent;
+}
+
+/* Active indicator bar on the left for parent and submenu */
+.quixnav .metismenu > li.mm-active > a,
+.quixnav .metismenu ul a.mm-active {
+  position: relative;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+.quixnav .metismenu > li.mm-active > a::before,
+.quixnav .metismenu ul a.mm-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #FF00F8;
+  box-shadow: 0 0 0 2px rgba(255, 0, 248, 0.2);
+}
+
+/* Focus visibility for keyboard users */
+.quixnav .metismenu a:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 0, 248, 0.4);
+}
+
+/* --- School Dashboard Stat Cards --- */
+.stat-card {
+  border: 1px solid #e9ecef;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
+.stat-card .stat-icon {
+  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,0,248,0.12); color: #FF00F8; font-size: 20px;
+}
+.stat-card .stat-label { font-size: 0.85rem; color: #6c757d; }
+.stat-card .stat-value { font-size: 1.75rem; font-weight: 700; color: #1f1f1f; line-height: 1; }
+.stat-card .progress { height: 6px; background: #f1f1f1; border-radius: 999px; overflow: hidden; }
+.stat-card .progress .progress-bar { background: #FF00F8; }
+/* Vertical separator between icon and content */
+.stat-card .stat-sep {
+  width: 1px;
+  align-self: stretch; /* override center alignment from flex container */
+  margin: 0 16px;
+  background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.12), rgba(0,0,0,0));
+}
+@media (max-width: 576px) {
+  .stat-card .stat-sep { margin: 0 12px; }
+}
+
+/* Small legend dot helper used in summary cards */
+.legend-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+/* Soft divider */
+.soft-hr {
+  border: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.12), rgba(0,0,0,0));
+}
+
+/* Chips for top types */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: #f8f8f8; color: #1f1f1f;
+  border: 1px solid #eee; border-radius: 999px;
+  padding: 4px 10px; font-size: 12px;
+}
+.chip-count {
+  background: #FF00F8; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; font-weight: 600;
+}
+
+/* Status pills */
+.status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+.pill-completed { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
+.pill-pending { background: rgba(0,0,0,0.08); color: #000; border: 1px solid rgba(0,0,0,0.18); }
+
+/* Section headers inside cards */
+.card .section-header .title { font-weight: 600; }
+
+/* Metric badges */
+.metric-badge {
+  background: #f8f9fb;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 110px;
+}
+.metric-badge .label { font-size: 12px; color: #6c757d; }
+.metric-badge .value { font-size: 18px; font-weight: 700; color: #1f1f1f; }
+.metric-badge.completed { box-shadow: inset 0 0 0 2px rgba(89,59,219,0.15); }
+.metric-badge.pending { box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08); }
+/* Metric icon inside tiles */
+.metric-badge .metric-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.metric-badge.completed .metric-icon { background: rgba(89,59,219,0.12); color: #593bdb; }
+.metric-badge.pending .metric-icon { background: rgba(0,0,0,0.08); color: #000; }
+/* Layout for simplified two-tile row */
+.simple-metrics .metric-badge {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Recent list */
+.recent-list .recent-item { border-bottom: 1px dashed #eee; }
+.recent-list .recent-item:last-child { border-bottom: 0; }
+.recent-list .title { line-height: 1.1; }
+.recent-list .subtext { line-height: 1.1; }
+
+/* Variants per card (optional accent tweak) */
+.stat-students .stat-icon { background: rgba(89,59,219,0.12); color: #593bdb; }
+.stat-appointments .stat-icon { background: rgba(0,0,0,0.08); color: #000; }
+.stat-labtests .stat-icon { background: rgba(255,0,248,0.12); color: #FF00F8; }
+.stat-doctors .stat-icon { background: rgba(0,0,0,0.08); color: #000; }
+
+/* Nav header (brand bar) set to white */
+.nav-header { background-color: #ffffff !important; }
+.nav-header .brand-logo { color: #000 !important; }
+.hamburger .line { background: #FF00F8 !important; }
+
+/* Optional: top header bar dark mode for cohesion (keeps white content) */
+.header { background-color: #000 !important; }
+.header .navbar .nav-link, .header .navbar i { color: #fff !important; }
+.header .dropdown-menu { color: #000 !important; background-color: #fff !important; }
+/* Ensure profile dropdown items are readable */
+.header .header-profile .dropdown-menu .dropdown-item { color: #000 !important; }
+.header .header-profile .dropdown-menu .dropdown-item:hover,
+.header .header-profile .dropdown-menu .dropdown-item:focus,
+.header .header-profile .dropdown-menu .dropdown-item.active {
+  color: #FF00F8 !important;
+  background-color: rgba(255, 0, 248, 0.08) !important;
+}
+/* Fix dropdown icons being white on white */
+.header .header-profile .dropdown-menu i { color: #000 !important; }
+.header .header-profile .dropdown-menu .dropdown-item:hover i,
+.header .header-profile .dropdown-menu .dropdown-item:focus i,
+.header .header-profile .dropdown-menu .dropdown-item.active i { color: #FF00F8 !important; }
+
+/* Make Logout red */
+.header .header-profile .dropdown-menu .dropdown-item.logout-item,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item i {
+  color: #dc3545 !important; /* Bootstrap danger red */
+}
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:hover,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:focus {
+  background-color: rgba(220, 53, 69, 0.08) !important;
+  color: #dc3545 !important;
+}
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:hover i,
+.header .header-profile .dropdown-menu .dropdown-item.logout-item:focus i {
+  color: #dc3545 !important;
+}
+
+/* Ensure profile avatar uses brand border */
+.header .header-profile img.rounded-circle {
+  border-color: #FF00F8 !important;
+}
+
+/* --- Doctor Availability Page --- */
+.availability-card .availability-header { background: linear-gradient(90deg, #000, #1a1a1a); color: #fff; }
+.availability-card .availability-header .btn { border-color: rgba(255,255,255,0.3); color: #fff; }
+.availability-card .availability-header .btn:hover { background: rgba(255,255,255,0.1); }
+.availability-card .availability-header h4 { color: #FF00F8 !important; }
+.availability-card .availability-header small { color: #ffffff !important; }
+
+.day-card { border: 1px solid #e9ecef; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.06); transition: transform .2s ease, box-shadow .2s ease; }
+.day-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.10); }
+.day-card .day-title { font-weight: 600; color: #000; }
+.day-card .day-icon { width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-weight:700; background: rgba(255,0,248,0.12); color:#FF00F8; }
+.day-card .day-sep { width: 1px; height: 32px; margin: 0 10px; background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.16), rgba(0,0,0,0)); border-radius: 1px; }
+.day-card.is-available { outline: 2px solid rgba(89,59,219,0.25); }
+.day-card.is-off { outline: 2px dashed rgba(0,0,0,0.18); }
+
+.status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; letter-spacing: .2px; }
+.pill-on { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
+.pill-off { background: rgba(0,0,0,0.06); color: #000; border: 1px solid rgba(0,0,0,0.18); }
+
+/* Horizontal-only spacing for availability grid */
+.availability-grid { margin-left: -10px; margin-right: -10px; }
+.availability-grid > [class^="col-"],
+.availability-grid > [class*=" col-"] { padding-left: 10px; padding-right: 10px; }

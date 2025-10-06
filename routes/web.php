@@ -85,7 +85,7 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
-    return view('school', [
+    return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
         'appointmentsCount' => $school->appointments()->count(),

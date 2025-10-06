@@ -20,12 +20,14 @@
     <link rel="stylesheet" href="{{ asset('vendor/owl-carousel/css/owl.theme.default.min.css') }}">
     <link href="{{ asset('vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/keti-theme.css') }}" rel="stylesheet">
 
 
 
 </head>
 
 <body>
+    @php($currentUser = (isset($user) && $user) ? $user : (auth()->check() ? auth()->user() : null))
 
     <!--*******************
         Preloader start
@@ -51,18 +53,8 @@
             Nav header start
         ***********************************-->
         <div class="nav-header">
-            <a href="/" class="brand-logo d-flex justify-content-center align-items-center position-relative" style="height:120px;">
-                <img class="profile-pic sidebar-profile" src="{{ $user->profile_picture_url ?? (isset($doctor) ? asset('images/doctor.png') : asset('images/profile.png')) }}" alt="User Profile" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border: 4px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-right:16px;">
-                @if(isset($user) && $user->is_online)
-                    <span class="position-absolute" style="top:70px; right:100px; width:22px; height:22px; z-index:2;">
-                        <span class="bg-success border border-light rounded-circle d-block" style="width:100%; height:100%; box-shadow:0 0 0 2px #fff;"></span>
-                        <span class="visually-hidden">Active</span>
-                    </span>
-                @else
-                    <span class="position-absolute" style="top:90px; right:90px; width:22px; height:22px; z-index:2;">
-                        <span title="Offline" class="bg-danger border border-light rounded-circle d-block" style="width:100%; height:100%; box-shadow:0 0 0 2px #fff;"></span>
-                    </span>
-                @endif
+            <a href="/" class="brand-logo d-flex justify-content-center align-items-center" style="height:80px;">
+                <img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" style="height:48px; width:auto; display:block;">
             </a>
 
             <div class="nav-control">
@@ -110,18 +102,18 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #FF00F8; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-menu dropdown-menu-right text-dark">
                                     <a href="" class="dropdown-item">
-                                        <i class="icon-user"></i>
+                                        <i class="icon-user" style="color: #333"></i>
                                         <span class="ml-2">Profile </span>
                                     </a>
                                     <a href="" class="dropdown-item">
-                                        <i class="icon-envelope-open"></i>
+                                        <i class="icon-envelope-open" style="color: #333"></i>
                                         <span class="ml-2">Inbox </span>
                                     </a>
-                                    <a href="/" class="dropdown-item">
+                                    <a href="/" class="dropdown-item logout-item">
                                         <i class="icon-key"></i>
                                         <span class="ml-2">Logout </span>
                                     </a>
