@@ -19,8 +19,8 @@
                 <td align="center">
                     <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px; width:100%; background:#ffffff; border-radius:12px; box-shadow:0 4px 16px rgba(2,6,23,0.06); overflow:hidden;">
                         <tr>
-                            <td style="padding:20px 24px; background:#0ea5e9; color:#ffffff;">
-                                <div style="font-size:18px; font-weight:600;">{{ config('app.name', 'CHIL') }}</div>
+                                            <td style="padding:20px 24px; background:#0ea5e9; color:#ffffff;">
+                                                <div style="font-size:18px; font-weight:600;">KETI AI</div>
                                 <div style="opacity:0.9; font-size:13px; margin-top:4px;">Secure Sign-In</div>
                             </td>
                         </tr>
@@ -44,13 +44,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:0 24px 24px 24px;" align="center">
-                                <a href="{{ config('app.url') }}" style="display:inline-block; background:#0ea5e9; color:#ffffff; text-decoration:none; padding:10px 16px; border-radius:8px; font-size:14px;">Open Portal</a>
+                                            <td style="padding:0 24px 24px 24px;" align="center">
+                                                <a href="https://ketiai.com" style="display:inline-block; background:#0ea5e9; color:#ffffff; text-decoration:none; padding:10px 16px; border-radius:8px; font-size:14px;">Open Portal</a>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:16px 24px; background:#f8fafc; color:#64748b; font-size:12px;">
-                                <div>Sent by {{ config('app.name', 'CHIL') }} • {{ config('app.url') }}</div>
+                                            <td style="padding:16px 24px; background:#f8fafc; color:#64748b; font-size:12px;">
+                                                <div>Sent by KETI AI • https://ketiai.com</div>
                             </td>
                         </tr>
                     </table>
