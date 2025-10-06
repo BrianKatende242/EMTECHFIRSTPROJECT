@@ -24,9 +24,11 @@ class SchoolOtpMail extends Mailable
 
     public function envelope()
     {
-        $subject = $this->userType === 'health_facility'
-            ? 'Your Health Facility Login OTP'
-            : 'Your School Login OTP';
+        $subject = match ($this->userType) {
+            'health_facility' => 'Your Health Facility Login OTP',
+            'doctor' => 'Your Doctor Login OTP',
+            default => 'Your School Login OTP',
+        };
 
         return new Envelope(
             from: new Address(config('mail.from.address'), config('mail.from.name')),
@@ -47,16 +49,18 @@ class SchoolOtpMail extends Mailable
 
     public function build()
     {
-        $subject = $this->userType === 'health_facility'
-            ? 'Your Health Facility Login OTP'
-            : 'Your School Login OTP';
+        $subject = match ($this->userType) {
+            'health_facility' => 'Your Health Facility Login OTP',
+            'doctor' => 'Your Doctor Login OTP',
+            default => 'Your School Login OTP',
+        };
 
         return $this->from(config('mail.from.address'), config('mail.from.name'))
-                    ->view('emails.otp')
-                    ->with([
-                        'otp' => $this->otp,
-                        'userType' => $this->userType,
-                    ])
-                    ->subject($subject);
+            ->view('emails.otp')
+            ->with([
+                'otp' => $this->otp,
+                'userType' => $this->userType,
+            ])
+            ->subject($subject);
     }
 }
