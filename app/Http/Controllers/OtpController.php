@@ -157,7 +157,7 @@ class OtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid email address'
+                'message' => 'The selected email is not associated with any school, health facility, or doctor.'
             ], 422);
         }
 
@@ -182,8 +182,11 @@ class OtpController extends Controller
                 $userType = 'health_facility';
             } elseif (\App\Models\Doctor::where('email', $request->email)->exists()) {
                 $userType = 'doctor';
-            } else {
+            } elseif (\App\Models\School::where('email', $request->email)->exists()) {
                 $userType = 'school';
+            } else {
+                // This should not happen due to earlier validation
+                throw new \Exception('Email not associated with any entity');
             }
 
             Mail::to($request->email)->send(new SchoolOtpMail($otp, $userType));
