@@ -45,30 +45,31 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .nav-pills .nav-link.active { background-color: #FF00F8; border-color: #FF00F8; }
 
 /* Sidebar (Quixnav) overrides */
-/* Active/hover parent items */
+/* Sidebar background */
+.quixnav { background-color: #FF00F8 !important; }
+
+/* Base link colors (parent + submenu) */
+.quixnav .metismenu > li > a,
+.quixnav .metismenu ul a { color: #000 !important; }
+
+/* Active/hover parent items with subtle contrast on brand bg */
 .quixnav .metismenu > li:hover > a,
 .quixnav .metismenu > li:focus > a,
 .quixnav .metismenu > li.mm-active > a {
-  background-color: #FF00F8 !important;
-  color: #fff !important;
+  background-color: rgba(0, 0, 0, 0.10) !important;
+  color: #000 !important;
 }
 
-/* Submenu background + hover states */
-.quixnav .metismenu ul {
-  background-color: #2b0b2b !important; /* dark magenta tint */
-}
-.quixnav .metismenu > li.mm-active ul,
-.quixnav .metismenu > li.mm-active ul ul {
-  background-color: rgba(255, 0, 248, 0.06) !important;
-}
+/* Submenu background aligns with sidebar bg */
+.quixnav .metismenu ul { background-color: #FF00F8 !important; }
+
+/* Submenu hover/active contrast */
 .quixnav .metismenu ul a:hover,
 .quixnav .metismenu ul a:focus,
 .quixnav .metismenu ul a.mm-active {
-  background-color: rgba(255, 0, 248, 0.15) !important;
-  color: #fff !important;
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #000 !important;
 }
 
-/* Sidebar section labels */
-.nav-label {
-  color: #FF00F8 !important;
-}
+/* Sidebar section labels use black for readability on brand bg */
+.nav-label { color: #000 !important; }
