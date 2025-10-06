@@ -166,6 +166,52 @@
                             </div>
                         </div>
                     </div>
+
+                    @php
+                        $recentLabTests = isset($labTests) ? $labTests->take(5) : collect();
+                        $topTypes = isset($labTests)
+                            ? $labTests->groupBy('test_type')->map->count()->sortDesc()->take(3)
+                            : collect();
+                    @endphp
+
+                    <hr class="soft-hr my-3">
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <strong class="me-2">Top Test Types</strong>
+                            <small class="text-muted">last {{ isset($labTests) ? min($labTests->count(), 50) : 0 }}</small>
+                        </div>
+                        <div class="chips">
+                            @forelse($topTypes as $type => $count)
+                                <span class="chip">{{ $type }} <span class="chip-count">{{ $count }}</span></span>
+                            @empty
+                                <span class="text-muted small">No lab tests yet.</span>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                        <strong class="me-2">Recent Lab Tests</strong>
+                        <small class="text-muted">latest 5</small>
+                        <a class="ms-auto btn btn-sm btn-outline-primary" href="{{ route('lab-tests', ['school' => $school->id]) }}">View all</a>
+                    </div>
+                    <ul class="list-unstyled mb-0">
+                        @forelse($recentLabTests as $lt)
+                            @php $statusClass = ($lt->status ?? '') === 'completed' ? 'pill-completed' : 'pill-pending'; @endphp
+                            <li class="d-flex align-items-center py-2 border-bottom">
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">
+                                        {{ optional($lt->student)->name ?? 'Student' }}
+                                        <span class="text-muted">• {{ $lt->test_type ?? 'Test' }}</span>
+                                    </div>
+                                    <div class="text-muted small">{{ \Carbon\Carbon::parse($lt->created_at)->format('M j, Y') }}</div>
+                                </div>
+                                <span class="status-pill {{ $statusClass }}">{{ ucfirst($lt->status ?? 'pending') }}</span>
+                            </li>
+                        @empty
+                            <li class="text-muted small">No recent lab tests.</li>
+                        @endforelse
+                    </ul>
                 </div>
             </div>
 

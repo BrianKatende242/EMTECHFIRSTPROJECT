@@ -173,6 +173,28 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   border-radius: 50%;
 }
 
+/* Soft divider */
+.soft-hr {
+  border: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.12), rgba(0,0,0,0));
+}
+
+/* Chips for top types */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: #f8f8f8; color: #1f1f1f;
+  border: 1px solid #eee; border-radius: 999px;
+  padding: 4px 10px; font-size: 12px;
+}
+.chip-count {
+  background: #FF00F8; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; font-weight: 600;
+}
+
+/* Status pills */
+.status-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+.pill-completed { background: rgba(89,59,219,0.15); color: #593bdb; border: 1px solid rgba(89,59,219,0.35); }
+.pill-pending { background: rgba(0,0,0,0.08); color: #000; border: 1px solid rgba(0,0,0,0.18); }
+
 /* Variants per card (optional accent tweak) */
 .stat-students .stat-icon { background: rgba(89,59,219,0.12); color: #593bdb; }
 .stat-appointments .stat-icon { background: rgba(0,0,0,0.08); color: #000; }
