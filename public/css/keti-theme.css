@@ -87,6 +87,58 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 .quixnav .metismenu > li.mm-active > a i,
 .quixnav .metismenu ul a.mm-active i { color: #FF00F8 !important; }
 
+/* WOW styling for sidebar nav links */
+/* Rounded pill links, spacing, and smooth transitions */
+.quixnav .metismenu a {
+  border-radius: 10px;
+  margin: 4px 10px;
+  transition: background-color .2s ease, color .2s ease, box-shadow .25s ease, transform .2s ease;
+}
+.quixnav .metismenu > li > a i,
+.quixnav .metismenu ul a i {
+  margin-right: 8px;
+  transition: color .2s ease, transform .2s ease;
+}
+
+/* Hover micro-interactions */
+.quixnav .metismenu > li > a:hover,
+.quixnav .metismenu > li > a:focus {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  transform: translateX(2px);
+}
+.quixnav .metismenu > li > a:hover i { transform: translateX(1px); }
+
+/* Submenu items get slightly tighter margins */
+.quixnav .metismenu ul a {
+  margin: 3px 10px 3px 14px;
+  border-radius: 8px;
+}
+
+/* Active indicator bar on the left for parent and submenu */
+.quixnav .metismenu > li.mm-active > a,
+.quixnav .metismenu ul a.mm-active {
+  position: relative;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+.quixnav .metismenu > li.mm-active > a::before,
+.quixnav .metismenu ul a.mm-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #FF00F8;
+  box-shadow: 0 0 0 2px rgba(255, 0, 248, 0.2);
+}
+
+/* Focus visibility for keyboard users */
+.quixnav .metismenu a:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 0, 248, 0.4);
+}
+
 /* Nav header (brand bar) set to white */
 .nav-header { background-color: #ffffff !important; }
 .nav-header .brand-logo { color: #000 !important; }
