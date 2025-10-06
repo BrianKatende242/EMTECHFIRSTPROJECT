@@ -140,22 +140,26 @@
                             <small class="text-muted">Overall completion</small>
                         </div>
                     </div>
-                    <div class="row align-items-center">
-                        <div class="col-6">
-                            <canvas id="labTestsDonut" height="140"></canvas>
+                    <div class="row align-items-start g-3">
+                        <div class="col-12 col-md-6 text-center">
+                            <canvas id="labTestsDonut" height="150"></canvas>
+                            <div class="legend-inline d-flex justify-content-center gap-3 mt-2 small">
+                                <div class="d-flex align-items-center"><span class="legend-dot me-2" style="background:#593bdb"></span><span>Completed</span></div>
+                                <div class="d-flex align-items-center"><span class="legend-dot me-2" style="background: rgba(0,0,0,0.65)"></span><span>Pending</span></div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="legend-dot me-2" style="background:#593bdb"></span>
-                                <span>Completed</span>
-                                <span class="ms-auto fw-bold">{{ $completedLabTests }}</span>
+                        <div class="col-12 col-md-6">
+                            <div class="metric-badges d-flex flex-wrap gap-2 mb-3">
+                                <div class="metric-badge completed">
+                                    <div class="label">Completed</div>
+                                    <div class="value">{{ $completedLabTests }}</div>
+                                </div>
+                                <div class="metric-badge pending">
+                                    <div class="label">Pending</div>
+                                    <div class="value">{{ $pendingLabTests }}</div>
+                                </div>
                             </div>
-                            <div class="d-flex align-items-center">
-                                <span class="legend-dot me-2" style="background: rgba(0,0,0,0.65)"></span>
-                                <span>Pending</span>
-                                <span class="ms-auto fw-bold">{{ $pendingLabTests }}</span>
-                            </div>
-                            <div class="mt-3">
+                            <div>
                                 <div class="d-flex justify-content-between mb-1 small text-muted">
                                     <span>Completion</span>
                                     <span>{{ $completionRate }}%</span>
@@ -176,9 +180,9 @@
 
                     <hr class="soft-hr my-3">
 
-                    <div class="mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <strong class="me-2">Top Test Types</strong>
+                    <div class="card-section mb-3">
+                        <div class="section-header d-flex align-items-center mb-2">
+                            <div class="title me-2">Top Test Types</div>
                             <small class="text-muted">last {{ isset($labTests) ? min($labTests->count(), 50) : 0 }}</small>
                         </div>
                         <div class="chips">
@@ -190,21 +194,21 @@
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center mb-2">
-                        <strong class="me-2">Recent Lab Tests</strong>
+                    <div class="section-header d-flex align-items-center mb-2">
+                        <div class="title me-2">Recent Lab Tests</div>
                         <small class="text-muted">latest 5</small>
                         <a class="ms-auto btn btn-sm btn-outline-primary" href="{{ route('lab-tests', ['school' => $school->id]) }}">View all</a>
                     </div>
-                    <ul class="list-unstyled mb-0">
+                    <ul class="recent-list list-unstyled mb-0">
                         @forelse($recentLabTests as $lt)
                             @php $statusClass = ($lt->status ?? '') === 'completed' ? 'pill-completed' : 'pill-pending'; @endphp
-                            <li class="d-flex align-items-center py-2 border-bottom">
+                            <li class="recent-item d-flex align-items-center py-2">
                                 <div class="flex-grow-1">
-                                    <div class="fw-semibold">
+                                    <div class="title fw-semibold">
                                         {{ optional($lt->student)->name ?? 'Student' }}
                                         <span class="text-muted">• {{ $lt->test_type ?? 'Test' }}</span>
                                     </div>
-                                    <div class="text-muted small">{{ \Carbon\Carbon::parse($lt->created_at)->format('M j, Y') }}</div>
+                                    <div class="subtext text-muted small">{{ \Carbon\Carbon::parse($lt->created_at)->format('M j, Y') }}</div>
                                 </div>
                                 <span class="status-pill {{ $statusClass }}">{{ ucfirst($lt->status ?? 'pending') }}</span>
                             </li>
