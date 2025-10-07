@@ -258,6 +258,7 @@ Route::post('/health-facilities/{id}/change-password', [HealthFacilityController
 Route::post('/health-facilities/{id}/upload-logo', [HealthFacilityController::class, 'uploadLogo'])->name('health-facilities.upload-logo');
 Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+Route::delete('/patients/{patient}/delete', [PatientController::class, 'destroy'])->name('patients.delete');
 
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])

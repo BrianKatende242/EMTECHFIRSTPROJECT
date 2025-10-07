@@ -9,6 +9,13 @@
         </button>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     @if($patients->count())
     <div class="card">
         <div class="card-body">
@@ -21,6 +28,7 @@
                             <th>Gender</th>
                             <th>Age</th>
                             <th>Contact</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +39,15 @@
                             <td>{{ ucfirst($patient->gender) }}</td>
                             <td>{{ \Carbon\Carbon::parse($patient->birth_date)->age }}</td>
                             <td>{{ $patient->contact_number ?? 'N/A' }}</td>
+                            <td class="text-end">
+                                <form method="POST" action="{{ route('patients.delete', ['patient' => $patient->id]) }}" onsubmit="return confirm('Delete this patient? This action cannot be undone.');" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

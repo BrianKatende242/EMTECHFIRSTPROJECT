@@ -73,4 +73,24 @@ class PatientController extends Controller
         return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
                          ->with('success', 'Patient added successfully!');
     }
+
+    /**
+     * Delete a patient, preventing deletion if there are existing appointments.
+     */
+    public function destroy(Patient $patient)
+    {
+        $facilityId = $patient->health_facility_id;
+
+        if ($patient->appointments()->count() > 0) {
+            return redirect()
+                ->route('health-facility.patients', ['id' => $facilityId])
+                ->with('error', 'Cannot delete patient with existing appointments.');
+        }
+
+        $patient->delete();
+
+        return redirect()
+            ->route('health-facility.patients', ['id' => $facilityId])
+            ->with('success', 'Patient deleted successfully.');
+    }
 }
