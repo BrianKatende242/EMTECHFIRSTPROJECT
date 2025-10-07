@@ -271,6 +271,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Top header bar uses brand pink; brand bar (nav-header) remains white */
 .header { background-color: var(--primary) !important; }
 .header .navbar .nav-link, .header .navbar i { color: #fff !important; }
+.header .notification_dropdown .mdi-bell { color: #000 !important; }
 .header .dropdown-menu { color: #000 !important; background-color: #fff !important; }
 /* Ensure profile dropdown items are readable */
 .header .header-profile .dropdown-menu .dropdown-item { color: #000 !important; }
