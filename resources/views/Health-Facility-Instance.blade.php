@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.base')
+
+@push('styles')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $healthFacility->name }} Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .sidebar {
@@ -13,30 +9,29 @@
             background: #343a40;
             color: white;
         }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,.5);
-        }
+        .sidebar .nav-link { color: rgba(255,255,255,.8); }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             color: white;
-            background: rgba(88, 14, 14, 0.1);
+            background: rgba(255, 255, 255, 0.08);
         }
         .tab-content {
             padding: 20px;
             background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         }
         .profile-img {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 5px solid #fff;
+            border: 3px solid #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
-</head>
-<body>
+@endpush
+
+@section('content')
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -344,7 +339,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@push('scripts')
     <script>
     // Calculate appointment cost based on doctor type and duration
     function calculateAppointmentCost() {
@@ -625,5 +620,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 </script>
-</body>
-</html>
+@endpush
+@endsection

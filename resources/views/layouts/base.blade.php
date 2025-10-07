@@ -10,6 +10,8 @@
             {{ $school->name }} - Dashboard
         @elseif(isset($doctor))
             Dr. {{ $doctor->name }} - Dashboard
+        @elseif(isset($healthFacility))
+            {{ $healthFacility->name }} - Dashboard
         @else
             Dashboard
         @endif
@@ -21,6 +23,9 @@
     <link href="{{ asset('vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/keti-theme.css') }}" rel="stylesheet">
+
+    {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
+    @stack('styles')
 
 
 
