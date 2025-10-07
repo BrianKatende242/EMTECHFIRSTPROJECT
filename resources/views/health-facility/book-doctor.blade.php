@@ -29,6 +29,7 @@
                             <th>Time</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            <th class="text-end">Meeting</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +40,19 @@
                             <td>{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
                             <td>{{ $appt->duration }} mins</td>
-                            <td><span class="badge bg-secondary text-uppercase">{{ $appt->status }}</span></td>
+                            <td><span class="badge bg-secondary text-uppercase text-white">{{ $appt->status }}</span></td>
+                            <td class="text-end">
+                                @if($appt->doctor)
+                                    <a href="https://meet.jit.si/{{ $appt->doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $appt->doctor->name)) }}"
+                                       class="btn btn-sm btn-outline-dark"
+                                       title="Open Jitsi meeting"
+                                       target="_blank" rel="noopener">
+                                        <i class="fa fa-video-camera"></i>
+                                    </a>
+                                @else
+                                    —
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -73,7 +86,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Doctor</label>
                                 <select name="doctor_id" class="form-select form-control" required>
                                     <option value="">Select Doctor</option>
