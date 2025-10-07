@@ -8,7 +8,6 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookDoctorModal">
                 <i class="fa fa-calendar-plus me-2"></i> New Appointment
             </button>
-            <a href="{{ route('health-facility.patients', ['id' => $healthFacility->id]) }}" class="btn btn-outline-secondary">Back to Patients</a>
         </div>
     </div>
 
