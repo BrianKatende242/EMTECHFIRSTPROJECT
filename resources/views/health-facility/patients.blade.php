@@ -40,13 +40,14 @@
                             <td>{{ \Carbon\Carbon::parse($patient->birth_date)->age }}</td>
                             <td>{{ $patient->contact_number ?? 'N/A' }}</td>
                             <td class="text-end">
-                                <form method="POST" action="{{ route('patients.delete', ['patient' => $patient->id]) }}" onsubmit="return confirm('Delete this patient? This action cannot be undone.');" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteModal"
+                                        data-action="{{ route('patients.delete', ['patient' => $patient->id]) }}"
+                                        data-name="{{ $patient->name }}">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
                             </td>
                         </tr>
                         @endforeach
@@ -106,4 +107,40 @@
         </div>
     </div>
 </div>
+
+        {{-- Confirm Delete Modal --}}
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-dark">
+                        Are you sure you want to delete <strong id="deletePatientName">this patient</strong>? This action cannot be undone.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deletePatientForm" method="POST" action="">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var modalEl = document.getElementById('confirmDeleteModal');
+                    modalEl.addEventListener('show.bs.modal', function (event) {
+                        var button = event.relatedTarget;
+                        var action = button.getAttribute('data-action');
+                        var name = button.getAttribute('data-name');
+                        modalEl.querySelector('#deletePatientForm').setAttribute('action', action);
+                        modalEl.querySelector('#deletePatientName').textContent = name || 'this patient';
+                    });
+                });
+            </script>
+        </div>
 @endsection
