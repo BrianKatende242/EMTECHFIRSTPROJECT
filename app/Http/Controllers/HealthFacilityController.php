@@ -153,7 +153,7 @@ class HealthFacilityController extends Controller
             $day = (clone $startOfWeek)->addDays($i);
             $labels[] = $day->format('D');
             $countForDay = Appointment::where('health_facility_id', $id)
-                ->whereDate('created_at', $day->toDateString())
+                ->whereDate('appointment_time', $day->toDateString())
                 ->count();
             $series[] = $countForDay;
         }
