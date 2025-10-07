@@ -145,15 +145,17 @@ class HealthFacilityController extends Controller
                 $query->where('available', true);
             })->count();
 
-        // Build 7-day appointments series (Mon-Sun of current week)
-        $startOfWeek = Carbon::now()->startOfWeek();
+        // Build last 7 days series (rolling window including today)
         $labels = [];
         $series = [];
+        $startDay = Carbon::now()->subDays(6)->startOfDay();
         for ($i = 0; $i < 7; $i++) {
-            $day = (clone $startOfWeek)->addDays($i);
+            $day = (clone $startDay)->addDays($i);
             $labels[] = $day->format('D');
+            $dayStart = (clone $day)->startOfDay();
+            $dayEnd = (clone $day)->endOfDay();
             $countForDay = Appointment::where('health_facility_id', $id)
-                ->whereDate('appointment_time', $day->toDateString())
+                ->whereBetween('appointment_time', [$dayStart, $dayEnd])
                 ->count();
             $series[] = $countForDay;
         }
