@@ -266,7 +266,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Nav header (brand bar) set to white */
 .nav-header { background-color: #ffffff !important; }
 .nav-header .brand-logo { color: #000 !important; }
-.hamburger .line { background: #FF00F8 !important; }
+.hamburger .line { background: #000000 !important; }
 
 /* Top header bar uses brand pink; brand bar (nav-header) remains white */
 .header { background-color: var(--primary) !important; }
