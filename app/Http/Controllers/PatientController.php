@@ -81,16 +81,13 @@ class PatientController extends Controller
     {
         $facilityId = $patient->health_facility_id;
 
-        if ($patient->appointments()->count() > 0) {
-            return redirect()
-                ->route('health-facility.patients', ['id' => $facilityId])
-                ->with('error', 'Cannot delete patient with existing appointments.');
-        }
+        // Cascade appointments: delete child appointments before patient
+        $patient->appointments()->delete();
 
         $patient->delete();
 
         return redirect()
             ->route('health-facility.patients', ['id' => $facilityId])
-            ->with('success', 'Patient deleted successfully.');
+            ->with('success', 'Patient and their appointments deleted successfully.');
     }
 }
