@@ -168,6 +168,10 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   box-shadow: inset 0 0 0 2px rgba(255, 0, 248, 0.4);
 }
 
+/* --- Forms --- */
+/* Make all form labels black for readability on light card backgrounds */
+label, .form-label { color: #000 !important; }
+
 /* --- School Dashboard Stat Cards --- */
 .stat-card {
   border: 1px solid #e9ecef;
