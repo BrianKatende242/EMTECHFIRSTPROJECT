@@ -341,6 +341,26 @@
 
 @push('scripts')
     <script>
+    // Activate tab based on URL hash for deep links from sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        var hash = window.location.hash;
+        if (hash) {
+            var triggerEl = document.querySelector('a.nav-link[href="' + hash + '"]');
+            if (triggerEl) {
+                var tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+        }
+        // Keep URL hash in sync when switching tabs
+        document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function(link) {
+            link.addEventListener('shown.bs.tab', function (e) {
+                if (e.target && e.target.getAttribute('href')) {
+                    history.replaceState(null, '', e.target.getAttribute('href'));
+                }
+            });
+        });
+    });
+
     // Calculate appointment cost based on doctor type and duration
     function calculateAppointmentCost() {
         const doctorSelect = document.getElementById('doctor-select');
