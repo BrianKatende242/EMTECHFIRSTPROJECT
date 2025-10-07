@@ -95,12 +95,6 @@
                 </div>
             </div>
             <div class="col-lg-5">
-                <div class="card mb-3">
-                    <div class="card-header">Appointments by Status</div>
-                    <div class="card-body">
-                        <canvas id="hfApptByStatus" height="200"></canvas>
-                    </div>
-                </div>
                 <div class="card">
                     <div class="card-header">Patients by Gender</div>
                     <div class="card-body">
@@ -141,28 +135,6 @@
                 scales: {
                     x: { grid: { display: false } },
                     y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
-                }
-            }
-        });
-
-        // Doughnut: Appointments by Status
-        var apptCtx = document.getElementById('hfApptByStatus').getContext('2d');
-        new Chart(apptCtx, {
-            type: 'doughnut',
-            data: {
-                labels: @json($appointmentStatusLabels),
-                datasets: [{
-                    data: @json($appointmentStatusData),
-                    backgroundColor: ['#FF00F8', '#6c757d', '#000000', '#e83e8c'],
-                    hoverBackgroundColor: ['#e000dc', '#5a6268', '#000000', '#d63384'],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                cutout: '60%',
-                plugins: {
-                    legend: { position: 'bottom' }
                 }
             }
         });

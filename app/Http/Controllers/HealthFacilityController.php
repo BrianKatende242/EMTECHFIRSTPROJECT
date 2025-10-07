@@ -158,14 +158,6 @@ class HealthFacilityController extends Controller
             $series[] = $countForDay;
         }
 
-        // Doughnut: Appointments by status
-        $confirmedCount = Appointment::where('health_facility_id', $id)->where('status', 'confirmed')->count();
-        $pendingCount = Appointment::where('health_facility_id', $id)->whereIn('status', ['pending','pending_payment'])->count();
-        $completedCount = Appointment::where('health_facility_id', $id)->where('status', 'completed')->count();
-        $cancelledCount = Appointment::where('health_facility_id', $id)->where('status', 'cancelled')->count();
-        $appointmentStatusLabels = ['Confirmed', 'Pending', 'Completed', 'Cancelled'];
-        $appointmentStatusData = [$confirmedCount, $pendingCount, $completedCount, $cancelledCount];
-
         // Doughnut: Patients by gender
         $maleCount = Patient::where('health_facility_id', $id)->where('gender', 'male')->count();
         $femaleCount = Patient::where('health_facility_id', $id)->where('gender', 'female')->count();
@@ -190,8 +182,6 @@ class HealthFacilityController extends Controller
             ],
             'weeklyLabels' => $labels,
             'weeklyData' => $series,
-            'appointmentStatusLabels' => $appointmentStatusLabels,
-            'appointmentStatusData' => $appointmentStatusData,
             'genderLabels' => $genderLabels,
             'genderData' => $genderData,
         ]);
