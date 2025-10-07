@@ -1,27 +1,27 @@
 @if(isset($school))
 <ul class="metismenu" id="menu">
     <li class="nav-label first">Main Menu</li>
-    <li>
-            <a class="{{ request()->is('dashboard*') ? 'mm-active' : '' }}"
+    <li class="{{ request()->routeIs('school.dashboard') ? 'mm-active' : '' }}">
+            <a
                 href="{{ route('school.dashboard', ['school' => $school]) }}" aria-expanded="false">
                 <i class="fa fa-dashboard"></i>
                 <span class="nav-text">Dashboard</span>
             </a>
     </li>
-    <li>
-        <a class="" href="{{ route('students', ['school' => $school]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('students') ? 'mm-active' : '' }}">
+        <a href="{{ route('students', ['school' => $school]) }}" aria-expanded="false">
             <i class="fa fa-users"></i>
             <span class="nav-text">Students</span>
         </a>
     </li>
-    <li>
-        <a class="" href="{{ route('book-doctor', ['school' => $school])}}" aria-expanded="false">
+    <li class="{{ request()->routeIs('book-doctor') ? 'mm-active' : '' }}">
+        <a href="{{ route('book-doctor', ['school' => $school])}}" aria-expanded="false">
             <i class="fa fa-user-md"></i>
             <span class="nav-text">Book Doctor</span>
         </a>
     </li>
-    <li>
-        <a class="" href="{{ route('lab-tests', ['school' => $school]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('lab-tests') ? 'mm-active' : '' }}">
+        <a href="{{ route('lab-tests', ['school' => $school]) }}" aria-expanded="false">
             <i class="fa fa-flask"></i>
             <span class="nav-text">Lab Tests</span>
         </a>
@@ -30,26 +30,29 @@
 @elseif(isset($healthFacility))
 <ul class="metismenu" id="menu">
     <li class="nav-label first">Health Facility</li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#patients" aria-expanded="false">
+    <li class="{{ request()->routeIs('health-facility.dashboard') ? 'mm-active' : '' }}">
+        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}" aria-expanded="false">
+            <i class="fa fa-dashboard"></i>
+            <span class="nav-text">Dashboard</span>
+        </a>
+    </li>
+    <li class="{{ request()->routeIs('health-facility.patients') ? 'mm-active' : '' }}">
+        <a href="{{ route('health-facility.patients', ['id' => $healthFacility->id]) }}" aria-expanded="false">
             <i class="fa fa-users"></i>
             <span class="nav-text">Patients</span>
         </a>
     </li>
     <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#add-patient" aria-expanded="false">
-            <i class="fa fa-user-plus"></i>
-            <span class="nav-text">Add Patient</span>
-        </a>
+        {{-- Add Patient via modal on Patients page; link removed from sidebar --}}
     </li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#book-doctor" aria-expanded="false">
+    <li class="{{ request()->routeIs('health-facility.book-doctor') ? 'mm-active' : '' }}">
+        <a href="{{ route('health-facility.book-doctor', ['id' => $healthFacility->id]) }}" aria-expanded="false">
             <i class="fa fa-user-md"></i>
             <span class="nav-text">Book Doctor</span>
         </a>
     </li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#lab-tests" aria-expanded="false">
+    <li class="{{ request()->routeIs('health-facility.lab-tests') ? 'mm-active' : '' }}">
+        <a href="{{ route('health-facility.lab-tests', ['id' => $healthFacility->id]) }}" aria-expanded="false">
             <i class="fa fa-flask"></i>
             <span class="nav-text">Lab Tests</span>
         </a>
@@ -58,27 +61,26 @@
 @elseif(isset($doctor))
 <ul class="metismenu" id="menu">
     <li class="nav-label first">Doctor's Menu</li>
-    <li>
-        <a class="{{ request()->is('doctor-dashboard*') ? 'mm-active' : '' }}"
-            href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('doctor.dashboard') ? 'mm-active' : '' }}">
+        <a href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
             <i class="fa fa-dashboard"></i>
             <span class="nav-text">Dashboard</span>
         </a>
     </li>
-    <li>
-        <a class="" href="{{ route('doctor.appointments', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('doctor.appointments') ? 'mm-active' : '' }}">
+        <a href="{{ route('doctor.appointments', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
             <i class="fa fa-calendar"></i>
             <span class="nav-text">Appointments</span>
         </a>
     </li>
-    <li>
-        <a class="" href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('doctor.meeting-link') ? 'mm-active' : '' }}">
+        <a href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
             <i class="fa fa-video-camera"></i>
             <span class="nav-text">Meeting link</span>
         </a>
     </li>
-    <li>
-        <a class="" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
+    <li class="{{ request()->routeIs('doctor.availability') ? 'mm-active' : '' }}">
+        <a href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
             <i class="fa fa-check"></i>
             <span class="nav-text">Availability</span>
         </a>
