@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
+use Carbon\Carbon;
 
 
 class HealthFacilityController extends Controller
@@ -135,6 +136,43 @@ class HealthFacilityController extends Controller
                            ->get();
     
         $patients = Patient::where('health_facility_id', $id)->get();
+
+        // Metrics
+        $patientsCount = $patients->count();
+        $appointmentsCount = Appointment::where('health_facility_id', $id)->count();
+        $availableDoctorsCount = Doctor::where('health_facility_id', $id)
+            ->whereHas('availabilities', function ($query) {
+                $query->where('available', true);
+            })->count();
+
+        // Build 7-day appointments series (Mon-Sun of current week)
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $labels = [];
+        $series = [];
+        for ($i = 0; $i < 7; $i++) {
+            $day = (clone $startOfWeek)->addDays($i);
+            $labels[] = $day->format('D');
+            $countForDay = Appointment::where('health_facility_id', $id)
+                ->whereDate('created_at', $day->toDateString())
+                ->count();
+            $series[] = $countForDay;
+        }
+
+        // Doughnut: Appointments by status
+        $confirmedCount = Appointment::where('health_facility_id', $id)->where('status', 'confirmed')->count();
+        $pendingCount = Appointment::where('health_facility_id', $id)->whereIn('status', ['pending','pending_payment'])->count();
+        $completedCount = Appointment::where('health_facility_id', $id)->where('status', 'completed')->count();
+        $cancelledCount = Appointment::where('health_facility_id', $id)->where('status', 'cancelled')->count();
+        $appointmentStatusLabels = ['Confirmed', 'Pending', 'Completed', 'Cancelled'];
+        $appointmentStatusData = [$confirmedCount, $pendingCount, $completedCount, $cancelledCount];
+
+        // Doughnut: Patients by gender
+        $maleCount = Patient::where('health_facility_id', $id)->where('gender', 'male')->count();
+        $femaleCount = Patient::where('health_facility_id', $id)->where('gender', 'female')->count();
+        $otherCount = Patient::where('health_facility_id', $id)->where('gender', 'other')->count();
+        $unknownCount = Patient::where('health_facility_id', $id)->whereNull('gender')->orWhere('gender','')->count();
+        $genderLabels = ['Male', 'Female', 'Other', 'Unspecified'];
+        $genderData = [$maleCount, $femaleCount, $otherCount, $unknownCount];
     
         return view('Health-Facility-Instance', [
             'healthFacility' => $healthFacility,
@@ -144,8 +182,48 @@ class HealthFacilityController extends Controller
             'availableDoctors' => $availableDoctors,
             'patients' => $patients,
             'messages' => $messages,
-            'stats' => null
+            'stats' => [
+                'patients' => $patientsCount,
+                'appointments' => $appointmentsCount,
+                'availableDoctors' => $availableDoctorsCount,
+                'unreadMessages' => $unreadMessages,
+            ],
+            'weeklyLabels' => $labels,
+            'weeklyData' => $series,
+            'appointmentStatusLabels' => $appointmentStatusLabels,
+            'appointmentStatusData' => $appointmentStatusData,
+            'genderLabels' => $genderLabels,
+            'genderData' => $genderData,
         ]);
+    }
+
+    public function patients($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        return view('health-facility/patients', compact('healthFacility', 'patients'));
+    }
+
+    public function createPatient($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        return view('health-facility/patients-create', compact('healthFacility'));
+    }
+
+    public function bookDoctor($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        $doctors = Doctor::latest()->get();
+        return view('health-facility/book-doctor', compact('healthFacility', 'patients', 'doctors'));
+    }
+
+    public function labTests($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        // Placeholder: if LabTest supports health_facility_id, filter; else show empty list
+        $labTests = collect();
+        return view('health-facility/lab-tests', compact('healthFacility', 'labTests'));
     }
     
 
