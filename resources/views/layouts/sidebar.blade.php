@@ -27,6 +27,34 @@
         </a>
     </li>
 </ul>
+@elseif(isset($healthFacility))
+<ul class="metismenu" id="menu">
+    <li class="nav-label first">Health Facility</li>
+    <li>
+        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#patients" aria-expanded="false">
+            <i class="fa fa-users"></i>
+            <span class="nav-text">Patients</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#add-patient" aria-expanded="false">
+            <i class="fa fa-user-plus"></i>
+            <span class="nav-text">Add Patient</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#book-doctor" aria-expanded="false">
+            <i class="fa fa-user-md"></i>
+            <span class="nav-text">Book Doctor</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#lab-tests" aria-expanded="false">
+            <i class="fa fa-flask"></i>
+            <span class="nav-text">Lab Tests</span>
+        </a>
+    </li>
+</ul>
 @elseif(isset($doctor))
 <ul class="metismenu" id="menu">
     <li class="nav-label first">Doctor's Menu</li>
@@ -56,33 +84,5 @@
         </a>
     </li>
 
-</ul>
-@elseif(isset($healthFacility))
-<ul class="metismenu" id="menu">
-    <li class="nav-label first">Health Facility</li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#patients" aria-expanded="false">
-            <i class="fa fa-users"></i>
-            <span class="nav-text">Patients</span>
-        </a>
-    </li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#add-patient" aria-expanded="false">
-            <i class="fa fa-user-plus"></i>
-            <span class="nav-text">Add Patient</span>
-        </a>
-    </li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#book-doctor" aria-expanded="false">
-            <i class="fa fa-user-md"></i>
-            <span class="nav-text">Book Doctor</span>
-        </a>
-    </li>
-    <li>
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}#lab-tests" aria-expanded="false">
-            <i class="fa fa-flask"></i>
-            <span class="nav-text">Lab Tests</span>
-        </a>
-    </li>
 </ul>
 @endif

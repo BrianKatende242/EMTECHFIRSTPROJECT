@@ -244,9 +244,9 @@
                             <label class="form-label">Doctor</label>
                             <select name="doctor_id" class="form-select" required>
                                 <option value="">Select Doctor</option>
-                                @foreach($allDoctors as $doctor)
-                                <option value="{{ $doctor->id }}">
-                                    Dr. {{ $doctor->name }} ({{ $doctor->specialization }})
+                                @foreach($allDoctors as $aDoctor)
+                                <option value="{{ $aDoctor->id }}">
+                                    Dr. {{ $aDoctor->name }} ({{ $aDoctor->specialization }})
                                 </option>
                                 @endforeach
                             </select>
