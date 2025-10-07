@@ -301,10 +301,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   color: #dc3545 !important;
 }
 
-/* Ensure profile avatar uses brand border */
-.header .header-profile img.rounded-circle {
-  border-color: #FF00F8 !important;
-}
+/* Profile avatar border styling is now handled inline (black) */
 
 /* --- Doctor Availability Page --- */
 .availability-card .availability-header { background: linear-gradient(90deg, #000, #1a1a1a); color: #fff; }

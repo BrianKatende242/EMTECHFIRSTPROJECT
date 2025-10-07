@@ -107,7 +107,7 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #FF00F8; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #000000; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right text-dark">
                                     <a href="" class="dropdown-item">
