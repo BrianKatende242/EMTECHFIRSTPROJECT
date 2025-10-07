@@ -20,12 +20,7 @@
             <span class="nav-text">Book Doctor</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('lab-tests') ? 'mm-active' : '' }}">
-        <a href="{{ route('lab-tests', ['school' => $school]) }}" aria-expanded="false">
-            <i class="fa fa-flask"></i>
-            <span class="nav-text">Lab Tests</span>
-        </a>
-    </li>
+    {{-- Lab Tests removed until laboratory functionality is available --}}
 </ul>
 @elseif(isset($healthFacility))
 <ul class="metismenu" id="menu">
@@ -51,12 +46,7 @@
             <span class="nav-text">Book Doctor</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('health-facility.lab-tests') ? 'mm-active' : '' }}">
-        <a href="{{ route('health-facility.lab-tests', ['id' => $healthFacility->id]) }}" aria-expanded="false">
-            <i class="fa fa-flask"></i>
-            <span class="nav-text">Lab Tests</span>
-        </a>
-    </li>
+    {{-- Lab Tests removed until laboratory functionality is available --}}
 </ul>
 @elseif(isset($doctor))
 <ul class="metismenu" id="menu">
