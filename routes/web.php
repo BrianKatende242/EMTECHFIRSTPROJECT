@@ -2,6 +2,7 @@
 
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientController; 
 use App\Http\Controllers\AppointmentController;
@@ -9,7 +10,6 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FinanceDashboardController;
 use App\Http\Controllers\HealthFacilityController;
 use App\Http\Controllers\ApiDashboardController;
-use App\Models\NewsletterSubscriber;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\OtpController;
@@ -54,19 +54,8 @@ Route::get('/admin/contact-submissions', [ContactController::class, 'index'])
      ->name('admin.contact-submissions');
 
 
-// ✅ Email Verification Route for Newsletter
-Route::get('/verify-newsletter/{token}', function ($token) {
-    $subscriber = NewsletterSubscriber::where('verification_token', $token)->first();
-
-    if (!$subscriber) {
-        return response()->json(['message' => 'Invalid or expired verification link.'], 404);
-    }
-
-    // Mark as verified
-    $subscriber->update(['is_verified' => true]);
-
-    return response()->json(['message' => 'Email confirmed!']);
-})->name('verify-newsletter');
+// Newsletter verification (web - HTML)
+Route::get('/verify-newsletter/{token}', [NewsletterController::class, 'verify'])->name('newsletter.verify.web');
 
 Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp']);
 

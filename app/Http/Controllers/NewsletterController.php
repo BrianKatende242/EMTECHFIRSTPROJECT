@@ -95,11 +95,17 @@ class NewsletterController extends Controller
         }
     }
 
-    public function verify($token)
+    public function verify($token, Request $request)
     {
         $subscriber = NewsletterSubscriber::where('verification_token', $token)->first();
 
         if (!$subscriber) {
+            if (!$request->wantsJson()) {
+                return response()->view('newsletter-verify', [
+                    'status' => 'invalid',
+                    'email' => null,
+                ], 400);
+            }
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid verification token.'
@@ -107,6 +113,12 @@ class NewsletterController extends Controller
         }
 
         if ($subscriber->isVerified()) {
+            if (!$request->wantsJson()) {
+                return response()->view('newsletter-verify', [
+                    'status' => 'already',
+                    'email' => $subscriber->email,
+                ]);
+            }
             return response()->json([
                 'success' => false,
                 'message' => 'Email already verified.'
@@ -114,6 +126,13 @@ class NewsletterController extends Controller
         }
 
         $subscriber->verify();
+
+        if (!$request->wantsJson()) {
+            return response()->view('newsletter-verify', [
+                'status' => 'success',
+                'email' => $subscriber->email,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
