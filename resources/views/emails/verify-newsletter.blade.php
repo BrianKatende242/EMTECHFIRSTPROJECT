@@ -4,21 +4,21 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Verify Your Subscription</title>
-	<style>
+		<style>
 		/* Basic email-safe styles */
-		body { margin:0; padding:0; background:#0f172a; color:#0b1220; }
-		.container { width:100%; background:#0f172a; padding:24px 0; }
-		.card { max-width:620px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 10px 30px rgba(2,6,23,0.25); }
-		.header { background:linear-gradient(135deg,#0ea5e9,#22c55e); padding:28px 32px; text-align:center; }
+			body { margin:0; padding:0; background:#1a001a; color:#0b1220; }
+			.container { width:100%; background:#1a001a; padding:24px 0; }
+			.card { max-width:620px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 10px 30px rgba(10,0,10,0.25); }
+			.header { background:linear-gradient(135deg,#FF00F8,rgb(128,0,128)); padding:28px 32px; text-align:center; }
 		.header img { height:40px; }
 		.content { padding:28px 32px; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
 		h1 { font-size:22px; margin:0 0 8px; color:#0b1220; }
 		p { color:#334155; line-height:1.6; margin:0 0 16px; }
-		.btn { display:inline-block; background:#16a34a; color:#ffffff !important; text-decoration:none; padding:12px 18px; border-radius:10px; font-weight:600; }
-		.btn:hover { background:#15803d; }
+			.btn { display:inline-block; background:#FF00F8; color:#ffffff !important; text-decoration:none; padding:12px 18px; border-radius:10px; font-weight:600; }
+			.btn:hover { background:rgb(128,0,128); }
 		.footer { padding:20px 32px 28px; color:#94a3b8; font-size:12px; }
 		.muted { color:#64748b; font-size:13px; }
-		.spacer { height:4px; background:linear-gradient(90deg,#0ea5e9,#22c55e); }
+			.spacer { height:4px; background:linear-gradient(90deg,#FF00F8,rgb(128,0,128)); }
 	</style>
 </head>
 <body>
