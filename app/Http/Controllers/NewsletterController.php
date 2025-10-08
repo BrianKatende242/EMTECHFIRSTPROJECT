@@ -85,13 +85,21 @@ class NewsletterController extends Controller
             'email' => 'required|email',
         ]);
 
-        $subscriber = NewsletterSubscriber::where('email', $request->email)->first();
+        $email = strtolower(trim($request->input('email')));
+
+        $subscriber = NewsletterSubscriber::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if ($subscriber) {
             $subscriber->update(['is_active' => false]);
         }
 
-        // Return a generic success to avoid leaking subscription existence
+        // Respond with HTML page if not requesting JSON (e.g., clicked from email link)
+        if (!$request->wantsJson()) {
+            return response()->view('newsletter-unsubscribed', [
+                'email' => $email,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'You have been unsubscribed from the newsletter. If this email was not subscribed, no action was taken.'
