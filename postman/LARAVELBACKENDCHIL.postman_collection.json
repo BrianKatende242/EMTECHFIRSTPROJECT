@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "c9f6e7f5-7092-4b9e-9df7-7fb4a2f2a0d3",
+    "name": "LARAVELBACKENDCHIL API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for LARAVELBACKENDCHIL. Includes API endpoints grouped by domain with example payloads and descriptions. Use the companion environment file to switch between local and deployed base URLs."
+  },
+  "item": [
+    {
+      "name": "Utilities",
+      "item": [
+        {
+          "name": "Hello",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hello",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hello"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schools",
+      "item": [
+        {
+          "name": "Register School",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example High School\",\n  \"email\": \"school@example.com\",\n  \"contact\": \"+15551234567\",\n  \"file_url\": \"https://example.com/file.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/register-school", "host": ["{{baseUrl}}"], "path": ["api","register-school"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Schools",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/schools", "host": ["{{baseUrl}}"], "path": ["api","schools"] } },
+          "response": []
+        },
+        {
+          "name": "Update Latest School File URL",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"file_url\": \"https://example.com/updated.pdf\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/update-latest-school-file", "host": ["{{baseUrl}}"], "path": ["api","update-latest-school-file"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"school_id\": 1,\n  \"name\": \"Jane Doe\",\n  \"grade\": \"P6\",\n  \"birth_date\": \"2015-02-01\",\n  \"parent_contact\": \"+15552345678\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api","students"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Create Patient",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"health_facility_id\": 1,\n  \"name\": \"John Smith\",\n  \"gender\": \"male\",\n  \"birth_date\": \"1990-05-01\",\n  \"contact_number\": \"+15550001111\",\n  \"medical_history\": \"Allergic to penicillin\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api","patients"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Patients by Health Facility",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/patients/:healthFacilityId", "host": ["{{baseUrl}}"], "path": ["api","patients",":healthFacilityId"], "variable": [{"key": "healthFacilityId", "value": "1"}] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Appointment (School Context)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"duration\": 30,\n  \"appointment_time\": \"2030-01-30T14:00:00Z\",\n  \"reason\": \"Routine checkup\",\n  \"school_id\": 1,\n  \"student_id\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/appointments", "host": ["{{baseUrl}}"], "path": ["api","appointments"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Appointment (Health Facility Context)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"duration\": 20,\n  \"appointment_time\": \"2030-01-30T14:00:00Z\",\n  \"reason\": \"Headache\",\n  \"health_facility_id\": 1,\n  \"patient_id\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/appointments", "host": ["{{baseUrl}}"], "path": ["api","appointments"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Appointments (by school_id or health_facility_id)",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/appointments?school_id=1", "host": ["{{baseUrl}}"], "path": ["api","appointments"], "query": [{"key":"school_id","value":"1"}] } },
+          "response": []
+        },
+        {
+          "name": "Check Appointment Status by Payment Ref",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/appointments/status/:referenceId", "host": ["{{baseUrl}}"], "path": ["api","appointments","status",":referenceId"], "variable": [{"key":"referenceId","value":"ref_123"}] } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments (MoMo)",
+      "item": [
+        { "name": "Init API User", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/momo/init", "host": ["{{baseUrl}}"], "path": ["api","momo","init"] } }, "response": [] },
+        { "name": "Get API User", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/momo/user", "host": ["{{baseUrl}}"], "path": ["api","momo","user"] } }, "response": [] },
+        {
+          "name": "Request Payment",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"amount\": 1000,\n  \"payer\": \"256771234567\",\n  \"externalId\": \"ORDER-001\",\n  \"payerMessage\": \"Payment for appointment\",\n  \"payeeNote\": \"KETI\"\n}"}, "url": { "raw": "{{baseUrl}}/api/momo/request-payment", "host": ["{{baseUrl}}"], "path": ["api","momo","request-payment"] } },
+          "response": []
+        },
+        { "name": "Payment Status", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/momo/payment-status/:referenceId", "host": ["{{baseUrl}}"], "path": ["api","momo","payment-status",":referenceId"], "variable": [{"key":"referenceId","value":"ref_123"}] } }, "response": [] },
+        { "name": "Account Balance", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/momo/balance", "host": ["{{baseUrl}}"], "path": ["api","momo","balance"] } }, "response": [] },
+        { "name": "Payment Callback (simulate)", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/momo/callback", "host": ["{{baseUrl}}"], "path": ["api","momo","callback"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Newsletter",
+      "item": [
+        { "name": "Subscribe", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"user@example.com\"\n}"}, "url": { "raw": "{{baseUrl}}/api/newsletter/subscribe", "host": ["{{baseUrl}}"], "path": ["api","newsletter","subscribe"] } }, "response": [] },
+        { "name": "Verify", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/verify-newsletter/:token", "host": ["{{baseUrl}}"], "path": ["api","verify-newsletter", ":token"], "variable": [{"key":"token","value":"token-here"}] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Contact",
+      "item": [
+        { "name": "Create Contact Submission", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"message\": \"Hi!\"\n}"}, "url": { "raw": "{{baseUrl}}/api/contact-submissions", "host": ["{{baseUrl}}"], "path": ["api","contact-submissions"] } }, "response": [] },
+        { "name": "List Contact Submissions", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/contact-submissions", "host": ["{{baseUrl}}"], "path": ["api","contact-submissions"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "OTP & Voiceflow",
+      "item": [
+        { "name": "Send OTP (School)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"school_id\": 1,\n  \"email\": \"school@example.com\"\n}"}, "url": { "raw": "{{baseUrl}}/api/send-otp", "host": ["{{baseUrl}}"], "path": ["api","send-otp"] } }, "response": [] },
+        { "name": "Send Login OTP (email only)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"user@example.com\"\n}"}, "url": { "raw": "{{baseUrl}}/api/voiceflow/send-login-otp", "host": ["{{baseUrl}}"], "path": ["api","voiceflow","send-login-otp"] } }, "response": [] },
+        { "name": "Verify OTP (email)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"}, "url": { "raw": "{{baseUrl}}/api/voiceflow/verify-otp", "host": ["{{baseUrl}}"], "path": ["api","voiceflow","verify-otp"] } }, "response": [] },
+        { "name": "Verify Doctor OTP", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"doctor@example.com\",\n  \"otp\": \"123456\"\n}"}, "url": { "raw": "{{baseUrl}}/api/voiceflow/verify-doctor-otp", "host": ["{{baseUrl}}"], "path": ["api","voiceflow","verify-doctor-otp"] } }, "response": [] },
+        { "name": "Verify Health Facility OTP", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"hf@example.com\",\n  \"otp\": \"123456\"\n}"}, "url": { "raw": "{{baseUrl}}/api/voiceflow/verify-health-facility-otp", "host": ["{{baseUrl}}"], "path": ["api","voiceflow","verify-health-facility-otp"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Doctors",
+      "item": [
+        { "name": "Register Doctor", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"name\": \"Dr. Who\",\n  \"email\": \"doctor@example.com\",\n  \"specialization\": \"General Practitioner\"\n}"}, "url": { "raw": "{{baseUrl}}/api/register-doctor", "host": ["{{baseUrl}}"], "path": ["api","register-doctor"] } }, "response": [] },
+        { "name": "List Doctors", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/doctors", "host": ["{{baseUrl}}"], "path": ["api","doctors"] } }, "response": [] },
+        { "name": "Update Latest Doctor File", "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"file_url\": \"https://example.com/doctor.pdf\"\n}"}, "url": { "raw": "{{baseUrl}}/api/update-latest-doctor-file", "host": ["{{baseUrl}}"], "path": ["api","update-latest-doctor-file"] } }, "response": [] },
+        { "name": "Update Doctor (generic)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"name\": \"Dr. Updated\"\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/update", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "update"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Change Password", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"password\": \"newStrongPassword\"\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/change-password", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "change-password"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Update Notifications", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"notify_email\": true\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/update-notifications", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "update-notifications"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Update Payment Settings", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"momo_number\": \"256771234567\"\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/update-payment", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "update-payment"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Upload Doctor Image", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/upload-image", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "upload-image"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Send Meeting Link", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"recipient@example.com\"\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/send-link", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "send-link"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] },
+        { "name": "Update Online Status", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"online\": true\n}"}, "url": { "raw": "{{baseUrl}}/api/doctors/:doctorId/update-online-status", "host": ["{{baseUrl}}"], "path": ["api","doctors", ":doctorId", "update-online-status"], "variable": [{"key":"doctorId","value":"1"}] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Health Facilities",
+      "item": [
+        { "name": "Register Health Facility", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"name\": \"KETI Clinic\",\n  \"email\": \"clinic@example.com\",\n  \"contact\": \"+256700000000\"\n}"}, "url": { "raw": "{{baseUrl}}/api/register-health-facility", "host": ["{{baseUrl}}"], "path": ["api","register-health-facility"] } }, "response": [] },
+        { "name": "List Health Facilities", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/health-facilities", "host": ["{{baseUrl}}"], "path": ["api","health-facilities"] } }, "response": [] },
+        { "name": "Update Latest Health Facility File", "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"file_url\": \"https://example.com/hf.pdf\"\n}"}, "url": { "raw": "{{baseUrl}}/api/update-latest-health-facility-file", "host": ["{{baseUrl}}"], "path": ["api","update-latest-health-facility-file"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        { "name": "Generate Presigned URL", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/documents/signed-url", "host": ["{{baseUrl}}"], "path": ["api","documents","signed-url"] } }, "response": [] },
+        { "name": "Store File URLs", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"patient_id\": 1,\n  \"document_type\": \"ultrasound\",\n  \"file_urls\": [\n    \"https://example.com/ultrasound1.jpg\",\n    \"https://example.com/ultrasound2.jpg\"\n  ]\n}"}, "url": { "raw": "{{baseUrl}}/api/documents/store-urls", "host": ["{{baseUrl}}"], "path": ["api","documents","store-urls"] } }, "response": [] },
+        { "name": "Upload to tmp_files (direct)", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/documents/upload", "host": ["{{baseUrl}}"], "path": ["api","documents","upload"] } }, "response": [] },
+        { "name": "Proxy Upload (server-side)", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/documents/proxy-upload", "host": ["{{baseUrl}}"], "path": ["api","documents","proxy-upload"] } }, "response": [] },
+        { "name": "Create Maternal Document", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"patient_id\": 1,\n  \"document_type\": \"antenatal\",\n  \"file_url\": \"https://example.com/file1.pdf\"\n}"}, "url": { "raw": "{{baseUrl}}/api/maternal-documents", "host": ["{{baseUrl}}"], "path": ["api","maternal-documents"] } }, "response": [] }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": { "type": "text/javascript", "exec": ["// You can add auth token injection here if needed"] }
+    },
+    {
+      "listen": "test",
+      "script": { "type": "text/javascript", "exec": ["// Basic 2xx status check","pm.test('Status code is 2xx', function () { pm.response.to.be.success; });"] }
+    }
+  ]
+}
