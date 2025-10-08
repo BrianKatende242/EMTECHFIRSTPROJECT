@@ -2,6 +2,7 @@
 
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PatientController; 
 use App\Http\Controllers\AppointmentController;
@@ -9,7 +10,6 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FinanceDashboardController;
 use App\Http\Controllers\HealthFacilityController;
 use App\Http\Controllers\ApiDashboardController;
-use App\Models\NewsletterSubscriber;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\OtpController;
@@ -54,19 +54,8 @@ Route::get('/admin/contact-submissions', [ContactController::class, 'index'])
      ->name('admin.contact-submissions');
 
 
-// ✅ Email Verification Route for Newsletter
-Route::get('/verify-newsletter/{token}', function ($token) {
-    $subscriber = NewsletterSubscriber::where('verification_token', $token)->first();
-
-    if (!$subscriber) {
-        return response()->json(['message' => 'Invalid or expired verification link.'], 404);
-    }
-
-    // Mark as verified
-    $subscriber->update(['is_verified' => true]);
-
-    return response()->json(['message' => 'Email confirmed!']);
-})->name('verify-newsletter');
+// Newsletter verification (web - HTML)
+Route::get('/verify-newsletter/{token}', [NewsletterController::class, 'verify'])->name('newsletter.verify.web');
 
 Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp']);
 
@@ -247,11 +236,18 @@ Route::get('/health-facilities-dashboard', function () {
 
 Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 'showDashboard'])->name('health-facility.dashboard');
 
+// Health Facility section routes
+Route::get('/health-facility/{id}/patients', [HealthFacilityController::class, 'patients'])->name('health-facility.patients');
+Route::get('/health-facility/{id}/patients/create', [HealthFacilityController::class, 'createPatient'])->name('health-facility.patients.create');
+Route::get('/health-facility/{id}/book-doctor', [HealthFacilityController::class, 'bookDoctor'])->name('health-facility.book-doctor');
+Route::get('/health-facility/{id}/lab-tests', [HealthFacilityController::class, 'labTests'])->name('health-facility.lab-tests');
+
 Route::put('/health-facilities/{id}', [HealthFacilityController::class, 'updateHealthFacility'])->name('health-facilities.update');
 Route::post('/health-facilities/{id}/change-password', [HealthFacilityController::class, 'changePassword'])->name('health-facilities.change-password');
 Route::post('/health-facilities/{id}/upload-logo', [HealthFacilityController::class, 'uploadLogo'])->name('health-facilities.upload-logo');
 Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+Route::delete('/patients/{patient}/delete', [PatientController::class, 'destroy'])->name('patients.delete');
 
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])
@@ -270,7 +266,8 @@ Route::post('/patients/create', function (Request $request) {
 
         $patient = App\Models\Patient::create($validated);
 
-        return redirect()->route('health-facility.dashboard', ['id' => $validated['health_facility_id']]);
+        // After adding a patient, redirect to the patients list for this health facility
+        return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']]);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,

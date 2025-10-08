@@ -62,6 +62,12 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/verify-newsletter/{token}', [NewsletterController::class, 'verify'])
     ->name('newsletter.verify');
 
+// Unsubscribe Newsletter
+Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])
+    ->name('newsletter.unsubscribe');
+Route::get('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])
+    ->name('newsletter.unsubscribe.get');
+
 
     // Contact form routes
 Route::post('/contact-submissions', [ContactController::class, 'store']);

@@ -58,19 +58,36 @@ class PatientController extends Controller
     {
         // Validate the incoming request
         $validated = $request->validate([
-           'health_facility_id',
-        'name',
-        'gender',
-        'birth_date',
-        'contact_number',
-        'medical_history'
+            'health_facility_id' => 'required|exists:health_facilities,id',
+            'name' => 'required|string|max:255',
+            'gender' => 'required|string|in:male,female,other',
+            'birth_date' => 'required|date',
+            'contact_number' => 'nullable|string',
+            'medical_history' => 'nullable|string'
         ]);
 
         // Create the new patient
         Patient::create($validated);
 
         // Redirect back to the patients list for this health facility
-        return redirect()->route('patients.index', ['id' => $validated['health_facility_id']])
+        return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
                          ->with('success', 'Patient added successfully!');
+    }
+
+    /**
+     * Delete a patient, preventing deletion if there are existing appointments.
+     */
+    public function destroy(Patient $patient)
+    {
+        $facilityId = $patient->health_facility_id;
+
+        // Cascade appointments: delete child appointments before patient
+        $patient->appointments()->delete();
+
+        $patient->delete();
+
+        return redirect()
+            ->route('health-facility.patients', ['id' => $facilityId])
+            ->with('success', 'Patient and their appointments deleted successfully.');
     }
 }
