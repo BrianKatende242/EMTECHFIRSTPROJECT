@@ -10,7 +10,7 @@
 			.container { width:100%; background:#1a001a; padding:24px 0; }
 			.card { max-width:620px; margin:0 auto; background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 10px 30px rgba(10,0,10,0.25); }
 			.header { background:linear-gradient(135deg,#FF00F8,rgb(128,0,128)); padding:28px 32px; text-align:center; }
-		.header img { height:40px; }
+		.header .brand { color:#ffffff; font-weight:800; font-size:22px; letter-spacing:0.5px; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
 		.content { padding:28px 32px; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
 		h1 { font-size:22px; margin:0 0 8px; color:#0b1220; }
 		p { color:#334155; line-height:1.6; margin:0 0 16px; }
@@ -24,9 +24,9 @@
 <body>
 	<div class="container">
 		<div class="card">
-			<div class="header">
-				<img src="{{ asset('images/emoji-logo-white.svg') }}" alt="{{ config('app.name') }}">
-			</div>
+					<div class="header">
+						<div class="brand">KETI AI</div>
+					</div>
 			<div class="content">
 				<h1>Verify your subscription</h1>
 				<p>Thanks for subscribing to our newsletter! Please confirm your email address to start receiving updates.</p>
