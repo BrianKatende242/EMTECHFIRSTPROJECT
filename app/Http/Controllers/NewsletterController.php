@@ -78,4 +78,23 @@ class NewsletterController extends Controller
             'message' => 'Email verified successfully!'
         ]);
     }
+
+    public function unsubscribe(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $subscriber = NewsletterSubscriber::where('email', $request->email)->first();
+
+        if ($subscriber) {
+            $subscriber->update(['is_active' => false]);
+        }
+
+        // Return a generic success to avoid leaking subscription existence
+        return response()->json([
+            'success' => true,
+            'message' => 'You have been unsubscribed from the newsletter. If this email was not subscribed, no action was taken.'
+        ]);
+    }
 }

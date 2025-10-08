@@ -1,0 +1,44 @@
+{
+  "info": {
+    "_postman_id": "b7f1c7f2-2d99-4a0b-9b8b-8bf3e9e5b1aa",
+    "name": "LARAVELBACKENDCHIL API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection including Newsletter endpoints (subscribe, verify, unsubscribe)."
+  },
+  "item": [
+    {
+      "name": "Newsletter",
+      "item": [
+        {
+          "name": "Subscribe",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/newsletter/subscribe", "host": ["{{baseUrl}}"], "path": ["api","newsletter","subscribe"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/verify-newsletter/:token", "host": ["{{baseUrl}}"], "path": ["api","verify-newsletter", ":token"], "variable": [{"key":"token","value":"token-here"}] }
+          },
+          "response": []
+        },
+        {
+          "name": "Unsubscribe",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/newsletter/unsubscribe", "host": ["{{baseUrl}}"], "path": ["api","newsletter","unsubscribe"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
