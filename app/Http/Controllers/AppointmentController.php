@@ -64,7 +64,7 @@ class AppointmentController extends Controller
 
     // Create appointment
     try {
-        $appointment = Appointment::create([
+    $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
             'appointment_time' => $request->appointment_time,
             'duration' => (int)$request->duration,
@@ -76,7 +76,16 @@ class AppointmentController extends Controller
             'student_id' => $request->student_id
         ]);
 
-        return redirect()->route('book-doctor', ['school' => $request->school_id]);
+        // Redirect based on context
+        if ($appointment->health_facility_id) {
+            return redirect()->route('health-facility.book-doctor', ['id' => $appointment->health_facility_id])
+                ->with('success', 'Appointment booked successfully');
+        }
+        if ($appointment->school_id) {
+            return redirect()->route('book-doctor', ['school' => $appointment->school_id])
+                ->with('success', 'Appointment booked successfully');
+        }
+        return redirect()->back()->with('success', 'Appointment booked successfully');
 
     } catch (\Exception $e) {
         \Log::error('Appointment creation failed: '.$e->getMessage());

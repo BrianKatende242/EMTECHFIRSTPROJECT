@@ -43,8 +43,8 @@
                                         <td>
                                             <span class="badge bg-{{ 
                                                 $appointment->status == 'confirmed' ? 'success' : 
-                                                ($appointment->status == 'awaiting_payment' ? 'warning' : 'secondary') 
-                                            }}">
+                                                ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
+                                            }} text-white">
                                                 {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                             </span>
                                         </td>

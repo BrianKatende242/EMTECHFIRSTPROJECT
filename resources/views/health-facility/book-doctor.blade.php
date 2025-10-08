@@ -12,10 +12,7 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="alert alert-light text-dark">{{ session('success') }}</div>
     @endif
 
     <div class="card mb-4">
@@ -26,34 +23,26 @@
                 <table class="table table-striped text-dark">
                     <thead class="table-light">
                         <tr>
-                            <th class="d-none d-md-table-cell">#</th>
+                            <th>#</th>
                             <th>Patient</th>
-                            <th class="d-none d-sm-table-cell">Doctor</th>
+                            <th>Doctor</th>
                             <th>Time</th>
-                            <th class="d-none d-lg-table-cell">Duration</th>
-                            <th class="d-none d-md-table-cell">Status</th>
-                            <th class="text-end">Actions</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th class="text-end">Meeting</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($appointments as $appt)
                         <tr>
-                            <td class="d-none d-md-table-cell">{{ $appt->id }}</td>
+                            <td>{{ $appt->id }}</td>
                             <td>{{ optional($appt->patient)->name ?? '—' }}</td>
-                            <td class="d-none d-sm-table-cell">{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
+                            <td>{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
-                            <td class="d-none d-lg-table-cell">{{ $appt->duration }} mins</td>
-                            <td class="d-none d-md-table-cell">
-                                <span class="badge text-uppercase text-white {{ $appt->status === 'awaiting_payment' ? 'bg-warning' : 'bg-secondary' }}">
-                                    {{ $appt->status }}
-                                </span>
-                            </td>
+                            <td>{{ $appt->duration }} mins</td>
+                            <td><span class="badge bg-secondary text-uppercase text-white">{{ $appt->status }}</span></td>
                             <td class="text-end">
-                                @if($appt->status === 'awaiting_payment')
-                                    <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-credit-card me-1"></i> Pay
-                                    </a>
-                                @elseif($appt->doctor)
+                                @if($appt->doctor)
                                     <a href="https://meet.jit.si/{{ $appt->doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $appt->doctor->name)) }}"
                                        class="btn btn-sm btn-outline-dark"
                                        title="Open Jitsi meeting"
