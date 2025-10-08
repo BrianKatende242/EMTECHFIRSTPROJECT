@@ -29,7 +29,6 @@
                             <th>Time</th>
                             <th>Duration</th>
                             <th>Status</th>
-                            <th class="text-end">Meeting</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,18 +40,6 @@
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
                             <td>{{ $appt->duration }} mins</td>
                             <td><span class="badge bg-secondary text-uppercase text-white">{{ $appt->status }}</span></td>
-                            <td class="text-end">
-                                @if($appt->doctor)
-                                    <a href="https://meet.jit.si/{{ $appt->doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $appt->doctor->name)) }}"
-                                       class="btn btn-sm btn-outline-dark"
-                                       title="Open Jitsi meeting"
-                                       target="_blank" rel="noopener">
-                                        <i class="fa fa-video-camera"></i>
-                                    </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>
