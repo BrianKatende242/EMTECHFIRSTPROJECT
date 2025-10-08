@@ -22,6 +22,7 @@
                                         <th>Amount</th>
                                         <th>Reason</th>
                                         <th>Status</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -36,10 +37,23 @@
                                         <td>
                                             <span class="badge bg-{{ 
                                                 $appointment->status == 'confirmed' ? 'success' : 
-                                                ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
+                                                ($appointment->status == 'awaiting_payment' ? 'warning' : 'secondary') 
                                             }}">
                                                 {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                             </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if($appointment->status === 'awaiting_payment')
+                                                <form action="{{ route('payment.appointment.checkout') }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="fa fa-credit-card me-1"></i> Pay
+                                                    </button>
+                                                </form>
+                                            @else
+                                                —
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach

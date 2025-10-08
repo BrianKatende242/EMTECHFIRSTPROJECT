@@ -69,7 +69,7 @@ class AppointmentController extends Controller
             'appointment_time' => $request->appointment_time,
             'duration' => (int)$request->duration,
             'reason' => $request->reason,
-            'status' => 'confirmed',
+            'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,
             'patient_id' => $request->patient_id,
             'school_id' => $request->school_id,
