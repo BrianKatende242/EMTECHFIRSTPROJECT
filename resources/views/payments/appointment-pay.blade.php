@@ -9,9 +9,6 @@
           <strong>Pay for Appointment #{{ $appointment->id }}</strong>
         </div>
         <div class="card-body">
-          <div class="d-flex justify-content-center align-items-center mb-3">
-            <img src="{{ asset('images/momo.png') }}" alt="MTN MoMo" style="height: 40px; width: auto;" loading="lazy">
-          </div>
           @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
           @endif
@@ -42,6 +39,10 @@
               <label class="form-label">Amount (UGX)</label>
               <input type="number" name="amount" min="1" step="1" class="form-control"
                      value="{{ old('amount', $appointment->amount ?? '') }}">
+            </div>
+
+            <div class="mb-3">
+              <img src="{{ asset('images/momo.png') }}" alt="MTN MoMo" style="width: 100%; height: auto;" loading="lazy">
             </div>
 
             <div class="d-flex justify-content-between">
