@@ -12,7 +12,10 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-light text-dark">{{ session('success') }}</div>
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
     <div class="card mb-4">
@@ -47,13 +50,9 @@
                             </td>
                             <td class="text-end">
                                 @if($appt->status === 'awaiting_payment')
-                                    <form action="{{ route('payment.appointment.checkout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="appointment_id" value="{{ $appt->id }}">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-credit-card me-1"></i> Pay
-                                        </button>
-                                    </form>
+                                    <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-credit-card me-1"></i> Pay
+                                    </a>
                                 @elseif($appt->doctor)
                                     <a href="https://meet.jit.si/{{ $appt->doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $appt->doctor->name)) }}"
                                        class="btn btn-sm btn-outline-dark"

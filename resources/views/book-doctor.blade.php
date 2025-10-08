@@ -2,6 +2,12 @@
 
 
 @section('content')
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -44,13 +50,9 @@
                                         </td>
                                         <td class="text-end">
                                             @if($appointment->status === 'awaiting_payment')
-                                                <form action="{{ route('payment.appointment.checkout') }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
-                                                    <button type="submit" class="btn btn-sm btn-primary">
-                                                        <i class="fa fa-credit-card me-1"></i> Pay
-                                                    </button>
-                                                </form>
+                                                <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-credit-card me-1"></i> Pay
+                                                </a>
                                             @else
                                                 —
                                             @endif

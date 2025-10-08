@@ -17,6 +17,15 @@ class PaymentController extends Controller
         $this->momoService = $momoService;
     }
 
+    // Show pay page for an appointment
+    public function showAppointmentPayForm(Appointment $appointment)
+    {
+        if ($appointment->status !== 'awaiting_payment') {
+            return back()->with('error', 'This appointment is not awaiting payment.');
+        }
+        return view('payments/appointment-pay', compact('appointment'));
+    }
+
     // Initialize API User (one-time setup)
     public function initApiUser()
     {
@@ -85,17 +94,19 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
+            'phone_number' => 'nullable|string',
+            'amount' => 'nullable|numeric',
         ]);
 
         $appointment = Appointment::with(['patient', 'student'])->findOrFail($validated['appointment_id']);
 
         // Determine payer phone and amount
-        $phone = $appointment->patient->contact_number ?? $appointment->student->parent_contact ?? null;
+        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? null);
         if (!$phone) {
             return back()->with('error', 'No phone number available for this appointment.');
         }
 
-        $amount = $appointment->amount ?? 1.00; // fallback minimal amount for sandbox
+        $amount = $validated['amount'] ?? ($appointment->amount ?? 1.00); // allow override on pay page
 
         // External ID ties request to this appointment
         $externalId = 'appointment-' . $appointment->id . '-' . time();
