@@ -26,9 +26,10 @@ class VerifyNewsletterSubscription extends Mailable
     public function build()
     {
         return $this->subject('Verify Your Newsletter Subscription')
-                    ->markdown('emails.verify-newsletter')
+                    ->view('emails.verify-newsletter')
+                    ->text('emails.verify-newsletter_plain')
                     ->with([
-                        'verificationUrl' => $this->verificationUrl // Pass verification link
+                        'verificationUrl' => $this->verificationUrl
                     ]);
     }
 }
