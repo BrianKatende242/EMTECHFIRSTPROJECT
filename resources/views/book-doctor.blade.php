@@ -2,6 +2,12 @@
 
 
 @section('content')
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -22,6 +28,7 @@
                                         <th>Amount</th>
                                         <th>Reason</th>
                                         <th>Status</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -40,6 +47,15 @@
                                             }} text-white">
                                                 {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                             </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if($appointment->status === 'awaiting_payment')
+                                                <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-credit-card me-1"></i> Pay
+                                                </a>
+                                            @else
+                                                —
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach
