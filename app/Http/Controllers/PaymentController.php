@@ -23,7 +23,11 @@ class PaymentController extends Controller
         if ($appointment->status !== 'awaiting_payment') {
             return back()->with('error', 'This appointment is not awaiting payment.');
         }
-        return view('payments/appointment-pay', compact('appointment'));
+        // Load relations and pass sidebar context so menu renders
+        $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility']);
+        $school = $appointment->school;
+        $doctor = $appointment->doctor;
+        return view('payments/appointment-pay', compact('appointment', 'school', 'doctor'));
     }
 
     // Initialize API User (one-time setup)
@@ -106,12 +110,35 @@ class PaymentController extends Controller
             return back()->with('error', 'No phone number available for this appointment.');
         }
 
+        // Normalize phone to MSISDN digits without plus (e.g., 2567XXXXXXXX)
+        $digits = preg_replace('/\D+/', '', $phone);
+        if (str_starts_with($digits, '07')) {
+            // 07XXXXXXXX -> 2567XXXXXXXX
+            $digits = '256' . substr($digits, 1);
+        } elseif (str_starts_with($digits, '2560')) {
+            // 2560XXXXXXXX -> 2567XXXXXXXX (drop the 0)
+            $digits = '256' . substr($digits, 3);
+        } elseif (str_starts_with($digits, '0') && strlen($digits) >= 9) {
+            // 0XXXXXXXXX -> 256XXXXXXXXX (general fallback)
+            $digits = '256' . substr($digits, 1);
+        }
+        if (str_starts_with($digits, '256')) {
+            $phone = $digits;
+        } else {
+            // Last resort: assume already in international without country code is 9 digits starting with 7
+            if (strlen($digits) === 9 && $digits[0] === '7') {
+                $phone = '256' . $digits;
+            } else {
+                $phone = $digits; // pass as-is
+            }
+        }
+
         $amount = $validated['amount'] ?? ($appointment->amount ?? 1.00); // allow override on pay page
 
         // External ID ties request to this appointment
         $externalId = 'appointment-' . $appointment->id . '-' . time();
 
-        $result = $this->momoService->requestToPay($amount, $phone, $externalId, 'Appointment payment', 'KETI AI');
+    $result = $this->momoService->requestToPay($amount, $phone, $externalId, 'Appointment payment', 'KETI AI');
 
         if (!($result['success'] ?? false)) {
             return back()->with('error', $result['message'] ?? 'Failed to initiate payment');
