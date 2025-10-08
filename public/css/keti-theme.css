@@ -1,6 +1,8 @@
 /* KETI AI dashboard theme overrides */
 :root {
   --primary: #FF00F8;
+  /* Sidebar background color used across sidebar + active states */
+  --sidebar-bg: #000000;
 }
 
 /* Buttons */
@@ -46,54 +48,53 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 
 /* Sidebar (Quixnav) overrides */
 /* Sidebar background */
-.quixnav { background-color: #FF00F8 !important; }
+.quixnav { background-color: var(--sidebar-bg) !important; }
 
 /* Base link colors (parent + submenu) */
 .quixnav .metismenu > li > a,
-.quixnav .metismenu ul a { color: #000 !important; }
+.quixnav .metismenu ul a { color: #f1f1f1 !important; }
 
 /* Give inactive links subtle light backgrounds for contrast on brand pink */
 .quixnav .metismenu > li > a {
-  background-color: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   font-weight: 500;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 10px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 10px rgba(0,0,0,0.14);
 }
 .quixnav .metismenu ul a {
-  background-color: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   font-weight: 500;
 }
 
-/* Active/hover parent items with subtle contrast on brand bg */
+/* Active/hover parent items with subtle contrast on dark sidebar */
 .quixnav .metismenu > li:hover > a,
-.quixnav .metismenu > li:focus > a,
-.quixnav .metismenu > li.mm-active > a {
-  background-color: rgba(0, 0, 0, 0.10) !important;
-  color: #000 !important;
+.quixnav .metismenu > li:focus > a {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
 }
 
 /* Submenu background aligns with sidebar bg */
-.quixnav .metismenu ul { background-color: #FF00F8 !important; }
+.quixnav .metismenu ul { background-color: var(--sidebar-bg) !important; }
 
 /* Submenu hover/active contrast */
 .quixnav .metismenu ul a:hover,
 .quixnav .metismenu ul a:focus,
 .quixnav .metismenu ul a.mm-active {
-  background-color: rgba(0, 0, 0, 0.08) !important;
-  color: #000 !important;
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  color: #ffffff !important;
 }
 
 /* Sidebar section labels use black for readability on brand bg */
-.nav-label { color: #000 !important; }
+.nav-label { color: #ffffff !important; }
 
-/* ACTIVE states: black background with brand text */
+/* ACTIVE states: use the same color as the current sidebar background for cohesion */
 .quixnav .metismenu > li.mm-active > a {
-  background-color: #000 !important;
+  background-color: var(--sidebar-bg) !important;
   color: #FF00F8 !important;
 }
 .quixnav .metismenu ul a.mm-active {
-  background-color: #000 !important;
+  background-color: var(--sidebar-bg) !important;
   color: #FF00F8 !important;
 }
 /* Ensure icons within active links also reflect brand color */
@@ -116,7 +117,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Hover micro-interactions */
 .quixnav .metismenu > li > a:hover,
 .quixnav .metismenu > li > a:focus {
-  background-color: rgba(255, 255, 255, 0.26) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
   transform: translateX(2px);
 }
 .quixnav .metismenu > li > a:hover i { transform: translateX(1px); }
@@ -130,7 +131,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Icon chips for better separation and readability */
 .quixnav .metismenu > li > a i,
 .quixnav .metismenu ul a i {
-  background: rgba(255,255,255,0.38);
+  background: rgba(255,255,255,0.20);
   padding: 6px;
   border-radius: 8px;
 }
@@ -143,9 +144,10 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 
 /* Active indicator bar on the left for parent and submenu */
 .quixnav .metismenu > li.mm-active > a,
-.quixnav .metismenu ul a.mm-active {
+.quixnav .metismenu ul a.mm-active,
+.quixnav .metismenu ul li.mm-active > a {
   position: relative;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
 }
 .quixnav .metismenu > li.mm-active > a::before,
 .quixnav .metismenu ul a.mm-active::before {
@@ -165,6 +167,10 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   outline: none;
   box-shadow: inset 0 0 0 2px rgba(255, 0, 248, 0.4);
 }
+
+/* --- Forms --- */
+/* Make all form labels black for readability on light card backgrounds */
+label, .form-label { color: #000 !important; }
 
 /* --- School Dashboard Stat Cards --- */
 .stat-card {
@@ -264,11 +270,22 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
 /* Nav header (brand bar) set to white */
 .nav-header { background-color: #ffffff !important; }
 .nav-header .brand-logo { color: #000 !important; }
-.hamburger .line { background: #FF00F8 !important; }
+.hamburger .line { background: #000000 !important; }
 
-/* Optional: top header bar dark mode for cohesion (keeps white content) */
-.header { background-color: #000 !important; }
+/* Top header bar uses brand pink; brand bar (nav-header) remains white */
+.header { background-color: var(--primary) !important; }
 .header .navbar .nav-link, .header .navbar i { color: #fff !important; }
+.header .notification_dropdown .mdi-bell {
+  color: #000 !important;
+  font-size: 1.4rem !important; /* Increase bell size */
+  line-height: 1; /* keep tight alignment */
+}
+/* Keep the pulse dot centered on the larger icon if used */
+.header .notification_dropdown .pulse-css {
+  transform: scale(1.0);
+  top: -2px; /* minor tweak if pulse uses absolute positioning */
+  right: -2px;
+}
 .header .dropdown-menu { color: #000 !important; background-color: #fff !important; }
 /* Ensure profile dropdown items are readable */
 .header .header-profile .dropdown-menu .dropdown-item { color: #000 !important; }
@@ -299,10 +316,7 @@ button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !im
   color: #dc3545 !important;
 }
 
-/* Ensure profile avatar uses brand border */
-.header .header-profile img.rounded-circle {
-  border-color: #FF00F8 !important;
-}
+/* Profile avatar border styling is now handled inline (black) */
 
 /* --- Doctor Availability Page --- */
 .availability-card .availability-header { background: linear-gradient(90deg, #000, #1a1a1a); color: #fff; }
