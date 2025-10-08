@@ -56,4 +56,73 @@ class NewsletterUnsubscribeTest extends TestCase
             'is_active' => false,
         ]);
     }
+
+    /** @test */
+    public function resubscribe_reactivates_if_previously_unsubscribed()
+    {
+        $email = 'reuser@example.com';
+
+        NewsletterSubscriber::create([
+            'email' => $email,
+            'verification_token' => null,
+            'verified_at' => now(),
+            'is_active' => false,
+        ]);
+
+        $this->postJson('/api/newsletter/subscribe', ['email' => $email])
+            ->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'You have been resubscribed to the newsletter.'
+            ]);
+
+        $this->assertDatabaseHas('newsletter_subscribers', [
+            'email' => $email,
+            'is_active' => true,
+        ]);
+    }
+
+    /** @test */
+    public function resubscribe_sends_new_verification_if_not_verified_yet()
+    {
+        $email = 'pending@example.com';
+
+        NewsletterSubscriber::create([
+            'email' => $email,
+            'verification_token' => 'oldtok',
+            'verified_at' => null,
+            'is_active' => false,
+        ]);
+
+        $resp = $this->postJson('/api/newsletter/subscribe', ['email' => $email]);
+        $resp->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        // token should be refreshed and still inactive until verified
+        $this->assertDatabaseHas('newsletter_subscribers', [
+            'email' => $email,
+            'is_active' => false,
+        ]);
+    }
+
+    /** @test */
+    public function resubscribe_when_already_active_returns_message()
+    {
+        $email = 'active@example.com';
+        NewsletterSubscriber::create([
+            'email' => $email,
+            'verification_token' => null,
+            'verified_at' => now(),
+            'is_active' => true,
+        ]);
+
+        $this->postJson('/api/newsletter/subscribe', ['email' => $email])
+            ->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => "You're already subscribed to the newsletter."
+            ]);
+    }
 }

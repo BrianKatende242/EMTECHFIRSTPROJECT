@@ -15,7 +15,7 @@ class NewsletterController extends Controller
     public function subscribe(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:newsletter_subscribers,email',
+            'email' => 'required|email',
         ]);
 
         if ($validator->fails()) {
@@ -25,16 +25,58 @@ class NewsletterController extends Controller
             ], 422);
         }
 
+        $email = strtolower(trim($request->input('email')));
+
         DB::beginTransaction();
 
         try {
+            // Case-insensitive lookup
+            $existing = NewsletterSubscriber::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            if ($existing) {
+                // If never verified, (re)send verification email and ensure inactive until verified
+                if (!$existing->isVerified()) {
+                    $existing->update([
+                        'verification_token' => Str::random(60),
+                        'is_active' => false,
+                    ]);
+
+                    Mail::to($existing->email)
+                        ->send(new VerifyNewsletterSubscription($existing));
+
+                    DB::commit();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Subscription pending verification. We\'ve sent a new verification email.'
+                    ]);
+                }
+
+                // If already verified
+                if ($existing->is_active) {
+                    DB::commit();
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'You\'re already subscribed to the newsletter.'
+                    ]);
+                }
+
+                // Verified but inactive (previously unsubscribed): reactivate
+                $existing->update(['is_active' => true]);
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'You have been resubscribed to the newsletter.'
+                ]);
+            }
+
+            // New subscriber: create and send verification
             $subscriber = NewsletterSubscriber::create([
-                'email' => $request->email,
+                'email' => $email,
                 'verification_token' => Str::random(60),
                 'is_active' => false
             ]);
 
-            // Send verification email
             Mail::to($subscriber->email)
                 ->send(new VerifyNewsletterSubscription($subscriber));
 
