@@ -176,7 +176,7 @@ class AppointmentController extends Controller
                    ($appointment->student ? "Student" : "Patient") . ": {$user->name}\n" .
                    "Doctor: Dr. {$doctor->name}\n" .
                    "Type: " . ($doctor->specialization === 'General Practitioner' ? 'General' : 'Specialist') . "\n" .
-                   "Duration: {$appointment->duration} mins\n" .
+                   "Duration: {$appointment->duration->minutes} mins\n" .
                    "Time: {$appointment->appointment_time->format('D, M j, Y g:i A')}\n" .
                    "Reason: {$appointment->reason}";
 

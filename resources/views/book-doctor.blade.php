@@ -37,8 +37,8 @@
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                                         <td>{{ $appointment->student->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
-                                        <td>{{ $appointment->duration }} mins</td>
-                                        <td>{{ number_format($appointment->amount) }} UGX</td>
+                                        <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->amount) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 

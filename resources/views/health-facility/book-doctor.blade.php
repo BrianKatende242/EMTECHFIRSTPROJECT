@@ -38,7 +38,7 @@
                             <td>{{ optional($appt->patient)->name ?? '—' }}</td>
                             <td>{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
-                            <td>{{ $appt->duration }} mins</td>
+                            <td>{{ $appt->duration ? $appt->duration->minutes . ' mins' : '—' }}</td>
                             <td><span class="badge bg-secondary text-uppercase text-white">{{ $appt->status }}</span></td>
                         </tr>
                         @endforeach
