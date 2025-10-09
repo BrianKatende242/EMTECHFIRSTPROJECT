@@ -45,7 +45,7 @@
             </div>
           </div>
 
-          <form class="text-dark" action="{{ route('payment.appointment.checkout') }}" method="POST">
+          <form class="text-dark" action="{{ route('payment.appointment.checkout') }}" method="POST" id="paymentForm">
             @csrf
             <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
 
@@ -67,10 +67,25 @@
             
       <div class="d-flex justify-content-between mb-1">
                 <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
-        <button type="submit" class="btn btn-brand">Request Payment</button>
+        <button type="button" class="btn btn-brand" id="requestPaymentBtn">Request Payment</button>
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Processing Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden"></span>
+        </div>
+        <h5 class="modal-title" id="paymentModalLabel">Processing Payment Request</h5>
+        <p class="text-muted mt-2">Please wait while we initiate your payment...</p>
       </div>
     </div>
   </div>
@@ -124,14 +139,53 @@
 @push('scripts')
 <script>
   (function(){
-    const form = document.querySelector('form[action*="payment.appointment.checkout"]');
-    if(!form) return;
-    const btn = form.querySelector('button[type="submit"]');
-    form.addEventListener('submit', function(e){
-      if(!btn) return;
-      btn.disabled = true;
-      btn.dataset.originalText = btn.innerHTML;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting…';
+    const form = document.getElementById('paymentForm');
+    const btn = document.getElementById('requestPaymentBtn');
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: 'static', keyboard: false });
+    
+    if(!form || !btn) return;
+    
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      
+      // Basic validation
+      const phoneInput = document.getElementById('phone_number');
+      if(!phoneInput.checkValidity()){
+        phoneInput.reportValidity();
+        return;
+      }
+      
+      // Show modal
+      modal.show();
+      
+      // Prepare form data
+      const formData = new FormData(form);
+      
+      // Send AJAX request
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        modal.hide();
+        if(data.success){
+          // Redirect to success page or show success message
+          window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
+        } else {
+          // Show error
+          alert(data.message || 'Payment request failed. Please try again.');
+        }
+      })
+      .catch(error => {
+        modal.hide();
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
     });
   })();
 </script>
