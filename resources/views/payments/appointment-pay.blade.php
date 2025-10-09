@@ -58,11 +58,7 @@
               <div class="invalid-feedback">Enter a valid number like 2567XXXXXXXX</div>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label">Amount (UGX)</label>
-              <input type="number" name="amount" min="1" step="1" class="form-control"
-                     value="{{ old('amount', $appointment->duration ? $appointment->duration->amount : '') }}" readonly>
-            </div>
+            <input type="hidden" name="amount" value="{{ old('amount', $appointment->duration ? $appointment->duration->amount : '') }}">
 
             
       <div class="d-flex justify-content-between mb-1">
