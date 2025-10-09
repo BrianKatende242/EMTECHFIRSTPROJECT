@@ -117,16 +117,14 @@
     </div>
 
     <div class="mb-3">
-        <label for="duration" class="form-label">Duration (mins)</label>
-        <select id="duration" class="form-control form-select" name="duration" required>
+        <label for="duration_id" class="form-label">Duration</label>
+        <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
-            <option value="15">15 minutes</option>
-            <option value="20">20 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
+            @foreach(\App\Models\Duration::active()->get() as $duration)
+            <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - UGX {{ number_format($duration->amount, 0) }}</option>
+            @endforeach
         </select>
-        @error('duration')
+        @error('duration_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>

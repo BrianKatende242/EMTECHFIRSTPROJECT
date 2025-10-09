@@ -8,6 +8,7 @@ use App\Models\HealthFacility;
 use App\Models\Doctor;
 use App\Models\Student;
 use App\Models\Patient;
+use App\Models\Duration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class AppointmentController extends Controller
     // Validate request
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
-        'duration' => 'required|in:15,20,30,45,60',
+        'duration_id' => 'required|exists:durations,id',
         'appointment_time' => [
             'required',
             'date',
@@ -67,7 +68,7 @@ class AppointmentController extends Controller
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
             'appointment_time' => $request->appointment_time,
-            'duration' => (int)$request->duration,
+            'duration_id' => $request->duration_id,
             'reason' => $request->reason,
             'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,

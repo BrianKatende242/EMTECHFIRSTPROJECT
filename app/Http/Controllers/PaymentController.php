@@ -24,7 +24,7 @@ class PaymentController extends Controller
             return back()->with('error', 'This appointment is not awaiting payment.');
         }
         // Load relations and pass sidebar context so menu renders
-        $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility']);
+        $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility', 'duration']);
         $school = $appointment->school;
         $doctor = $appointment->doctor;
         return view('payments/appointment-pay', compact('appointment', 'school', 'doctor'));
@@ -137,7 +137,7 @@ class PaymentController extends Controller
             }
         }
 
-        $amount = $validated['amount'] ?? ($appointment->amount ?? 1.00); // allow override on pay page
+        $amount = $validated['amount'] ?? ($appointment->duration->amount ?? 1.00); // allow override on pay page
 
         // External ID ties request to this appointment
         $externalId = 'appointment-' . $appointment->id . '-' . time();

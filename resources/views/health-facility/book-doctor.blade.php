@@ -84,12 +84,11 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Duration</label>
-                                <select name="duration" class="form-select form-control" required>
-                                    <option value="15">15 minutes</option>
-                                    <option value="20">20 minutes</option>
-                                    <option value="30">30 minutes</option>
-                                    <option value="45">45 minutes</option>
-                                    <option value="60">60 minutes</option>
+                                <select name="duration_id" class="form-select form-control" required>
+                                    <option value="">Select Duration</option>
+                                    @foreach(\App\Models\Duration::active()->get() as $duration)
+                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - UGX {{ number_format($duration->amount, 0) }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">
