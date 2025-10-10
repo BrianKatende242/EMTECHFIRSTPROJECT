@@ -107,7 +107,11 @@ class PaymentController extends Controller
         // Determine payer phone and amount
         $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? null);
         if (!$phone) {
-            return back()->with('error', 'No phone number available for this appointment.');
+            $message = 'No phone number available for this appointment.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return back()->with('error', $message);
         }
 
         // Normalize phone to MSISDN digits without plus (e.g., 2567XXXXXXXX)
@@ -141,7 +145,11 @@ class PaymentController extends Controller
     $result = $this->momoService->requestToPay($amount, $phone, $externalId, 'Appointment payment', 'KETI AI');
 
         if (!($result['success'] ?? false)) {
-            return back()->with('error', $result['message'] ?? 'Failed to initiate payment');
+            $message = $result['message'] ?? 'Failed to initiate payment';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return back()->with('error', $message);
         }
 
         // Store payment reference on appointment for tracking
@@ -149,7 +157,11 @@ class PaymentController extends Controller
         // Keep status as awaiting_payment until confirmed by callback or manual success
         $appointment->save();
 
-        return back()->with('success', 'Payment request sent. Please approve on your phone.');
+        $message = 'Payment request sent. Please approve on your phone.';
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message, 'redirect' => route('payment.appointment.success', $appointment->id)]);
+        }
+        return back()->with('success', $message);
     }
 
     // Mark appointment as paid (manual success landing)
