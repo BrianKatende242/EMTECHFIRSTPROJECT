@@ -112,7 +112,6 @@ Route::post('/students/create', function (Request $request) {
         $validated = $request->validate([
             'name' => 'required',
             'grade' => 'required',
-            'age' => 'required',
             'parent_contact' => 'required',
             'birth_date' => 'required',
             'school_id' => 'required',

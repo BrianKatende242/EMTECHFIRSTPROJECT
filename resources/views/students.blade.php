@@ -42,10 +42,6 @@
                                 <input type="text" required class="form-control" id="grade" name="grade">
                             </div>
                             <div class="form-group">
-                                <label for="age">Age:</label>
-                                <input type="number" required class="form-control" id="age" name="age">
-                            </div>
-                            <div class="form-group">
                                 <label for="parent_contact">Parent Contact:</label>
                                 <input type="text" required class="form-control" id="parent_contact" name="parent_contact">
                             </div>

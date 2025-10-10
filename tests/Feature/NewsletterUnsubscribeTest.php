@@ -5,12 +5,13 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\NewsletterSubscriber;
+use PHPUnit\Framework\Attributes\Test;
 
 class NewsletterUnsubscribeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_unsubscribes_via_post_and_is_case_insensitive()
     {
         $emailOriginal = 'User@Example.com';
@@ -35,7 +36,7 @@ class NewsletterUnsubscribeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_unsubscribes_via_get_and_renders_html()
     {
         $email = 'get@example.com';
@@ -57,7 +58,7 @@ class NewsletterUnsubscribeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function resubscribe_reactivates_if_previously_unsubscribed()
     {
         $email = 'reuser@example.com';
@@ -82,7 +83,7 @@ class NewsletterUnsubscribeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function resubscribe_sends_new_verification_if_not_verified_yet()
     {
         $email = 'pending@example.com';
@@ -107,7 +108,7 @@ class NewsletterUnsubscribeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function resubscribe_when_already_active_returns_message()
     {
         $email = 'active@example.com';
