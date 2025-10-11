@@ -33,4 +33,25 @@ class Doctor extends Model
     return $this->hasMany(DoctorAvailability::class);
 }
 
+    /**
+     * Scope to get doctors available on a specific day
+     */
+    public function scopeAvailableOnDay($query, $dayOfWeek)
+    {
+        return $query->whereHas('availabilities', function ($q) use ($dayOfWeek) {
+            $q->where('day', strtolower($dayOfWeek))
+              ->where('available', true);
+        });
+    }
+
+    /**
+     * Check if doctor is available on a specific day
+     */
+    public function isAvailableOnDay($dayOfWeek)
+    {
+        return $this->availabilities()
+            ->where('day', strtolower($dayOfWeek))
+            ->where('available', true)
+            ->exists();
+    }
 }

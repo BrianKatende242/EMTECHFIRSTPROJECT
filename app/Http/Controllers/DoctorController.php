@@ -107,6 +107,28 @@ class DoctorController extends Controller
     }
 
     /**
+     * Get available doctors for a specific day
+     */
+    public function getAvailableDoctors(Request $request)
+    {
+        $day = $request->query('day');
+
+        if (!$day) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Day parameter is required'
+            ], 400);
+        }
+
+        $doctors = Doctor::availableOnDay($day)->get();
+
+        return response()->json([
+            'success' => true,
+            'doctors' => $doctors
+        ]);
+    }
+
+    /**
      * Update file URL for most recently created doctor
      */
    public function updateLatestDoctorFile(Request $request)
