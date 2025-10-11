@@ -27,7 +27,8 @@ class PaymentController extends Controller
         $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility', 'duration']);
         $school = $appointment->school;
         $doctor = $appointment->doctor;
-        return view('payments/appointment-pay', compact('appointment', 'school', 'doctor'));
+        $healthFacility = $appointment->healthFacility;
+        return view('payments/appointment-pay', compact('appointment', 'school', 'doctor', 'healthFacility'));
     }
 
     // Initialize API User (one-time setup)
@@ -102,10 +103,10 @@ class PaymentController extends Controller
             'amount' => 'nullable|numeric',
         ]);
 
-        $appointment = Appointment::with(['patient', 'student'])->findOrFail($validated['appointment_id']);
+        $appointment = Appointment::with(['patient', 'student', 'healthFacility'])->findOrFail($validated['appointment_id']);
 
         // Determine payer phone and amount
-        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? null);
+        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? $appointment->healthFacility->contact ?? null);
         if (!$phone) {
             $message = 'No phone number available for this appointment.';
             if ($request->expectsJson()) {
@@ -137,7 +138,7 @@ class PaymentController extends Controller
             }
         }
 
-        $amount = $validated['amount'] ?? ($appointment->duration->amount ?? 1.00); // allow override on pay page
+        $amount = $validated['amount'] ?? ($appointment->duration ? $appointment->duration->getPrice() : 1.00); // allow override on pay page
 
         // External ID ties request to this appointment
         $externalId = 'appointment-' . $appointment->id . '-' . time();

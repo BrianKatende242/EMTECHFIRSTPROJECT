@@ -28,7 +28,9 @@
                             <th>Doctor</th>
                             <th>Time</th>
                             <th>Duration</th>
+                            <th>Amount</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +41,24 @@
                             <td>{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
                             <td>{{ $appt->duration ? $appt->duration->minutes . ' mins' : '—' }}</td>
-                            <td><span class="badge bg-secondary text-uppercase text-white">{{ $appt->status }}</span></td>
+                            <td>{{ $appt->duration ? number_format($appt->duration->getPrice()) . ' UGX' : '—' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 
+                                    $appt->status == 'confirmed' ? 'success' : 
+                                    ($appt->status == 'awaiting_payment' ? 'warning' : 'secondary') 
+                                }} text-white">
+                                    {{ ucfirst(str_replace('_', ' ', $appt->status)) }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($appt->status === 'awaiting_payment')
+                                    <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-credit-card me-1"></i> Pay
+                                    </a>
+                                @else
+                                    —
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -87,7 +106,7 @@
                                 <select name="duration_id" class="form-select form-control" required>
                                     <option value="">Select Duration</option>
                                     @foreach(\App\Models\Duration::active()->get() as $duration)
-                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - UGX {{ number_format($duration->amount, 0) }}</option>
+                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
                                     @endforeach
                                 </select>
                             </div>

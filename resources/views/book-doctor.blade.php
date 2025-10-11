@@ -38,7 +38,7 @@
                                         <td>{{ $appointment->student->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
                                         <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
-                                        <td>{{ $appointment->duration ? number_format($appointment->duration->amount) . ' UGX' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 
@@ -121,7 +121,7 @@
         <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
             @foreach(\App\Models\Duration::active()->get() as $duration)
-            <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - UGX {{ number_format($duration->amount, 0) }}</option>
+                                                    <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
             @endforeach
         </select>
         @error('duration_id')
