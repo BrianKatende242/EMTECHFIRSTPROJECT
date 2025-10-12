@@ -22,6 +22,21 @@ class Payment extends Model
         'amount' => 'decimal:2',
     ];
 
+    /**
+     * Validation rules for the Payment model
+     */
+    public static function rules($id = null)
+    {
+        return [
+            'appointment_id' => 'required|exists:appointments,id',
+            'amount' => 'required|numeric|min:0',
+            'phone_number' => 'required|string|max:20',
+            'reference_id' => 'required|string|unique:payments,reference_id' . ($id ? ',' . $id : ''),
+            'status' => 'in:pending,completed,failed,cancelled',
+            'metadata' => 'nullable|array',
+        ];
+    }
+
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
