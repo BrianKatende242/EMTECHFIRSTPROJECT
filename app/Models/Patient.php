@@ -73,10 +73,11 @@ class Patient extends Model
             }
         }
 
-        // Search by name, birth_date, and contact
-        if (!empty($allAttributes['name']) && !empty($allAttributes['birth_date'])) {
+        // Search by name, birth_date, gender, and contact
+        if (!empty($allAttributes['name']) && !empty($allAttributes['birth_date']) && !empty($allAttributes['gender'])) {
             $existing = $query->where('name', $allAttributes['name'])
                               ->where('birth_date', $allAttributes['birth_date'])
+                              ->where('gender', $allAttributes['gender'])
                               ->when(!empty($allAttributes['contact_number']), function($q) use ($allAttributes) {
                                   return $q->where('contact_number', $allAttributes['contact_number']);
                               })

@@ -111,6 +111,7 @@ Route::post('/students/create', function (Request $request) {
     try {
         $validated = $request->validate([
             'name' => 'required',
+            'gender' => 'required|in:male,female,other',
             'grade' => 'required',
             'parent_contact' => 'required',
             'birth_date' => 'required',
@@ -128,6 +129,7 @@ Route::post('/students/create', function (Request $request) {
     $student = App\Models\Patient::findOrCreate([
         'name' => $validated['name'],
         'birth_date' => $validated['birth_date'],
+        'gender' => $validated['gender'],
         'parent_contact' => $validated['parent_contact'],
     ], [
         'school_id' => $validated['school_id'],
