@@ -9,12 +9,21 @@ use App\Models\LabTest;
 use App\Models\LabRequest;
 use App\Models\Appointment;
 use App\Models\Doctor;
+use App\Models\Duration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\CreatesTestDurations;
 use Tests\TestCase;
 
 class UnifiedPatientManagementTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTestDurations;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->createTestDurations();
+    }
 
     /** @test */
     public function it_can_find_or_create_patient_for_school()
@@ -315,7 +324,7 @@ class UnifiedPatientManagementTest extends TestCase
             'appointment_time' => now()->addDays(1),
             'reason' => 'Regular checkup',
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
         ]);
 
         // Test relationships
@@ -509,7 +518,7 @@ class UnifiedPatientManagementTest extends TestCase
             'appointment_time' => now()->addDays(1),
             'reason' => 'Medical consultation',
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
         ]);
 
         $response = $this->withoutMiddleware()->delete("/students/{$patient->id}/delete");
@@ -582,7 +591,7 @@ class UnifiedPatientManagementTest extends TestCase
             'appointment_time' => now()->addDays(1),
             'reason' => 'Regular checkup',
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
         ]);
 
         LabTest::create([

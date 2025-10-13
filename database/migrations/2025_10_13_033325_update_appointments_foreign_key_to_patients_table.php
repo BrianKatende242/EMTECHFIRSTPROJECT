@@ -24,13 +24,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            // Add back the student_id column
-            $table->unsignedBigInteger('student_id')->nullable();
-            $table->foreign('student_id')->references('id')->on('students');
+            // Remove the foreign key constraint to durations
+            $table->dropForeign(['duration_id']);
+            $table->dropColumn('duration_id');
             
-            // Make patient_id nullable again
+            // Add back the amount column
+            $table->decimal('amount', 10, 2)->nullable();
+            
+            // Make patient_id nullable again if needed
             $table->unsignedBigInteger('patient_id')->nullable()->change();
-            // Foreign key constraint for patient_id should remain
         });
     }
 };

@@ -16,7 +16,7 @@ class Appointment extends Model {
         'health_facility_id',
         'status',
         'payment_reference',
-        'amount',
+        // 'amount', // Removed - amount now comes from duration relationship
     ];
     
 

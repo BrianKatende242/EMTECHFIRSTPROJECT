@@ -8,12 +8,22 @@ use App\Models\HealthFacility;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\LabTest;
+use App\Models\Duration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\CreatesTestDurations;
 use Tests\TestCase;
 
 class PatientWebRoutesTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTestDurations;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Ensure durations exist for all tests
+        $this->createTestDurations();
+    }
 
     /** @test */
     public function it_can_display_students_page()
@@ -165,7 +175,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Medical checkup',
         ]);
 
@@ -218,7 +228,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Medical checkup',
         ]);
 
@@ -228,7 +238,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(2),
             'status' => 'completed',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Follow-up checkup',
         ]);
 
@@ -325,7 +335,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Medical consultation',
         ]);
 
@@ -398,7 +408,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'pending',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'School medical checkup',
         ]);
 
@@ -408,7 +418,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(2),
             'status' => 'scheduled',
-            'amount' => 75000,
+            'duration_id' => $this->getSpecialistDurationId(),
             'reason' => 'Health facility consultation',
         ]);
 
@@ -555,7 +565,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'completed',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Follow-up checkup',
             'notes' => 'Patient recovering well',
         ]);
@@ -794,7 +804,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor1->id,
             'appointment_time' => now()->addDays(1),
             'status' => 'completed',
-            'amount' => 50000,
+            'duration_id' => $this->getGeneralDurationId(),
             'reason' => 'Annual checkup',
         ]);
 
@@ -804,7 +814,7 @@ class PatientWebRoutesTest extends TestCase
             'doctor_id' => $doctor2->id,
             'appointment_time' => now()->addDays(7),
             'status' => 'pending',
-            'amount' => 75000,
+            'duration_id' => $this->getSpecialistDurationId(),
             'reason' => 'Follow-up consultation',
         ]);
 
