@@ -21,33 +21,36 @@ class AppointmentController extends Controller
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
         'duration' => 'required|in:15,20,30,45,60',
-        'appointment_time' => [
-            'required',
-            'date',
-            function ($attribute, $value, $fail) {
-                if (now()->diffInHours(Carbon::parse($value)) < 1) {
-                    $fail('Appointments must be scheduled at least 1 hour in advance.');
-                }
-            }
-        ],
+        'appointment_date' => 'required|date|after:today',
+        'appointment_time' => 'required|date_format:H:i',
         'reason' => 'required|string|max:500',
-        'health_facility_id' => 'required_without:school_id|exists:health_facilities,id',
         'patient_id' => 'required|exists:patients,id',
-        'school_id' => 'required_without:health_facility_id|exists:schools,id'
+        'school_id' => 'nullable|exists:schools,id',
+        'health_facility_id' => 'nullable|exists:health_facilities,id'
     ]);
 
     // Additional validation
     $validator->after(function ($validator) use ($request) {
-        if ($request->filled('health_facility_id')) {
-            $patient = Patient::find($request->patient_id);
-            if ($patient && $patient->health_facility_id != $request->health_facility_id) {
+        // Combine date and time safely
+        try {
+            $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->appointment_date . ' ' . $request->appointment_time);
+
+            // Check if appointment is at least 1 hour in advance
+            if (now()->diffInHours($appointmentDateTime) < 1) {
+                $validator->errors()->add('appointment_time', 'Appointments must be scheduled at least 1 hour in advance.');
+            }
+        } catch (\Exception $e) {
+            $validator->errors()->add('appointment_date', 'Invalid date or time format.');
+            return;
+        }
+
+        // Validate patient belongs to the institution
+        $patient = Patient::find($request->patient_id);
+        if ($patient) {
+            if ($request->filled('health_facility_id') && $patient->health_facility_id != $request->health_facility_id) {
                 $validator->errors()->add('patient_id', 'Patient does not belong to this health facility');
             }
-        }
-        
-        if ($request->filled('school_id')) {
-            $patient = Patient::find($request->patient_id);
-            if ($patient && $patient->school_id != $request->school_id) {
+            if ($request->filled('school_id') && $patient->school_id != $request->school_id) {
                 $validator->errors()->add('patient_id', 'Patient does not belong to this school');
             }
         }
@@ -62,9 +65,11 @@ class AppointmentController extends Controller
 
     // Create appointment
     try {
+    $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->appointment_date . ' ' . $request->appointment_time);
+
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
-            'appointment_time' => $request->appointment_time,
+            'appointment_time' => $appointmentDateTime,
             'duration' => (int)$request->duration,
             'reason' => $request->reason,
             'status' => 'awaiting_payment',
@@ -72,6 +77,18 @@ class AppointmentController extends Controller
             'patient_id' => $request->patient_id,
             'school_id' => $request->school_id
         ]);
+
+        // Send confirmation if needed
+        $this->sendAppointmentConfirmation($appointment);
+
+        // Check if this is an AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment scheduled successfully',
+                'appointment' => $appointment->load(['patient', 'doctor'])
+            ]);
+        }
 
         // Redirect based on context
         if ($appointment->health_facility_id) {
@@ -86,11 +103,16 @@ class AppointmentController extends Controller
 
     } catch (\Exception $e) {
         \Log::error('Appointment creation failed: '.$e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Appointment creation failed',
-            'error' => $e->getMessage()
-        ], 500);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Appointment creation failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+        return redirect()->back()->with('error', 'Appointment creation failed');
     }
 }
     public function index(Request $request)

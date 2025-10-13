@@ -186,51 +186,6 @@
                 </div>
             </div>
 
-            <!-- Appointments Section -->
-            @if($patient->appointments->count() > 0)
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fa fa-calendar-alt mr-2"></i>Appointment History
-                    </h3>
-                </div>
-                <div class="card-body table-responsive p-0">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th><i class="fa fa-calendar-day mr-1"></i>Date & Time</th>
-                                <th><i class="fa fa-user-md mr-1"></i>Doctor</th>
-                                <th><i class="fa fa-info-circle mr-1"></i>Status</th>
-                                <th><i class="fa fa-sticky-note mr-1"></i>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($patient->appointments->sortByDesc('appointment_date') as $appointment)
-                            <tr>
-                                <td>{{ $appointment->appointment_date ? $appointment->appointment_date->format('M d, Y H:i') : 'N/A' }}</td>
-                                <td>
-                                    @if($appointment->doctor)
-                                        <strong>{{ $appointment->doctor->name }}</strong><br>
-                                        <small class="text-muted">{{ $appointment->doctor->specialization ?? 'General' }}</small>
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge badge-{{ $appointment->status === 'completed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : 'warning') }}">
-                                        <i class="fa fa-{{ $appointment->status === 'completed' ? 'check' : ($appointment->status === 'cancelled' ? 'times' : 'clock') }} mr-1"></i>
-                                        {{ ucfirst($appointment->status) }}
-                                    </span>
-                                </td>
-                                <td>{{ $appointment->notes ?: 'No notes' }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @endif
-
             <!-- Lab Tests Section -->
             @if($patient->labTests->count() > 0)
             <div class="card mt-4">
@@ -287,7 +242,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary mb-2" disabled>
+                        <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#scheduleAppointmentModal">
                             <i class="fa fa-calendar-plus mr-2"></i>Schedule Appointment
                         </button>
                         <button class="btn btn-success mb-2" disabled>
@@ -330,6 +285,225 @@
                 </div>
             </div>
             @endif
+        </div>
+    </div>
+
+    <!-- Full Width Appointment History -->
+    @if($patient->appointments->count() > 0)
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fa fa-calendar-alt mr-2"></i>Appointment History
+                    </h3>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fa fa-calendar-day mr-1"></i>Date & Time</th>
+                                <th><i class="fa fa-user-md mr-1"></i>Doctor</th>
+                                <th><i class="fa fa-info-circle mr-1"></i>Status</th>
+                                <th><i class="fa fa-sticky-note mr-1"></i>Notes</th>
+                                <th><i class="fa fa-cogs mr-1"></i>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($patient->appointments->sortByDesc('appointment_date') as $appointment)
+                            <tr>
+                                <td>{{ $appointment->appointment_date ? $appointment->appointment_date->format('M d, Y H:i') : 'N/A' }}</td>
+                                <td>
+                                    @if($appointment->doctor)
+                                        <strong>{{ $appointment->doctor->name }}</strong><br>
+                                        <small class="text-muted">{{ $appointment->doctor->specialization ?? 'General' }}</small>
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ $appointment->status === 'completed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : ($appointment->status === 'awaiting_payment' ? 'warning' : 'secondary')) }}">
+                                        <i class="fa fa-{{ $appointment->status === 'completed' ? 'check' : ($appointment->status === 'cancelled' ? 'times' : ($appointment->status === 'awaiting_payment' ? 'credit-card' : 'clock')) }} mr-1"></i>
+                                        {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
+                                    </span>
+                                </td>
+                                <td>{{ $appointment->notes ?: 'No notes' }}</td>
+                                <td>
+                                    @if($appointment->status === 'awaiting_payment')
+                                        <button class="btn btn-sm btn-success pay-btn" data-appointment-id="{{ $appointment->id }}" data-amount="{{ $appointment->amount ?? '0.00' }}">
+                                            <i class="fa fa-credit-card mr-1"></i>Pay Now
+                                        </button>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Full Width Lab Tests Section -->
+    @if($patient->labTests->count() > 0)
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fa fa-flask mr-2"></i>Lab Test History
+                    </h3>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fa fa-vial mr-1"></i>Test Type</th>
+                                <th><i class="fa fa-calendar-plus mr-1"></i>Requested Date</th>
+                                <th><i class="fa fa-tasks mr-1"></i>Status</th>
+                                <th><i class="fa fa-clipboard-check mr-1"></i>Results</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($patient->labTests->sortByDesc('created_at') as $labTest)
+                            <tr>
+                                <td><strong>{{ $labTest->test_type ?: 'N/A' }}</strong></td>
+                                <td>{{ $labTest->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ $labTest->status === 'completed' ? 'success' : 'warning' }}">
+                                        <i class="fa fa-{{ $labTest->status === 'completed' ? 'check-circle' : 'clock' }} mr-1"></i>
+                                        {{ ucfirst($labTest->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($labTest->results)
+                                        <span class="text-success">{{ $labTest->results }}</span>
+                                    @else
+                                        <span class="text-muted">Pending results</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+
+<!-- Schedule Appointment Modal -->
+<div class="modal fade" id="scheduleAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="scheduleAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scheduleAppointmentModalLabel">
+                    <i class="fa fa-calendar-plus mr-2"></i>Schedule Appointment for {{ $patient->name }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="appointmentForm" method="POST" action="{{ route('appointments.store') }}">
+                @csrf
+                <div class="modal-body">
+                    <!-- Hidden fields for patient and institution -->
+                    <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+                    @if($patient->school)
+                        <input type="hidden" name="school_id" value="{{ $patient->school->id }}">
+                    @elseif($patient->healthFacility)
+                        <input type="hidden" name="health_facility_id" value="{{ $patient->healthFacility->id }}">
+                    @endif
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="doctor_id" class="form-label">
+                                    <i class="fa fa-user-md mr-1"></i>Doctor <span class="text-danger">*</span>
+                                </label>
+                                <select name="doctor_id" id="doctor_id" class="form-control" required>
+                                    <option value="">Select Doctor</option>
+                                    @php
+                                        $doctors = \App\Models\Doctor::all();
+                                    @endphp
+                                    @foreach($doctors as $doctor)
+                                        <option value="{{ $doctor->id }}">
+                                            Dr. {{ $doctor->name }} - {{ $doctor->specialization ?? 'General' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="duration" class="form-label">
+                                    <i class="fa fa-clock mr-1"></i>Duration <span class="text-danger">*</span>
+                                </label>
+                                <select name="duration" id="duration" class="form-control" required>
+                                    <option value="">Select Duration</option>
+                                    <option value="15">15 minutes</option>
+                                    <option value="20">20 minutes</option>
+                                    <option value="30">30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="appointment_date" class="form-label">
+                                    <i class="fa fa-calendar mr-1"></i>Appointment Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="appointment_date" id="appointment_date" class="form-control" required
+                                       min="{{ \Carbon\Carbon::tomorrow()->format('Y-m-d') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="appointment_time" class="form-label">
+                                    <i class="fa fa-clock mr-1"></i>Appointment Time <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" name="appointment_time" id="appointment_time" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason" class="form-label">
+                            <i class="fa fa-comment mr-1"></i>Reason for Visit <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="reason" id="reason" class="form-control" rows="3" required
+                                  placeholder="Please describe the reason for this appointment..."></textarea>
+                    </div>
+
+                    <!-- Patient Info Summary -->
+                    <div class="alert alert-info text-dark">
+                        <h6><i class="fa fa-info-circle mr-1"></i>Appointment Details</h6>
+                        <p class="mb-1"><strong>Patient:</strong> {{ $patient->name }} (ID: {{ $patient->patient_id }})</p>
+                        @if($patient->school)
+                            <p class="mb-1"><strong>Institution:</strong> {{ $patient->school->name }} (School)</p>
+                        @elseif($patient->healthFacility)
+                            <p class="mb-1"><strong>Institution:</strong> {{ $patient->healthFacility->name }} (Health Facility)</p>
+                        @endif
+                        <p class="mb-0"><strong>Age:</strong> {{ $patient->birth_date ? $patient->birth_date->age . ' years' : 'Not specified' }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-calendar-check mr-1"></i>Schedule Appointment
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -672,6 +846,96 @@ dl.row dd {
                 button.classList.add('btn-outline-secondary');
             }, 2000);
         }
+    });
+
+    // Appointment form submission
+    $(document).ready(function() {
+        $('#appointmentForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const originalText = submitBtn.html();
+
+            // Disable submit button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Scheduling...');
+
+            // Clear any previous alerts
+            $('.alert').not('.alert-info').remove();
+
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle mr-1"></i>
+                            <strong>Success!</strong> Appointment scheduled successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    form.closest('.modal-content').prepend(successAlert);
+
+                    // Reset form
+                    form[0].reset();
+
+                    // Close modal after 2 seconds
+                    setTimeout(function() {
+                        $('#scheduleAppointmentModal').modal('hide');
+                        // Reload page to show new appointment
+                        location.reload();
+                    }, 2000);
+                },
+                error: function(xhr) {
+                    let errorMessage = 'An error occurred while scheduling the appointment.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = Object.values(xhr.responseJSON.errors).flat();
+                        errorMessage = errors.join('<br>');
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    // Show error message
+                    const errorAlert = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                            <strong>Error!</strong> ${errorMessage}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    form.closest('.modal-content').prepend(errorAlert);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+
+        // Reset form when modal is closed
+        $('#scheduleAppointmentModal').on('hidden.bs.modal', function() {
+            $('#appointmentForm')[0].reset();
+            $('.alert').not('.alert-info').remove();
+        });
+
+        // Pay button functionality
+        $('.pay-btn').on('click', function() {
+            const appointmentId = $(this).data('appointment-id');
+            const amount = $(this).data('amount');
+
+            // Confirm payment
+            if (confirm(`Are you sure you want to proceed with payment of $${amount} for this appointment?`)) {
+                // Redirect to payment form
+                window.location.href = `/appointment/pay/${appointmentId}`;
+            }
+        });
     });
 </script>
 @endsection

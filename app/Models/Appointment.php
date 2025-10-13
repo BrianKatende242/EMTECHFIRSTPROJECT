@@ -10,7 +10,7 @@ class Appointment extends Model {
         'school_id',
         'patient_id', // Unified patient reference (replaces student_id)
         'doctor_id',
-        'duration_id',
+        'duration',
         'appointment_time',
         'reason',
         'health_facility_id',
