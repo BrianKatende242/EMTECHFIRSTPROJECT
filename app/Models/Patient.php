@@ -76,7 +76,7 @@ class Patient extends Model
         // Search by name, birth_date, gender, and contact
         if (!empty($identificationAttributes['name']) && !empty($identificationAttributes['birth_date']) && !empty($identificationAttributes['gender'])) {
             $existing = $query->where('name', $identificationAttributes['name'])
-                              ->where('birth_date', $identificationAttributes['birth_date'])
+                              ->whereDate('birth_date', $identificationAttributes['birth_date'])
                               ->where('gender', $identificationAttributes['gender'])
                               ->when(!empty($identificationAttributes['contact_number']), function($q) use ($identificationAttributes) {
                                   return $q->where('contact_number', $identificationAttributes['contact_number']);

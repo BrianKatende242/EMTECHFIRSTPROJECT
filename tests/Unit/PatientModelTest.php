@@ -161,7 +161,7 @@ class PatientModelTest extends TestCase
 
         $this->assertDatabaseHas('patients', [
             'name' => 'New Patient',
-            'birth_date' => '1990-01-01',
+            'birth_date' => '1990-01-01 00:00:00',
             'gender' => 'female',
         ]);
 
