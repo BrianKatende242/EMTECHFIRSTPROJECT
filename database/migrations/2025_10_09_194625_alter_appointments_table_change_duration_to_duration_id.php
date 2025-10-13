@@ -13,26 +13,37 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->unsignedBigInteger('duration_id')->nullable()->after('doctor_id');
+            if (!Schema::hasColumn('appointments', 'duration_id')) {
+                $table->unsignedBigInteger('duration_id')->nullable()->after('doctor_id');
+            }
         });
 
-        // Map existing duration values to duration_ids
-        // Assuming durations table is seeded with: 15->1, 20->2, 30->3, 45->4, 60->5
-        DB::statement("
-            UPDATE appointments 
-            SET duration_id = CASE 
-                WHEN duration = 15 THEN 1
-                WHEN duration = 20 THEN 2  
-                WHEN duration = 30 THEN 3
-                WHEN duration = 45 THEN 4
-                WHEN duration = 60 THEN 5
-                ELSE 1 END
-            WHERE duration IS NOT NULL
-        ");
+        // Skip the data mapping since duration_id column already exists and may have data
+        // DB::statement("
+        //     UPDATE appointments 
+        //     SET duration_id = CASE 
+        //         WHEN duration = 15 THEN 1
+        //         WHEN duration = 20 THEN 2  
+        //         WHEN duration = 30 THEN 3
+        //         WHEN duration = 45 THEN 4
+        //         WHEN duration = 60 THEN 5
+        //         ELSE 1 END
+        //     WHERE duration IS NOT NULL AND duration_id IS NULL
+        // ");
 
         Schema::table('appointments', function (Blueprint $table) {
-            $table->foreign('duration_id')->references('id')->on('durations');
-            $table->dropColumn(['duration', 'amount']);
+            // Only add foreign key if it doesn't exist
+            $foreignKeys = \DB::select("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_NAME = 'appointments' AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND CONSTRAINT_NAME LIKE '%duration_id%'");
+            if (empty($foreignKeys)) {
+                $table->foreign('duration_id')->references('id')->on('durations');
+            }
+            
+            if (Schema::hasColumn('appointments', 'duration')) {
+                $table->dropColumn('duration');
+            }
+            if (Schema::hasColumn('appointments', 'amount')) {
+                $table->dropColumn('amount');
+            }
         });
     }
 

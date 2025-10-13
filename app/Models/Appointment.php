@@ -54,11 +54,6 @@ class Appointment extends Model {
         return $this->belongsTo(HealthFacility::class);
     }
 
-    public function duration(): BelongsTo
-    {
-        return $this->belongsTo(Duration::class);
-    }
-
 
     // Helper method to get the institution (school or health facility)
     public function institution()

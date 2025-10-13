@@ -330,9 +330,9 @@
                                 <td>{{ $appointment->notes ?: 'No notes' }}</td>
                                 <td>
                                     @if($appointment->status === 'awaiting_payment')
-                                        <button class="btn btn-sm btn-success pay-btn" data-appointment-id="{{ $appointment->id }}" data-amount="{{ $appointment->amount ?? '0.00' }}">
+                                        <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-success">
                                             <i class="fa fa-credit-card mr-1"></i>Pay Now
-                                        </button>
+                                        </a>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -440,16 +440,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="duration" class="form-label">
+                                <label for="duration_id" class="form-label">
                                     <i class="fa fa-clock mr-1"></i>Duration <span class="text-danger">*</span>
                                 </label>
-                                <select name="duration" id="duration" class="form-control" required>
+                                <select name="duration_id" id="duration_id" class="form-control" required>
                                     <option value="">Select Duration</option>
-                                    <option value="15">15 minutes</option>
-                                    <option value="20">20 minutes</option>
-                                    <option value="30">30 minutes</option>
-                                    <option value="45">45 minutes</option>
-                                    <option value="60">60 minutes</option>
+                                    @foreach(\App\Models\Duration::active()->get() as $duration)
+                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -923,18 +921,6 @@ dl.row dd {
         $('#scheduleAppointmentModal').on('hidden.bs.modal', function() {
             $('#appointmentForm')[0].reset();
             $('.alert').not('.alert-info').remove();
-        });
-
-        // Pay button functionality
-        $('.pay-btn').on('click', function() {
-            const appointmentId = $(this).data('appointment-id');
-            const amount = $(this).data('amount');
-
-            // Confirm payment
-            if (confirm(`Are you sure you want to proceed with payment of $${amount} for this appointment?`)) {
-                // Redirect to payment form
-                window.location.href = `/appointment/pay/${appointmentId}`;
-            }
         });
     });
 </script>

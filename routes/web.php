@@ -81,13 +81,8 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'labTestsCount' => $school->labTests()->count(),
         'doctorsCount' => $school->doctors()->count(),
         'students' => $school->students()->latest()->get(),
-<<<<<<< HEAD
-        'appointments' => $school->appointments()->with(['patient', 'doctor'])->latest()->get(),
+        'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'labTests' => $school->labTests()->with('patient')->latest()->get(),
-=======
-        'appointments' => $school->appointments()->with(['student', 'doctor', 'duration'])->latest()->get(),
-        'labTests' => $school->labTests()->with('student')->latest()->get(),
->>>>>>> 1dc0e78cd9838f8764a423167c2f682ba3ca21ea
         'doctors' => Doctor::latest()->get()
     ]);
 })->name('school.dashboard');
@@ -186,11 +181,7 @@ Route::get('/lab-tests/{school}', function (App\Models\School $school) {
 Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
-<<<<<<< HEAD
-        'appointments' => $school->appointments()->with(['patient', 'doctor'])->latest()->get(),
-=======
         'appointments' => $school->appointments()->with(['student', 'doctor', 'duration'])->latest()->get(),
->>>>>>> 1dc0e78cd9838f8764a423167c2f682ba3ca21ea
         'patients' => $school->students()->latest()->get(),
         'doctors' => Doctor::latest()->get()
     ]);

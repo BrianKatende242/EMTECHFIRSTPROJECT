@@ -184,6 +184,7 @@ class PatientController extends Controller
             'healthFacility',
             'school',
             'appointments.doctor',
+            'appointments.duration',
             'labTests',
             'maternalDocuments',
             'medicalHistories.doctor'

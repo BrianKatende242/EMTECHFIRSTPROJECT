@@ -22,15 +22,8 @@ class AppointmentController extends Controller
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
         'duration_id' => 'required|exists:durations,id',
-        'appointment_time' => [
-            'required',
-            'date',
-            function ($attribute, $value, $fail) {
-                if (now()->diffInHours(Carbon::parse($value)) < 1) {
-                    $fail('Appointments must be scheduled at least 1 hour in advance.');
-                }
-            }
-        ],
+        'appointment_date' => 'required|date|after:today',
+        'appointment_time' => 'required|date_format:H:i',
         'reason' => 'required|string|max:500',
         'patient_id' => 'required|exists:patients,id',
         'school_id' => 'nullable|exists:schools,id',
@@ -44,7 +37,7 @@ class AppointmentController extends Controller
             $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->appointment_date . ' ' . $request->appointment_time);
 
             // Check if appointment is at least 1 hour in advance
-            if (now()->diffInHours($appointmentDateTime) < 1) {
+            if (now()->diffInHours($appointmentDateTime, false) < 1) {
                 $validator->errors()->add('appointment_time', 'Appointments must be scheduled at least 1 hour in advance.');
             }
         } catch (\Exception $e) {
@@ -77,7 +70,7 @@ class AppointmentController extends Controller
 
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
-            'appointment_time' => $request->appointment_time,
+            'appointment_time' => $appointmentDateTime,
             'duration_id' => $request->duration_id,
             'reason' => $request->reason,
             'status' => 'awaiting_payment',

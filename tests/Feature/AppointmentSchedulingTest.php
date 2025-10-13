@@ -30,6 +30,13 @@ class AppointmentSchedulingTest extends TestCase
             'contact' => '+256700000001',
             'school_id' => $school->id,
         ]);
+        $duration = \App\Models\Duration::create([
+            'minutes' => 30,
+            'type' => 'General',
+            'price' => 50000,
+            'specialist_price' => 75000,
+            'active' => true,
+        ]);
         $patient = Patient::create([
             'patient_id' => 'P123456',
             'name' => 'Test Patient',
@@ -40,7 +47,7 @@ class AppointmentSchedulingTest extends TestCase
 
         $appointmentData = [
             'doctor_id' => $doctor->id,
-            'duration' => 30,
+            'duration_id' => $duration->id,
             'appointment_date' => now()->addDays(7)->format('Y-m-d'), // 7 days from now
             'appointment_time' => '15:00', // 3 PM
             'reason' => 'Regular checkup',
@@ -62,7 +69,7 @@ class AppointmentSchedulingTest extends TestCase
             'doctor_id' => $doctor->id,
             'patient_id' => $patient->id,
             'school_id' => $school->id,
-            'duration' => 30,
+            'duration_id' => $duration->id,
             'reason' => 'Regular checkup',
             'status' => 'awaiting_payment'
         ]);
@@ -87,6 +94,13 @@ class AppointmentSchedulingTest extends TestCase
             'contact' => '+256700000001',
             'health_facility_id' => $healthFacility->id,
         ]);
+        $duration = \App\Models\Duration::create([
+            'minutes' => 45,
+            'type' => 'Specialist',
+            'price' => 75000,
+            'specialist_price' => 100000,
+            'active' => true,
+        ]);
         $patient = Patient::create([
             'patient_id' => 'P654321',
             'name' => 'Test HF Patient',
@@ -97,7 +111,7 @@ class AppointmentSchedulingTest extends TestCase
 
         $appointmentData = [
             'doctor_id' => $doctor->id,
-            'duration' => 45,
+            'duration_id' => $duration->id,
             'appointment_date' => now()->addDays(7)->format('Y-m-d'), // 7 days from now
             'appointment_time' => '16:30', // 4:30 PM
             'reason' => 'Follow-up consultation',
@@ -119,7 +133,7 @@ class AppointmentSchedulingTest extends TestCase
             'doctor_id' => $doctor->id,
             'patient_id' => $patient->id,
             'health_facility_id' => $healthFacility->id,
-            'duration' => 45,
+            'duration_id' => $duration->id,
             'reason' => 'Follow-up consultation',
             'status' => 'awaiting_payment'
         ]);
@@ -137,8 +151,8 @@ class AppointmentSchedulingTest extends TestCase
 
         $invalidData = [
             'doctor_id' => '', // Required
-            'duration' => 30,
-            'appointment_date' => 'invalid-date',
+            'duration_id' => '', // Required
+            'appointment_date' => 'invalid-date', // Invalid date
             'appointment_time' => '25:00', // Invalid time
             'reason' => '', // Required
             'patient_id' => $patient->id
@@ -153,7 +167,7 @@ class AppointmentSchedulingTest extends TestCase
                 ->assertJsonStructure([
                     'errors' => [
                         'doctor_id',
-                        'appointment_date',
+                        'duration_id',
                         'appointment_time',
                         'reason'
                     ]
@@ -175,6 +189,13 @@ class AppointmentSchedulingTest extends TestCase
             'contact' => '+256700000001',
             'school_id' => $school->id,
         ]);
+        $duration = \App\Models\Duration::create([
+            'minutes' => 30,
+            'type' => 'General',
+            'price' => 50000,
+            'specialist_price' => 75000,
+            'active' => true,
+        ]);
         $patient = Patient::create([
             'patient_id' => 'P111111',
             'name' => 'Test Patient',
@@ -185,8 +206,8 @@ class AppointmentSchedulingTest extends TestCase
 
         $appointmentData = [
             'doctor_id' => $doctor->id,
-            'duration' => 30,
-            'appointment_date' => now()->format('Y-m-d'),
+            'duration_id' => $duration->id,
+            'appointment_date' => now()->format('Y-m-d'), // Today
             'appointment_time' => now()->addMinutes(30)->format('H:i'), // Less than 1 hour from now
             'reason' => 'Urgent checkup',
             'patient_id' => $patient->id,
