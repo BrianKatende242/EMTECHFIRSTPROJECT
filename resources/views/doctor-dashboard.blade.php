@@ -17,9 +17,9 @@
         $appointments = $appointments ?? collect();
         $upcomingAppointments = $upcomingAppointments ?? collect();
 
-        // unique patients count (student or patient)
+        // unique patients count
         $patientsIds = $appointments->map(function($a){
-            return data_get($a, 'student.id') ?? data_get($a, 'patient.id') ?? null;
+            return data_get($a, 'patient.id') ?? null;
         })->filter()->unique();
         $patientsCount = $patientsIds->count();
 
@@ -109,7 +109,7 @@
                         <ul class="list-group">
                             @foreach($upcomingAppointments as $appt)
                                 @php
-                                    $studentName = data_get($appt, 'student.name') ?? data_get($appt, 'patient.name') ?? 'Unknown';
+                                    $studentName = data_get($appt, 'patient.name') ?? 'Unknown';
                                     $time = isset($appt->appointment_time) ? \Carbon\Carbon::parse($appt->appointment_time)->format('M d, Y h:i A') : 'N/A';
                                 @endphp
                                 <li class="list-group-item d-flex justify-content-between align-items-center">

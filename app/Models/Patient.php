@@ -64,8 +64,8 @@ class Patient extends Model
         $query = static::query();
 
         // Search by patient_id if provided
-        if (!empty($allAttributes['patient_id'])) {
-            $existing = $query->where('patient_id', $allAttributes['patient_id'])->first();
+        if (!empty($identificationAttributes['patient_id'])) {
+            $existing = $query->where('patient_id', $identificationAttributes['patient_id'])->first();
             if ($existing) {
                 // Update associations if needed
                 $existing->updateAssociations($allAttributes);
@@ -74,15 +74,15 @@ class Patient extends Model
         }
 
         // Search by name, birth_date, gender, and contact
-        if (!empty($allAttributes['name']) && !empty($allAttributes['birth_date']) && !empty($allAttributes['gender'])) {
-            $existing = $query->where('name', $allAttributes['name'])
-                              ->where('birth_date', $allAttributes['birth_date'])
-                              ->where('gender', $allAttributes['gender'])
-                              ->when(!empty($allAttributes['contact_number']), function($q) use ($allAttributes) {
-                                  return $q->where('contact_number', $allAttributes['contact_number']);
+        if (!empty($identificationAttributes['name']) && !empty($identificationAttributes['birth_date']) && !empty($identificationAttributes['gender'])) {
+            $existing = $query->where('name', $identificationAttributes['name'])
+                              ->where('birth_date', $identificationAttributes['birth_date'])
+                              ->where('gender', $identificationAttributes['gender'])
+                              ->when(!empty($identificationAttributes['contact_number']), function($q) use ($identificationAttributes) {
+                                  return $q->where('contact_number', $identificationAttributes['contact_number']);
                               })
-                              ->when(!empty($allAttributes['parent_contact']), function($q) use ($allAttributes) {
-                                  return $q->orWhere('parent_contact', $allAttributes['parent_contact']);
+                              ->when(!empty($identificationAttributes['parent_contact']), function($q) use ($identificationAttributes) {
+                                  return $q->orWhere('parent_contact', $identificationAttributes['parent_contact']);
                               })
                               ->first();
 

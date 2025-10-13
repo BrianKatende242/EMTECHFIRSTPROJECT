@@ -14,7 +14,7 @@ class School extends Model
     
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Patient::class, 'school_id');
     }
     
     public function appointments(): HasMany

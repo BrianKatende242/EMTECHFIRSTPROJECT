@@ -26,7 +26,7 @@
           <div class="row mb-4 text-dark">
             <div class="col-12 col-md-7">
               <dl class="row small mb-0">
-                <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? optional($appointment->student)->name ?? '—' }}</dd>
+                <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? '—' }}</dd>
                 <dt class="col-4">Doctor</dt><dd class="col-8">{{ optional($appointment->doctor)->name ? 'Dr. ' . $appointment->doctor->name : '—' }}</dd>
                 <dt class="col-4">Time</dt><dd class="col-8">{{ optional($appointment->appointment_time)->format('D, M j, Y g:i A') }}</dd>
                 <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->amount ? number_format($appointment->amount, 0) . ' UGX' : '—' }}</dd>

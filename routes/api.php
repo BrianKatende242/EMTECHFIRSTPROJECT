@@ -91,19 +91,70 @@ Route::post('/voiceflow/verify-health-facility-otp', [OtpController::class, 'ver
 Route::post('/students', function(Request $request) {
     try {
         $validated = $request->validate([
+            'patient_type' => 'required|in:new,existing',
             'school_id' => 'required|exists:schools,id',
-            'name' => 'required|string|max:255',
-            'grade' => 'required|string',
-            'birth_date' => 'required|date',
-            'parent_contact' => 'nullable|string'
         ]);
 
-        $student = App\Models\Student::create($validated);
+        if ($validated['patient_type'] === 'existing') {
+            // Handle existing patient
+            $existingValidation = $request->validate([
+                'patient_id' => 'required|string|exists:patients,patient_id',
+            ]);
 
+            $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
+
+            // Check if patient is already associated with this school
+            if ($patient->school_id == $validated['school_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Patient is already associated with this school.'
+                ], 400);
+            }
+
+            // Update patient with school association
+            $patient->update([
+                'school_id' => $validated['school_id'],
+                'grade' => $request->input('grade'), // Optional grade for existing patients
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Existing patient associated with school successfully.',
+                'patient' => $patient
+            ]);
+        } else {
+            // Handle new patient
+            $newValidation = $request->validate([
+                'name' => 'required|string|max:255',
+                'gender' => 'required|in:male,female,other',
+                'grade' => 'required|string',
+                'birth_date' => 'required|date',
+                'parent_contact' => 'nullable|string'
+            ]);
+
+            // Use findOrCreate to check if student exists or create new one
+            $patient = App\Models\Patient::findOrCreate([
+                'name' => $newValidation['name'],
+                'birth_date' => $newValidation['birth_date'],
+                'gender' => $newValidation['gender'],
+                'parent_contact' => $newValidation['parent_contact'],
+            ], [
+                'school_id' => $validated['school_id'],
+                'grade' => $newValidation['grade'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Student created successfully.',
+                'patient' => $patient
+            ]);
+        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
         return response()->json([
-            'success' => true,
-            'student' => $student
-        ]);
+            'success' => false,
+            'message' => 'Validation failed.',
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
@@ -119,20 +170,62 @@ Route::post('/students', function(Request $request) {
 Route::post('/patients', function(Request $request) {
     try {
         $validated = $request->validate([
-            'health_facility_id' => 'required|exists:health_facilities,id',
-            'name' => 'required|string|max:255',
-            'gender' => 'required|string|in:male,female,other',
-            'birth_date' => 'required|date',
-            'contact_number' => 'nullable|string',
-            'medical_history' => 'nullable|string'
+            'patient_type' => 'required|in:new,existing',
         ]);
 
-        $patient = App\Models\Patient::create($validated);
+        if ($validated['patient_type'] === 'existing') {
+            // Handle existing patient
+            $existingValidation = $request->validate([
+                'patient_id' => 'required|string|exists:patients,patient_id',
+                'health_facility_id' => 'required|exists:health_facilities,id',
+            ]);
 
+            $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
+
+            // Check if patient is already associated with this health facility
+            if ($patient->health_facility_id == $existingValidation['health_facility_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Patient is already associated with this health facility.'
+                ], 400);
+            }
+
+            // Update patient with health facility association
+            $patient->update([
+                'health_facility_id' => $existingValidation['health_facility_id'],
+                'medical_history' => $request->input('medical_history'), // Optional medical history for existing patients
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Existing patient associated with health facility successfully.',
+                'patient' => $patient
+            ]);
+        } else {
+            // Handle new patient
+            $newValidation = $request->validate([
+                'health_facility_id' => 'required|exists:health_facilities,id',
+                'name' => 'required|string|max:255',
+                'gender' => 'required|string|in:male,female,other',
+                'birth_date' => 'required|date',
+                'contact_number' => 'nullable|string',
+                'medical_history' => 'nullable|string'
+            ]);
+
+            $patient = App\Models\Patient::create($newValidation);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Patient created successfully.',
+                'patient' => $patient
+            ]);
+        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
         return response()->json([
-            'success' => true,
-            'patient' => $patient
-        ]);
+            'success' => false,
+            'message' => 'Validation failed.',
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
@@ -174,7 +267,7 @@ Route::prefix('appointments')->group(function () {
 Route::post('/lab-tests', function(Request $request) {
     $validated = $request->validate([
         'school_id' => 'required|exists:schools,id',
-        'student_id' => 'required|exists:students,id',
+        'student_id' => 'required|exists:patients,id',
         'test_type' => 'required|string',
         'notes' => 'nullable|string'
     ]);
