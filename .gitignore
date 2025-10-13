@@ -5,6 +5,7 @@
 /vendor
 /storage/logs/*.log
 .env
+.env.testing
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
