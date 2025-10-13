@@ -88,7 +88,7 @@ class DoctorController extends Controller
         $doctor = Doctor::findOrFail($doctorId);
 
         $appointments = Appointment::where('doctor_id', $doctorId)
-            ->with(['student', 'doctor'])
+            ->with(['student', 'doctor', 'duration'])
             ->latest()
             ->get();
 
@@ -217,6 +217,7 @@ public function showDoctorDashboard($doctorId)
     $doctor = Doctor::with([
         'appointments.student',
         'appointments.school',
+        'appointments.duration',
         'availabilities' // ✅ Include availabilities here
     ])->findOrFail($doctorId);
 

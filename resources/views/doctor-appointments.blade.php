@@ -63,7 +63,7 @@
                                 N/A
                             @endif
                         </td>
-                        <td>{{ $appointment->duration }} mins</td>
+                        <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
                         <td class="appt-status">
                             <span class="badge bg-{{ $appointment->status == 'confirmed' ? 'success' : ($appointment->status == 'cancelled' ? 'danger' : ($appointment->status=='completed' ? 'secondary' : 'warning')) }}">{{ ucfirst($appointment->status) }}</span>
                         </td>

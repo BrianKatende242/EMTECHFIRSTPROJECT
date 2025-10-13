@@ -37,8 +37,8 @@
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                                         <td>{{ $appointment->patient->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
-                                        <td>{{ $appointment->duration }} mins</td>
-                                        <td>{{ number_format($appointment->amount) }} UGX</td>
+                                        <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 
@@ -104,29 +104,14 @@
     </div>
 
     <div class="mb-3">
-        <label for="doctor_id" class="form-label">Doctor</label>
-        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
-            <option value="">Select Date First</option>
-            @foreach($doctors as $doctor)
-            <option value="{{ $doctor->id }}" data-specialization="{{ $doctor->specialization }}" style="display: none;">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
+        <label for="duration_id" class="form-label">Duration</label>
+        <select id="duration_id" class="form-control form-select" name="duration_id" required>
+            <option value="">Select Duration</option>
+            @foreach(\App\Models\Duration::active()->get() as $duration)
+                                                    <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
             @endforeach
         </select>
-        @error('doctor_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="mb-3">
-        <label for="duration" class="form-label">Duration (mins)</label>
-        <select id="duration" class="form-control form-select" name="duration" required>
-            <option value="">Select Duration</option>
-            <option value="15">15 minutes</option>
-            <option value="20">20 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
-        </select>
-        @error('duration')
+        @error('duration_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>

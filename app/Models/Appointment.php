@@ -10,7 +10,7 @@ class Appointment extends Model {
         'school_id',
         'patient_id', // Unified patient reference (replaces student_id)
         'doctor_id',
-        'duration',
+        'duration_id',
         'appointment_time',
         'reason',
         'health_facility_id',
@@ -52,6 +52,11 @@ class Appointment extends Model {
     public function healthFacility(): BelongsTo
     {
         return $this->belongsTo(HealthFacility::class);
+    }
+
+    public function duration(): BelongsTo
+    {
+        return $this->belongsTo(Duration::class);
     }
 
 

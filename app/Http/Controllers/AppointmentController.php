@@ -7,6 +7,7 @@ use App\Models\School;
 use App\Models\HealthFacility;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Duration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,9 +21,16 @@ class AppointmentController extends Controller
     // Validate request
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
-        'duration' => 'required|in:15,20,30,45,60',
-        'appointment_date' => 'required|date|after:today',
-        'appointment_time' => 'required|date_format:H:i',
+        'duration_id' => 'required|exists:durations,id',
+        'appointment_time' => [
+            'required',
+            'date',
+            function ($attribute, $value, $fail) {
+                if (now()->diffInHours(Carbon::parse($value)) < 1) {
+                    $fail('Appointments must be scheduled at least 1 hour in advance.');
+                }
+            }
+        ],
         'reason' => 'required|string|max:500',
         'patient_id' => 'required|exists:patients,id',
         'school_id' => 'nullable|exists:schools,id',
@@ -69,8 +77,8 @@ class AppointmentController extends Controller
 
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
-            'appointment_time' => $appointmentDateTime,
-            'duration' => (int)$request->duration,
+            'appointment_time' => $request->appointment_time,
+            'duration_id' => $request->duration_id,
             'reason' => $request->reason,
             'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,
@@ -194,7 +202,7 @@ class AppointmentController extends Controller
                    "Patient: {$user->name}\n" .
                    "Doctor: Dr. {$doctor->name}\n" .
                    "Type: " . ($doctor->specialization === 'General Practitioner' ? 'General' : 'Specialist') . "\n" .
-                   "Duration: {$appointment->duration} mins\n" .
+                   "Duration: {$appointment->duration->minutes} mins\n" .
                    "Time: {$appointment->appointment_time->format('D, M j, Y g:i A')}\n" .
                    "Reason: {$appointment->reason}";
 
