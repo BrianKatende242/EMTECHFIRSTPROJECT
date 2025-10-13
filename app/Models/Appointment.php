@@ -10,16 +10,14 @@ class Appointment extends Model {
         'school_id',
         'student_id',
         'doctor_id',
-        'duration',
+        'duration_id',
         'appointment_time',
         'reason',
         'patient_id',
         'health_facility_id',
         'status',
-        'school_id',       // nullable
-       'health_facility_id', // nullable
-       'patient_id',      // nullable
-       'student_id'       // nullable
+        'payment_reference',
+        'amount',
     ];
     
 
@@ -60,6 +58,11 @@ class Appointment extends Model {
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function duration(): BelongsTo
+    {
+        return $this->belongsTo(Duration::class);
     }
 
 
