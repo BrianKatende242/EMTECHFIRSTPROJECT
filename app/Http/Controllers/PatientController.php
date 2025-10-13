@@ -66,8 +66,16 @@ class PatientController extends Controller
             'medical_history' => 'nullable|string'
         ]);
 
-        // Create the new patient
-        Patient::create($validated);
+        // Use findOrCreate to check if patient exists or create new one
+        $patient = Patient::findOrCreate([
+            'name' => $validated['name'],
+            'birth_date' => $validated['birth_date'],
+            'gender' => $validated['gender'],
+            'contact_number' => $validated['contact_number'],
+        ], [
+            'health_facility_id' => $validated['health_facility_id'],
+            'medical_history' => $validated['medical_history'],
+        ]);
 
         // Redirect back to the patients list for this health facility
         return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])

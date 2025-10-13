@@ -35,7 +35,7 @@
                                     @foreach($appointments as $appointment)
                                     <tr>
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-                                        <td>{{ $appointment->student->name }}</td>
+                                        <td>{{ $appointment->patient->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
                                         <td>{{ $appointment->duration }} mins</td>
                                         <td>{{ number_format($appointment->amount) }} UGX</td>
@@ -83,14 +83,14 @@
     <input type="hidden" name="school_id" value="{{ $school->id }}">
 
     <div class="mb-3">
-        <label for="student_id" class="form-label">Student</label>
-        <select id="student_id" class="form-control form-select" name="student_id" required>
+        <label for="patient_id" class="form-label">Student</label>
+        <select id="patient_id" class="form-control form-select" name="patient_id" required>
             <option value="">Select student</option>
             @foreach($patients as $patient)
             <option value="{{ $patient->id }}">{{ $patient->name }}</option>
             @endforeach
         </select>
-        @error('student_id')
+        @error('patient_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>

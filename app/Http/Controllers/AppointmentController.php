@@ -6,7 +6,6 @@ use App\Models\Appointment;
 use App\Models\School;
 use App\Models\HealthFacility;
 use App\Models\Doctor;
-use App\Models\Student;
 use App\Models\Patient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -33,9 +32,8 @@ class AppointmentController extends Controller
         ],
         'reason' => 'required|string|max:500',
         'health_facility_id' => 'required_without:school_id|exists:health_facilities,id',
-        'patient_id' => 'required_with:health_facility_id|exists:patients,id',
-        'school_id' => 'required_without:health_facility_id|exists:schools,id',
-        'student_id' => 'required_with:school_id|exists:students,id'
+        'patient_id' => 'required|exists:patients,id',
+        'school_id' => 'required_without:health_facility_id|exists:schools,id'
     ]);
 
     // Additional validation
@@ -48,9 +46,9 @@ class AppointmentController extends Controller
         }
         
         if ($request->filled('school_id')) {
-            $student = Student::find($request->student_id);
-            if ($student && $student->school_id != $request->school_id) {
-                $validator->errors()->add('student_id', 'Student does not belong to this school');
+            $patient = Patient::find($request->patient_id);
+            if ($patient && $patient->school_id != $request->school_id) {
+                $validator->errors()->add('patient_id', 'Patient does not belong to this school');
             }
         }
     });
@@ -72,8 +70,7 @@ class AppointmentController extends Controller
             'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,
             'patient_id' => $request->patient_id,
-            'school_id' => $request->school_id,
-            'student_id' => $request->student_id
+            'school_id' => $request->school_id
         ]);
 
         // Redirect based on context
@@ -102,7 +99,7 @@ class AppointmentController extends Controller
         
         if ($request->has('school_id')) {
             $query->where('school_id', $request->school_id)
-                  ->with(['student', 'doctor']);
+                  ->with(['patient', 'doctor']);
         } 
         elseif ($request->has('health_facility_id')) {
             $query->where('health_facility_id', $request->health_facility_id)
@@ -126,7 +123,7 @@ class AppointmentController extends Controller
     public function checkStatus($referenceId)
     {
         $appointment = Appointment::where('payment_reference', $referenceId)
-            ->with(['student', 'patient', 'doctor'])
+            ->with(['patient', 'doctor'])
             ->firstOrFail();
 
         return response()->json([
@@ -167,12 +164,12 @@ class AppointmentController extends Controller
 
     protected function sendAppointmentConfirmation(Appointment $appointment)
     {
-        $user = $appointment->student ?? $appointment->patient;
+        $user = $appointment->patient;
         $institution = $appointment->school ?? $appointment->healthFacility;
         $doctor = $appointment->doctor;
         
         $message = "Appointment Confirmed:\n\n" .
-                   ($appointment->student ? "Student" : "Patient") . ": {$user->name}\n" .
+                   "Patient: {$user->name}\n" .
                    "Doctor: Dr. {$doctor->name}\n" .
                    "Type: " . ($doctor->specialization === 'General Practitioner' ? 'General' : 'Specialist') . "\n" .
                    "Duration: {$appointment->duration} mins\n" .
@@ -180,11 +177,11 @@ class AppointmentController extends Controller
                    "Reason: {$appointment->reason}";
 
         // Send to appropriate contacts
-        if ($appointment->student && $appointment->student->parent_contact) {
-            $this->sendSms($appointment->student->parent_contact, $message);
-        }
-        elseif ($appointment->patient && $appointment->patient->contact_number) {
-            $this->sendSms($appointment->patient->contact_number, $message);
+        if ($appointment->patient) {
+            $contactNumber = $appointment->patient->contact_number ?? $appointment->patient->parent_contact;
+            if ($contactNumber) {
+                $this->sendSms($contactNumber, $message);
+            }
         }
 
         // Send to institution

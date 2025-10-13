@@ -97,7 +97,7 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 
 
 Route::delete('/students/{student}/delete', function ($studentId) {
-    $student = App\Models\Student::findOrFail($studentId);
+    $student = App\Models\Patient::findOrFail($studentId);
     $schoolId = $student->school_id;
     if ($student->appointments()->count() > 0) {
         return redirect()->route('students', ['school' => $schoolId])
@@ -124,7 +124,15 @@ Route::post('/students/create', function (Request $request) {
         ], 422);
     }
 
-    $student = App\Models\Student::create($validated);
+    // Use findOrCreate to check if student exists or create new one
+    $student = App\Models\Patient::findOrCreate([
+        'name' => $validated['name'],
+        'birth_date' => $validated['birth_date'],
+        'parent_contact' => $validated['parent_contact'],
+    ], [
+        'school_id' => $validated['school_id'],
+        'grade' => $validated['grade'],
+    ]);
 
     return redirect()->route('students', ['school' => $student->school_id]);
 })->name('students.create');
