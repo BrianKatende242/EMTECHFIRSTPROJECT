@@ -38,6 +38,15 @@
                                 <input type="text" required class="form-control" id="name" name="name">
                             </div>
                             <div class="form-group">
+                                <label for="gender">Gender:</label>
+                                <select required class="form-control" id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="grade">Grade:</label>
                                 <input type="text" required class="form-control" id="grade" name="grade">
                             </div>
@@ -64,6 +73,7 @@
                         <tr>
                             <th class="text-center">ID</th>
                             <th>Name</th>
+                            <th>Gender</th>
                             <th>Grade</th>
                             <th>Age</th>
                             <th>Parent Contact</th>
@@ -75,6 +85,7 @@
                         <tr>
                             <td class="text-center">{{ $student->id }}</td>
                             <td>{{ $student->name }}</td>
+                            <td>{{ ucfirst($student->gender ?? 'N/A') }}</td>
                             <td>{{ $student->grade }}</td>
                             <td>{{ \Carbon\Carbon::parse($student->birth_date)->age }}</td>
                             <td>{{ $student->parent_contact ?? 'N/A' }}</td>
