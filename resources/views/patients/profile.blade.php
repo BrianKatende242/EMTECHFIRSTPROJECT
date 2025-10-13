@@ -17,6 +17,9 @@
                             <h2 class="mb-1">{{ $patient->name }}</h2>
                             <p class="text-muted mb-2">
                                 <strong>Patient ID:</strong> {{ $patient->patient_id }}
+                                <button class="btn btn-sm btn-outline-secondary ml-2 copy-btn" data-clipboard-text="{{ $patient->patient_id }}" title="Copy Patient ID">
+                                    <i class="fa fa-copy"></i>
+                                </button>
                             </p>
                             <div class="d-flex flex-wrap">
                                 <span class="badge badge-primary" style="margin-right: 8px;">{{ ucfirst($patient->gender) }}</span>
@@ -542,10 +545,21 @@ dl.row dd {
     }
 }
 
-/* Timeline Styles */
-.timeline {
-    position: relative;
-    padding-left: 30px;
+/* Copy Button Styling */
+.copy-btn {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.copy-btn:hover {
+    transform: scale(1.05);
+}
+
+.copy-btn i {
+    font-size: 0.75rem;
 }
 
 .timeline::before {
@@ -590,4 +604,74 @@ dl.row dd {
     margin-left: 10px;
 }
 </style>
+
+{{-- Copy functionality script --}}
+<script>
+    // Copy to clipboard functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const textToCopy = this.getAttribute('data-clipboard-text');
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    // Use the Clipboard API when available
+                    navigator.clipboard.writeText(textToCopy).then(function() {
+                        showCopyFeedback(button, 'Copied!');
+                    }).catch(function(err) {
+                        console.error('Failed to copy: ', err);
+                        fallbackCopyTextToClipboard(textToCopy, button);
+                    });
+                } else {
+                    // Fallback for older browsers
+                    fallbackCopyTextToClipboard(textToCopy, button);
+                }
+            });
+        });
+
+        function fallbackCopyTextToClipboard(text, button) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyFeedback(button, 'Copied!');
+                } else {
+                    showCopyFeedback(button, 'Failed to copy', true);
+                }
+            } catch (err) {
+                showCopyFeedback(button, 'Failed to copy', true);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyFeedback(button, message, isError = false) {
+            const originalIcon = button.querySelector('i');
+            const originalClass = originalIcon.className;
+
+            // Change icon temporarily
+            originalIcon.className = isError ? 'fa fa-exclamation-triangle' : 'fa fa-check';
+
+            // Change button color temporarily
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add(isError ? 'btn-outline-danger' : 'btn-outline-success');
+
+            // Reset after 2 seconds
+            setTimeout(function() {
+                originalIcon.className = originalClass;
+                button.classList.remove(isError ? 'btn-outline-danger' : 'btn-outline-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        }
+    });
+</script>
 @endsection
