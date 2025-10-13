@@ -32,10 +32,11 @@ return new class extends Migration
         // ");
 
         Schema::table('appointments', function (Blueprint $table) {
-            // Only add foreign key if it doesn't exist
-            $foreignKeys = \DB::select("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_NAME = 'appointments' AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND CONSTRAINT_NAME LIKE '%duration_id%'");
-            if (empty($foreignKeys)) {
+            // Try to add foreign key constraint (will be ignored if it already exists)
+            try {
                 $table->foreign('duration_id')->references('id')->on('durations');
+            } catch (\Exception $e) {
+                // Foreign key already exists, skip
             }
             
             if (Schema::hasColumn('appointments', 'duration')) {
