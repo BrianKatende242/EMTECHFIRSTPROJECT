@@ -96,22 +96,22 @@
     </div>
 
     <div class="mb-3">
-        <label for="doctor_id" class="form-label">Doctor</label>
-        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
-            <option value="">Select doctor</option>
-            @foreach($doctors as $doctor)
-            <option value="{{ $doctor->id }}">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
-            @endforeach
-        </select>
-        @error('doctor_id')
+        <label for="appointment_time" class="form-label">Appointment Time</label>
+        <input id="appointment_time" type="datetime-local" class="form-control" name="appointment_time" required>
+        @error('appointment_time')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>
 
     <div class="mb-3">
-        <label for="appointment_time" class="form-label">Appointment Time</label>
-        <input id="appointment_time" type="datetime-local" class="form-control" name="appointment_time" required>
-        @error('appointment_time')
+        <label for="doctor_id" class="form-label">Doctor</label>
+        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
+            <option value="">Select Date First</option>
+            @foreach($doctors as $doctor)
+            <option value="{{ $doctor->id }}" data-specialization="{{ $doctor->specialization }}" style="display: none;">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
+            @endforeach
+        </select>
+        @error('doctor_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>
@@ -148,3 +148,52 @@
         </div>
         </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const appointmentTimeInput = document.getElementById('appointment_time');
+    const doctorSelect = document.getElementById('doctor_id');
+    const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
+
+    appointmentTimeInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        if (!selectedDate || isNaN(selectedDate.getTime())) {
+            // Reset doctor options
+            doctorOptions.forEach(option => {
+                option.style.display = 'none';
+            });
+            doctorSelect.value = '';
+            return;
+        }
+
+        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+        // Fetch available doctors for this day
+        fetch(`/api/doctors/available?day=${dayOfWeek}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const availableDoctorIds = data.doctors.map(doctor => doctor.id.toString());
+
+                    doctorOptions.forEach(option => {
+                        if (availableDoctorIds.includes(option.value)) {
+                            option.style.display = 'block';
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    });
+
+                    // Reset selection if current selection is not available
+                    if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
+                        doctorSelect.value = '';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching available doctors:', error);
+            });
+    });
+});
+</script>
+@endpush

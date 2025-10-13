@@ -212,6 +212,7 @@ Route::post('/voiceflow/school-action', [SchoolActionController::class, 'handleS
 // Doctor routes
 Route::post('/register-doctor', [DoctorController::class, 'registerDoctor']);
 Route::get('/doctors', [DoctorController::class, 'getDoctors']);
+Route::get('/doctors/available', [DoctorController::class, 'getAvailableDoctors']);
 Route::patch('/update-latest-doctor-file', [DoctorController::class, 'updateLatestDoctorFile']);
 Route::patch('/doctors/{id}', [DoctorController::class, 'updateDoctor']);
 
