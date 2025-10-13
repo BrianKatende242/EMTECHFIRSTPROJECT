@@ -189,6 +189,15 @@ class PatientController extends Controller
             'medicalHistories.doctor'
         ]);
 
-        return view('patients.profile', compact('patient'));
+        // Determine which sidebar to show based on patient association
+        $viewData = ['patient' => $patient];
+
+        if ($patient->school) {
+            $viewData['school'] = $patient->school;
+        } elseif ($patient->healthFacility) {
+            $viewData['healthFacility'] = $patient->healthFacility;
+        }
+
+        return view('patients.profile', $viewData);
     }
 }
