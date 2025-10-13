@@ -152,11 +152,31 @@
                         </div>
                     </div>
 
-                    @if($patient->medical_history)
+                    @if($patient->medicalHistories->count() > 0)
                     <div class="mt-3">
                         <h5><i class="fa fa-history mr-2"></i>Medical History</h5>
-                        <div class="alert alert-info">
-                            <i class="fa fa-info-circle mr-2"></i>{{ $patient->medical_history }}
+                        <div class="timeline">
+                            @foreach($patient->medicalHistories->sortByDesc('recorded_date') as $history)
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info">
+                                    <i class="fa fa-user-md"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ $history->doctor->name }}</strong>
+                                            <small class="text-muted d-block">{{ $history->doctor->specialization ?? 'General' }}</small>
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ $history->recorded_date ? $history->recorded_date->format('M d, Y') : $history->created_at->format('M d, Y') }}
+                                        </small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <p class="mb-0">{{ $history->content }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
                     @endif
@@ -520,6 +540,54 @@ dl.row dd {
         box-shadow: none !important;
         border: 1px solid #000 !important;
     }
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #fff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 15px;
+    margin-left: 10px;
 }
 </style>
 @endsection

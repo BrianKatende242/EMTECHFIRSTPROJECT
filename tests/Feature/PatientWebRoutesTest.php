@@ -536,9 +536,16 @@ class PatientWebRoutesTest extends TestCase
             'contact_number' => '+256711111114',
             'parent_contact' => '+256700000002',
             'grade' => 'Grade 10',
-            'medical_history' => 'Previous surgery for appendicitis',
             'school_id' => $school->id,
             'health_facility_id' => $healthFacility->id,
+        ]);
+
+        // Create medical history
+        $medicalHistory = \App\Models\MedicalHistory::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'content' => 'Previous surgery for appendicitis',
+            'recorded_date' => '2023-06-15',
         ]);
 
         // Create appointment
@@ -588,7 +595,6 @@ class PatientWebRoutesTest extends TestCase
         $this->assertEquals('+256711111114', $viewPatient->contact_number);
         $this->assertEquals('+256700000002', $viewPatient->parent_contact);
         $this->assertEquals('Grade 10', $viewPatient->grade);
-        $this->assertEquals('Previous surgery for appendicitis', $viewPatient->medical_history);
 
         // Check relationships are loaded
         $this->assertTrue($viewPatient->relationLoaded('school'));
@@ -596,10 +602,16 @@ class PatientWebRoutesTest extends TestCase
         $this->assertTrue($viewPatient->relationLoaded('appointments'));
         $this->assertTrue($viewPatient->relationLoaded('labTests'));
         $this->assertTrue($viewPatient->relationLoaded('maternalDocuments'));
+        $this->assertTrue($viewPatient->relationLoaded('medicalHistories'));
 
         // Check school and health facility associations
         $this->assertEquals($school->id, $viewPatient->school->id);
         $this->assertEquals($healthFacility->id, $viewPatient->healthFacility->id);
+
+        // Check medical history
+        $this->assertCount(1, $viewPatient->medicalHistories);
+        $this->assertEquals('Previous surgery for appendicitis', $viewPatient->medicalHistories->first()->content);
+        $this->assertEquals($doctor->name, $viewPatient->medicalHistories->first()->doctor->name);
 
         // Check appointments
         $this->assertCount(1, $viewPatient->appointments);
@@ -646,7 +658,6 @@ class PatientWebRoutesTest extends TestCase
         $this->assertEquals('Minimal Patient', $viewPatient->name);
         $this->assertEquals('male', $viewPatient->gender);
         $this->assertNull($viewPatient->contact_number);
-        $this->assertNull($viewPatient->medical_history);
         $this->assertNull($viewPatient->school);
         $this->assertNull($viewPatient->healthFacility);
 
@@ -654,6 +665,7 @@ class PatientWebRoutesTest extends TestCase
         $this->assertCount(0, $viewPatient->appointments);
         $this->assertCount(0, $viewPatient->labTests);
         $this->assertCount(0, $viewPatient->maternalDocuments);
+        $this->assertCount(0, $viewPatient->medicalHistories);
     }
 
     /** @test */
@@ -706,8 +718,23 @@ class PatientWebRoutesTest extends TestCase
             'gender' => 'male',
             'birth_date' => '1975-12-10',
             'contact_number' => '+256711111115',
-            'medical_history' => 'Hypertension diagnosis',
             'health_facility_id' => $healthFacility->id,
+        ]);
+
+        // Create doctor for medical history
+        $doctor = Doctor::create([
+            'name' => 'Dr. HF',
+            'email' => 'drhf@test.com',
+            'specialization' => 'Cardiology',
+            'contact' => '+256700000004',
+        ]);
+
+        // Create medical history
+        $medicalHistory = \App\Models\MedicalHistory::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'content' => 'Hypertension diagnosis',
+            'recorded_date' => '2023-08-20',
         ]);
 
         $response = $this->get("/patients/{$patient->id}/profile");
@@ -719,9 +746,13 @@ class PatientWebRoutesTest extends TestCase
         $this->assertEquals($healthFacility->id, $viewPatient->healthFacility->id);
         $this->assertEquals('HF Only', $viewPatient->healthFacility->name);
         $this->assertNull($viewPatient->school);
-        $this->assertEquals('Hypertension diagnosis', $viewPatient->medical_history);
         $this->assertNull($viewPatient->grade);
         $this->assertNull($viewPatient->parent_contact);
+
+        // Check medical history
+        $this->assertCount(1, $viewPatient->medicalHistories);
+        $this->assertEquals('Hypertension diagnosis', $viewPatient->medicalHistories->first()->content);
+        $this->assertEquals($doctor->name, $viewPatient->medicalHistories->first()->doctor->name);
     }
 
     /** @test */

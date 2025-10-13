@@ -180,7 +180,14 @@ class PatientController extends Controller
     public function show(Patient $patient)
     {
         // Load related data
-        $patient->load(['healthFacility', 'school', 'appointments.doctor', 'labTests', 'maternalDocuments']);
+        $patient->load([
+            'healthFacility',
+            'school',
+            'appointments.doctor',
+            'labTests',
+            'maternalDocuments',
+            'medicalHistories.doctor'
+        ]);
 
         return view('patients.profile', compact('patient'));
     }

@@ -20,7 +20,6 @@ class Patient extends Model
         'contact_number',
         'parent_contact', // For students
         'grade', // For students
-        'medical_history',
         'school_id', // Nullable - for school patients
         'health_facility_id', // Nullable - for health facility patients
     ];
@@ -151,6 +150,11 @@ class Patient extends Model
     public function labTests(): HasMany
     {
         return $this->hasMany(LabTest::class);
+    }
+
+    public function medicalHistories(): HasMany
+    {
+        return $this->hasMany(MedicalHistory::class);
     }
 
     /**
