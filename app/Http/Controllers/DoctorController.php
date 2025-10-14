@@ -270,14 +270,32 @@ public function showDoctorDashboard($doctorId)
 }
 
     /**
-     * Show availability management page for a doctor
+     * Show availability management page for all doctors with filtering
      */
-    public function availability($doctorId)
+    public function allAvailabilities(Request $request)
     {
-        $doctor = Doctor::with('availabilities')->findOrFail($doctorId);
+        $query = Doctor::with('availabilities');
 
-        return view('doctor-availability', [
-            'doctor' => $doctor
+        // Filter by specialization
+        if ($request->filled('specialization')) {
+            $query->where('specialization', 'like', '%' . $request->specialization . '%');
+        }
+
+        // Filter by name
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        // Filter by availability on specific day
+        if ($request->filled('day')) {
+            $query->availableOnDay($request->day);
+        }
+
+        $doctors = $query->paginate(10);
+
+        return view('doctor-availabilities', [
+            'doctors' => $doctors,
+            'filters' => $request->only(['specialization', 'name', 'day'])
         ]);
     }
 
@@ -414,5 +432,19 @@ public function updateOnlineStatus(Request $request, Doctor $doctor)
 
     return response()->json(['status' => 'success', 'is_online' => $doctor->is_online]);
 }
+
+    /**
+     * Show availability management page for a specific doctor
+     */
+    public function availability($doctorId)
+    {
+        $doctor = Doctor::with('availabilities')->findOrFail($doctorId);
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        return view('doctor-availability', [
+            'doctor' => $doctor,
+            'days' => $days
+        ]);
+    }
 
 }
