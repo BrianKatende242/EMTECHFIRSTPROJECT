@@ -4,7 +4,46 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card availability-card">
-            <div class="card-header d-flex justify-content-between align-items-center availability-header">
+            <div class="card-header d-flex justify-content-between align-it        // Make entire day card clickable to toggle availability
+        document.querySelectorAll('.day-card').forEach(function(card){
+            card.addEventListener('click', async function(e){
+                // Don't toggle if clicking on input, button, or label
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL') {
+                    return;
+                }
+
+                const day = card.getAttribute('data-day-card');
+                const checkbox = document.querySelector('.day-available[data-day="'+day+'"]');
+                const maxEl = document.querySelector('.day-max[data-day="'+day+'"]');
+
+                if (checkbox) {
+                    // Add loading state
+                    card.style.opacity = '0.7';
+                    card.style.pointerEvents = 'none';
+
+                    try {
+                        // Toggle the checkbox
+                        checkbox.checked = !checkbox.checked;
+
+                        // Trigger the change event to update UI
+                        checkbox.dispatchEvent(new Event('change'));
+
+                        // Auto-save the change
+                        const payload = {};
+                        payload[day] = {
+                            available: checkbox.checked ? 1 : 0,
+                            max_appointments: parseInt(maxEl.value) || 0
+                        };
+
+                        await postDays(payload);
+                    } finally {
+                        // Remove loading state
+                        card.style.opacity = '';
+                        card.style.pointerEvents = '';
+                    }
+                }
+            });
+        });bility-header">
                 <div>
                     <h4 class="mb-0">Manage Availability</h4>
                     <small class="text-white">Set which days you're available and the maximum appointments allowed.</small>
