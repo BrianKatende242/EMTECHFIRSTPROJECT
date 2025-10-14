@@ -31,7 +31,7 @@
                         @foreach($days as $day)
                             @php $key = strtolower($day); $av = $avMap[$key] ?? null; @endphp
                             <div class="col-md-6">
-                                <div class="card day-card h-100 {{ ($av && $av->available) ? 'is-available' : 'is-off' }}" data-day-card="{{ $day }}">
+                                <div class="card day-card h-100 {{ ($av && $av->available) ? 'is-available' : 'is-off' }}" data-day-card="{{ $day }}" style="cursor: pointer;">
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <div>
                                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -75,6 +75,47 @@
     </div>
 </div>
 
+@push('styles')
+<style>
+.day-card {
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.day-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+    transform: translateY(-2px);
+}
+
+.day-card.is-available {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.day-card.is-off {
+    border-color: #6c757d;
+    background-color: rgba(108, 117, 125, 0.05);
+}
+
+.status-pill {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.pill-on {
+    background-color: #28a745;
+    color: white;
+}
+
+.pill-off {
+    background-color: #6c757d;
+    color: white;
+}
+</style>
+@endpush
 @push('scripts')
 <script>
     (function(){
@@ -181,6 +222,24 @@
             });
         });
 
+        // Make entire day card clickable to toggle availability
+        document.querySelectorAll('.day-card').forEach(function(card){
+            card.addEventListener('click', function(e){
+                // Don't toggle if clicking on input, button, or label
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL') {
+                    return;
+                }
+
+                const day = card.getAttribute('data-day-card');
+                const checkbox = document.querySelector('.day-available[data-day="'+day+'"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Trigger the change event to update UI
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
         // Autofill defaultDays const in JS
         // Build a JS-friendly days structure from server for ordering
         // We used PHP variable $days earlier; recreate here for defaults
@@ -196,5 +255,3 @@
     })();
 </script>
 @endpush
-
-@endsection
