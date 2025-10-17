@@ -86,7 +86,7 @@
     <li>
         <a class="{{ request()->is('admin') ? 'mm-active' : '' }}" href="{{ route('admin.index') }}" aria-expanded="false">
             <i class="fa fa-cogs"></i>
-            <span class="nav-text">Admin Home</span>
+            <span class="nav-text">Dashboard</span>
         </a>
     </li>
     <li>

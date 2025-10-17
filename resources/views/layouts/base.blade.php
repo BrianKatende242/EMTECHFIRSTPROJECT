@@ -39,7 +39,7 @@
     <!--*******************
         Preloader start
     ********************-->
-    <div id="preloader">
+    <div id="preloader" style="display: none;">
         <div class="sk-three-bounce">
             <div class="sk-child sk-bounce1"></div>
             <div class="sk-child sk-bounce2"></div>

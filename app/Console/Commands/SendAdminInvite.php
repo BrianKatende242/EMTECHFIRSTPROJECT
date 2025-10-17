@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminInviteMail;
+use App\Models\AdminInvite;
+
+class SendAdminInvite extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'admin:invite {email?}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Send an admin registration invite to the specified email address';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $email = $this->argument('email') ?? $this->ask('Enter the admin email address');
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->error('Invalid email address provided.');
+            return 1;
+        }
+
+        // Check if an invite already exists for this email
+        $existingInvite = AdminInvite::where('email', $email)->where('used', false)->first();
+        if ($existingInvite && !$existingInvite->isExpired()) {
+            $this->error('An active invite already exists for this email address.');
+            return 1;
+        }
+
+        // Create a new invite record
+        $invite = AdminInvite::create([
+            'email' => $email,
+            'token' => AdminInvite::generateToken(),
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        // Generate the invite URL
+        $inviteUrl = route('admin.register', ['token' => $invite->token]);
+
+        // Send the email
+        Mail::to($email)->send(new AdminInviteMail($inviteUrl));
+
+        $this->info("Admin registration invite sent to {$email}. The link will expire in 24 hours.");
+        return 0;
+    }
+}

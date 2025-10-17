@@ -19,6 +19,14 @@ class AuthController extends Controller
             'password' => ['required']
         ]);
 
+        if ($request->expectsJson()) {
+            if (Auth::attempt($credentials, $request->boolean('remember'))) {
+                $request->session()->regenerate();
+                return response()->json(['success' => true, 'redirect' => '/admin']);
+            }
+            return response()->json(['success' => false, 'errors' => ['email' => 'Invalid credentials']], 422);
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))){
             $request->session()->regenerate();
             return redirect()->intended('/admin');
