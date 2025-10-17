@@ -147,7 +147,7 @@ class OtpController extends Controller
                           $isInDoctors = \App\Models\Doctor::where('email', $value)->exists();
 
                               if (!$isInSchools && !$isInHealthFacilities && !$isInDoctors) {
-                             $fail("The selected email is invalid.");
+                             $fail("The selected email is not associated with any school, health facility, or doctor.");
                                  }
                            }
             ]
@@ -157,7 +157,7 @@ class OtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid email address'
+                'message' => 'The selected email is not associated with any school, health facility, or doctor.'
             ], 422);
         }
 
@@ -177,9 +177,17 @@ class OtpController extends Controller
                 ]
             );
 
-            $userType = \App\Models\HealthFacility::where('email', $request->email)->exists() 
-               ? 'health_facility' 
-              : 'school';
+            // Determine entity type by email
+            if (\App\Models\HealthFacility::where('email', $request->email)->exists()) {
+                $userType = 'health_facility';
+            } elseif (\App\Models\Doctor::where('email', $request->email)->exists()) {
+                $userType = 'doctor';
+            } elseif (\App\Models\School::where('email', $request->email)->exists()) {
+                $userType = 'school';
+            } else {
+                // This should not happen due to earlier validation
+                throw new \Exception('Email not associated with any entity'); 
+            }
 
             Mail::to($request->email)->send(new SchoolOtpMail($otp, $userType));
 
@@ -277,11 +285,11 @@ class OtpController extends Controller
             'success' => true,
             'message' => 'OTP verified successfully. Access your dashboard below.',
             'dashboard_url' => 'https://laravelbackendchil.onrender.com/school-dashboard/'.$school->id,
-            // Optional: Add these for Voiceflow debugging
             'school_id' => $school->id,
             'school_name' => $school->name
         ]);
     }
+
     public function verifyDoctorOtp(Request $request)
     {
         \Log::info('Doctor OTP Verification Request', [

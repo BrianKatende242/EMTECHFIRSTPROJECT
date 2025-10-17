@@ -135,7 +135,7 @@ public function __construct()
             ],
             'json' => [
                 'amount' => $formattedAmount, // Ensure it's a string
-                'currency' => 'EUR',
+                'currency' => 'UGX',
                 'externalId' => $externalId, // Use the unique externalId
                 'payer' => [
                     'partyIdType' => 'MSISDN', // Payer's partyIdType

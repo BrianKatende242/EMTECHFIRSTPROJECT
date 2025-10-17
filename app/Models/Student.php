@@ -56,7 +56,13 @@ class Student extends Model
         });
     }
 
-   
+    /**
+     * Get the age of the student calculated from birth_date
+     */
+    public function getAgeAttribute()
+    {
+        return $this->birth_date ? \Carbon\Carbon::parse($this->birth_date)->age : null;
+    }
 }
 
 

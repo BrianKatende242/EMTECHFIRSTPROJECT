@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
+use Carbon\Carbon;
 
 
 class HealthFacilityController extends Controller
@@ -135,6 +136,37 @@ class HealthFacilityController extends Controller
                            ->get();
     
         $patients = Patient::where('health_facility_id', $id)->get();
+
+        // Metrics
+        $patientsCount = $patients->count();
+        $appointmentsCount = Appointment::where('health_facility_id', $id)->count();
+        $availableDoctorsCount = Doctor::where('health_facility_id', $id)
+            ->whereHas('availabilities', function ($query) {
+                $query->where('available', true);
+            })->count();
+
+        // Build last 7 days series (rolling window including today)
+        $labels = [];
+        $series = [];
+        $startDay = Carbon::now()->subDays(6)->startOfDay();
+        for ($i = 0; $i < 7; $i++) {
+            $day = (clone $startDay)->addDays($i);
+            $labels[] = $day->format('D');
+            $dayStart = (clone $day)->startOfDay();
+            $dayEnd = (clone $day)->endOfDay();
+            $countForDay = Appointment::where('health_facility_id', $id)
+                ->whereBetween('appointment_time', [$dayStart, $dayEnd])
+                ->count();
+            $series[] = $countForDay;
+        }
+
+        // Doughnut: Patients by gender
+        $maleCount = Patient::where('health_facility_id', $id)->where('gender', 'male')->count();
+        $femaleCount = Patient::where('health_facility_id', $id)->where('gender', 'female')->count();
+        $otherCount = Patient::where('health_facility_id', $id)->where('gender', 'other')->count();
+        $unknownCount = Patient::where('health_facility_id', $id)->whereNull('gender')->orWhere('gender','')->count();
+        $genderLabels = ['Male', 'Female', 'Other', 'Unspecified'];
+        $genderData = [$maleCount, $femaleCount, $otherCount, $unknownCount];
     
         return view('Health-Facility-Instance', [
             'healthFacility' => $healthFacility,
@@ -144,8 +176,50 @@ class HealthFacilityController extends Controller
             'availableDoctors' => $availableDoctors,
             'patients' => $patients,
             'messages' => $messages,
-            'stats' => null
+            'stats' => [
+                'patients' => $patientsCount,
+                'appointments' => $appointmentsCount,
+                'availableDoctors' => $availableDoctorsCount,
+                'unreadMessages' => $unreadMessages,
+            ],
+            'weeklyLabels' => $labels,
+            'weeklyData' => $series,
+            'genderLabels' => $genderLabels,
+            'genderData' => $genderData,
         ]);
+    }
+
+    public function patients($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        return view('health-facility/patients', compact('healthFacility', 'patients'));
+    }
+
+    public function createPatient($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        return view('health-facility/patients-create', compact('healthFacility'));
+    }
+
+    public function bookDoctor($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        $doctors = Doctor::latest()->get();
+        $appointments = Appointment::where('health_facility_id', $id)
+            ->with(['patient', 'doctor', 'duration'])
+            ->latest()
+            ->get();
+        return view('health-facility/book-doctor', compact('healthFacility', 'patients', 'doctors', 'appointments'));
+    }
+
+    public function labTests($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        // Placeholder: if LabTest supports health_facility_id, filter; else show empty list
+        $labTests = collect();
+        return view('health-facility/lab-tests', compact('healthFacility', 'labTests'));
     }
     
 

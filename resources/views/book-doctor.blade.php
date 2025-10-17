@@ -2,6 +2,12 @@
 
 
 @section('content')
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -22,6 +28,7 @@
                                         <th>Amount</th>
                                         <th>Reason</th>
                                         <th>Status</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -30,16 +37,25 @@
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                                         <td>{{ $appointment->student->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
-                                        <td>{{ $appointment->duration }} mins</td>
-                                        <td>{{ number_format($appointment->amount) }} UGX</td>
+                                        <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 
                                                 $appointment->status == 'confirmed' ? 'success' : 
                                                 ($appointment->status == 'pending_payment' ? 'warning' : 'danger') 
-                                            }}">
+                                            }} text-white">
                                                 {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                             </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if($appointment->status === 'awaiting_payment')
+                                                <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-credit-card me-1"></i> Pay
+                                                </a>
+                                            @else
+                                                —
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach
@@ -101,16 +117,14 @@
     </div>
 
     <div class="mb-3">
-        <label for="duration" class="form-label">Duration (mins)</label>
-        <select id="duration" class="form-control form-select" name="duration" required>
+        <label for="duration_id" class="form-label">Duration</label>
+        <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
-            <option value="15">15 minutes</option>
-            <option value="20">20 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
+            @foreach(\App\Models\Duration::active()->get() as $duration)
+                                                    <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+            @endforeach
         </select>
-        @error('duration')
+        @error('duration_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>

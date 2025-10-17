@@ -19,16 +19,17 @@ class VerifyNewsletterSubscription extends Mailable
 
     public function __construct(NewsletterSubscriber $subscriber)
     {
-        $this->subscriber = $subscriber;
-        $this->verificationUrl = url("/verify-newsletter/{$subscriber->verification_token}");
+    $this->subscriber = $subscriber;
+    $this->verificationUrl = route('newsletter.verify.web', ['token' => $subscriber->verification_token]);
     }
 
     public function build()
     {
         return $this->subject('Verify Your Newsletter Subscription')
-                    ->markdown('emails.verify-newsletter')
+                    ->view('emails.verify-newsletter')
+                    ->text('emails.verify-newsletter_plain')
                     ->with([
-                        'verificationUrl' => $this->verificationUrl // Pass verification link
+                        'verificationUrl' => $this->verificationUrl
                     ]);
     }
 }

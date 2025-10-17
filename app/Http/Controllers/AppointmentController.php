@@ -8,6 +8,7 @@ use App\Models\HealthFacility;
 use App\Models\Doctor;
 use App\Models\Student;
 use App\Models\Patient;
+use App\Models\Duration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class AppointmentController extends Controller
     // Validate request
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
-        'duration' => 'required|in:15,20,30,45,60',
+        'duration_id' => 'required|exists:durations,id',
         'appointment_time' => [
             'required',
             'date',
@@ -64,19 +65,28 @@ class AppointmentController extends Controller
 
     // Create appointment
     try {
-        $appointment = Appointment::create([
+    $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
             'appointment_time' => $request->appointment_time,
-            'duration' => (int)$request->duration,
+            'duration_id' => $request->duration_id,
             'reason' => $request->reason,
-            'status' => 'confirmed',
+            'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,
             'patient_id' => $request->patient_id,
             'school_id' => $request->school_id,
             'student_id' => $request->student_id
         ]);
 
-        return redirect()->route('book-doctor', ['school' => $request->school_id]);
+        // Redirect based on context
+        if ($appointment->health_facility_id) {
+            return redirect()->route('health-facility.book-doctor', ['id' => $appointment->health_facility_id])
+                ->with('success', 'Appointment booked successfully');
+        }
+        if ($appointment->school_id) {
+            return redirect()->route('book-doctor', ['school' => $appointment->school_id])
+                ->with('success', 'Appointment booked successfully');
+        }
+        return redirect()->back()->with('success', 'Appointment booked successfully');
 
     } catch (\Exception $e) {
         \Log::error('Appointment creation failed: '.$e->getMessage());
@@ -166,7 +176,7 @@ class AppointmentController extends Controller
                    ($appointment->student ? "Student" : "Patient") . ": {$user->name}\n" .
                    "Doctor: Dr. {$doctor->name}\n" .
                    "Type: " . ($doctor->specialization === 'General Practitioner' ? 'General' : 'Specialist') . "\n" .
-                   "Duration: {$appointment->duration} mins\n" .
+                   "Duration: {$appointment->duration->minutes} mins\n" .
                    "Time: {$appointment->appointment_time->format('D, M j, Y g:i A')}\n" .
                    "Reason: {$appointment->reason}";
 

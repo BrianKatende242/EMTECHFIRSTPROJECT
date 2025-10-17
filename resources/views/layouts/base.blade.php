@@ -10,6 +10,8 @@
             {{ $school->name }} - Dashboard
         @elseif(isset($doctor))
             Dr. {{ $doctor->name }} - Dashboard
+        @elseif(isset($healthFacility))
+            {{ $healthFacility->name }} - Dashboard
         @else
             Dashboard
         @endif
@@ -21,6 +23,9 @@
     <link href="{{ asset('vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/keti-theme.css') }}" rel="stylesheet">
+
+    {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
+    @stack('styles')
 
 
 
@@ -76,7 +81,7 @@
             <div class="header-content">
                 <nav class="navbar navbar-expand">
                     <div class="collapse navbar-collapse justify-content-between">
-                        <div class="header-left">
+                        <div class="header-left d-none d-lg-flex align-items-center ps-3 ps-lg-0">
                             <div class="search_bar dropdown">
                                 <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
                                     <i class="mdi mdi-magnify"></i>
@@ -90,6 +95,14 @@
                         </div>
 
                         <ul class="navbar-nav header-right">
+                            <!-- Mobile sidebar toggle on the right -->
+                            <li class="nav-item d-lg-none me-2">
+                                <div class="nav-control" role="button" aria-label="Toggle sidebar" aria-controls="quixnav" aria-expanded="false">
+                                    <div class="hamburger" style="margin-right: 10px;">
+                                        <span class="line"></span><span class="line"></span><span class="line"></span>
+                                    </div>
+                                </div>
+                            </li>
                             <li class="nav-item dropdown notification_dropdown">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     <i class="mdi mdi-bell"></i>
@@ -104,7 +117,7 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #FF00F8; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #000000; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
                                 </a>
                                 @php
                                     // Centralized profile route: controllers will render the correct profile page
@@ -155,6 +168,9 @@
         <!--**********************************
             Sidebar end
         ***********************************-->
+
+    <!-- Mobile overlay to close sidebar drawer -->
+    <div id="sidebar-overlay" class="d-lg-none" aria-hidden="true"></div>
 
         <!--**********************************
             Content body start
@@ -218,15 +234,44 @@
         }
     </style>
     <script>
-        // Example: toggling sidebar-collapsed class on #main-wrapper
+        // Toggle desktop collapse or mobile drawer for sidebar
         document.addEventListener('DOMContentLoaded', function() {
             var mainWrapper = document.getElementById('main-wrapper');
-            var navControl = document.querySelector('.nav-control');
-            if (mainWrapper && navControl) {
-                navControl.addEventListener('click', function() {
-                    mainWrapper.classList.toggle('sidebar-collapsed');
+            var navControls = document.querySelectorAll('.nav-control');
+            var overlay = document.getElementById('sidebar-overlay');
+
+            function isMobile() { return window.innerWidth < 992; } // Bootstrap lg breakpoint
+
+            function openDrawer() {
+                mainWrapper.classList.add('sidebar-open');
+                document.body.classList.add('sidebar-open');
+            }
+            function closeDrawer() {
+                mainWrapper.classList.remove('sidebar-open');
+                document.body.classList.remove('sidebar-open');
+            }
+
+            if (mainWrapper && navControls && navControls.length) {
+                navControls.forEach(function(ctrl){
+                    ctrl.addEventListener('click', function() {
+                        if (isMobile()) {
+                            if (mainWrapper.classList.contains('sidebar-open')) {
+                                closeDrawer();
+                                ctrl.setAttribute('aria-expanded', 'false');
+                            } else {
+                                openDrawer();
+                                ctrl.setAttribute('aria-expanded', 'true');
+                            }
+                        } else {
+                            mainWrapper.classList.toggle('sidebar-collapsed');
+                        }
+                    });
                 });
             }
+
+            if (overlay) overlay.addEventListener('click', closeDrawer);
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
+            window.addEventListener('resize', function() { if (!isMobile()) closeDrawer(); });
         });
     </script>
 
