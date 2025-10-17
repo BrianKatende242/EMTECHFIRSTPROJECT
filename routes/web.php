@@ -176,6 +176,8 @@ Route::post('/doctor/{doctor}/availability', [\App\Http\Controllers\DoctorAvaila
 
 Route::get('/doctor-dashboard/{doctorId}/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
 
+Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilities'])->middleware('admin')->name('doctor.all-availabilities');
+
 
 // Doctor Dashboard Route
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
