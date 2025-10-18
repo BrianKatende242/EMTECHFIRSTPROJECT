@@ -72,9 +72,25 @@
     <li class="{{ request()->routeIs('doctor.availability') ? 'mm-active' : '' }}">
         <a href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
             <i class="fa fa-check"></i>
-            <span class="nav-text">Availability</span>
+            <span class="nav-text">My Availability</span>
         </a>
     </li>
 
+</ul>
+@elseif(isset($admin))
+<ul class="metismenu" id="menu">
+    <li class="nav-label first">Admin Menu</li>
+    <li class="{{ request()->routeIs('doctor.all-availabilities') ? 'mm-active' : '' }}">
+        <a href="{{ route('doctor.all-availabilities') }}" aria-expanded="false">
+            <i class="fa fa-users-md"></i>
+            <span class="nav-text">Doctor Availabilities</span>
+        </a>
+    </li>
+    <li class="{{ request()->routeIs('admin.contact-submissions') ? 'mm-active' : '' }}">
+        <a href="{{ route('admin.contact-submissions') }}" aria-expanded="false">
+            <i class="fa fa-envelope"></i>
+            <span class="nav-text">Contact Submissions</span>
+        </a>
+    </li>
 </ul>
 @endif

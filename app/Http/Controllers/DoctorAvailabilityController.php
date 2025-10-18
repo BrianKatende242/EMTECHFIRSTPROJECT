@@ -13,12 +13,12 @@ class DoctorAvailabilityController extends Controller
             $doctor->availabilities()->updateOrCreate(
                 ['day' => strtolower($day)],
                 [
-                    'available' => isset($data['available']),
+                    'available' => (bool) ($data['available'] ?? 0),
                     'max_appointments' => $data['max_appointments'] ?? 0,
                 ]
             );
         }
 
-        return redirect()->back()->with('success', 'Availability updated successfully.');
+        return response()->json(['success' => true, 'message' => 'Availability updated successfully.']);
     }
 }
