@@ -22,8 +22,7 @@ class AppointmentController extends Controller
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
         'duration_id' => 'required|exists:durations,id',
-        'appointment_date' => 'required|date|after:today',
-        'appointment_time' => 'required|date_format:H:i',
+        'appointment_time' => 'required|date|after:now',
         'reason' => 'required|string|max:500',
         'patient_id' => 'required|exists:patients,id',
         'school_id' => 'nullable|exists:schools,id',
@@ -32,16 +31,16 @@ class AppointmentController extends Controller
 
     // Additional validation
     $validator->after(function ($validator) use ($request) {
-        // Combine date and time safely
+        // Parse the appointment time
         try {
-            $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->appointment_date . ' ' . $request->appointment_time);
+            $appointmentDateTime = Carbon::parse($request->appointment_time);
 
             // Check if appointment is at least 1 hour in advance
             if (now()->diffInHours($appointmentDateTime, false) < 1) {
                 $validator->errors()->add('appointment_time', 'Appointments must be scheduled at least 1 hour in advance.');
             }
         } catch (\Exception $e) {
-            $validator->errors()->add('appointment_date', 'Invalid date or time format.');
+            $validator->errors()->add('appointment_time', 'Invalid date or time format.');
             return;
         }
 
@@ -66,7 +65,7 @@ class AppointmentController extends Controller
 
     // Create appointment
     try {
-    $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->appointment_date . ' ' . $request->appointment_time);
+    $appointmentDateTime = Carbon::parse($request->appointment_time);
 
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,

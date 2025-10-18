@@ -117,6 +117,19 @@
     </div>
 
     <div class="mb-3">
+        <label for="doctor_id" class="form-label">Doctor</label>
+        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
+            <option value="">Select Date First</option>
+            @foreach($doctors ?? [] as $doc)
+                <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+            @endforeach
+        </select>
+        @error('doctor_id')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3">
         <label for="reason" class="form-label">Reason</label>
         <textarea id="reason" class="form-control" name="reason" required></textarea>
         @error('reason')
