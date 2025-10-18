@@ -48,8 +48,7 @@ class AppointmentSchedulingTest extends TestCase
         $appointmentData = [
             'doctor_id' => $doctor->id,
             'duration_id' => $duration->id,
-            'appointment_date' => now()->addDays(7)->format('Y-m-d'), // 7 days from now
-            'appointment_time' => '15:00', // 3 PM
+            'appointment_time' => now()->addDays(7)->setTime(15, 0)->format('Y-m-d\TH:i'), // 7 days from now at 3 PM
             'reason' => 'Regular checkup',
             'patient_id' => $patient->id,
             'school_id' => $school->id
@@ -112,8 +111,7 @@ class AppointmentSchedulingTest extends TestCase
         $appointmentData = [
             'doctor_id' => $doctor->id,
             'duration_id' => $duration->id,
-            'appointment_date' => now()->addDays(7)->format('Y-m-d'), // 7 days from now
-            'appointment_time' => '16:30', // 4:30 PM
+            'appointment_time' => now()->addDays(7)->setTime(16, 30)->format('Y-m-d\TH:i'), // 7 days from now at 4:30 PM
             'reason' => 'Follow-up consultation',
             'patient_id' => $patient->id,
             'health_facility_id' => $healthFacility->id
@@ -152,8 +150,7 @@ class AppointmentSchedulingTest extends TestCase
         $invalidData = [
             'doctor_id' => '', // Required
             'duration_id' => '', // Required
-            'appointment_date' => 'invalid-date', // Invalid date
-            'appointment_time' => '25:00', // Invalid time
+            'appointment_time' => 'invalid-datetime', // Invalid datetime
             'reason' => '', // Required
             'patient_id' => $patient->id
         ];
@@ -207,8 +204,7 @@ class AppointmentSchedulingTest extends TestCase
         $appointmentData = [
             'doctor_id' => $doctor->id,
             'duration_id' => $duration->id,
-            'appointment_date' => now()->format('Y-m-d'), // Today
-            'appointment_time' => now()->addMinutes(30)->format('H:i'), // Less than 1 hour from now
+            'appointment_time' => now()->addMinutes(30)->format('Y-m-d\TH:i'), // Less than 1 hour from now
             'reason' => 'Urgent checkup',
             'patient_id' => $patient->id,
             'school_id' => $school->id
