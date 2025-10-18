@@ -55,8 +55,8 @@ class AppointmentSchedulingTest extends TestCase
             'school_id' => $school->id
         ];
 
-        // Make AJAX request
-        $response = $this->postJson(route('appointments.store'), $appointmentData);
+        // Make AJAX request without CSRF middleware
+        $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $appointmentData);
 
         $response->assertStatus(200)
                 ->assertJson([
@@ -119,8 +119,8 @@ class AppointmentSchedulingTest extends TestCase
             'health_facility_id' => $healthFacility->id
         ];
 
-        // Make AJAX request
-        $response = $this->postJson(route('appointments.store'), $appointmentData);
+        // Make AJAX request without CSRF middleware
+        $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $appointmentData);
 
         $response->assertStatus(200)
                 ->assertJson([
@@ -158,7 +158,7 @@ class AppointmentSchedulingTest extends TestCase
             'patient_id' => $patient->id
         ];
 
-        $response = $this->postJson(route('appointments.store'), $invalidData);
+        $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $invalidData);
 
         $response->assertStatus(422)
                 ->assertJson([
@@ -214,7 +214,7 @@ class AppointmentSchedulingTest extends TestCase
             'school_id' => $school->id
         ];
 
-        $response = $this->postJson(route('appointments.store'), $appointmentData);
+        $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $appointmentData);
 
         $response->assertStatus(422)
                 ->assertJson([
