@@ -23,14 +23,17 @@ class Doctor extends Authenticatable
         return $this->belongsTo(School::class);
     }
 
+    public function healthFacility(): BelongsTo
+    {
+        return $this->belongsTo(HealthFacility::class);
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
     }
 
     public function availabilities(): HasMany
-{
-    return $this->hasMany(DoctorAvailability::class);
-}
-
-}
+    {
+        return $this->hasMany(DoctorAvailability::class);
+    }}

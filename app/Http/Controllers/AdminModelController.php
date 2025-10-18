@@ -83,6 +83,77 @@ class AdminModelController extends Controller
 
             $items = $q->latest()->paginate(30)->appends(request()->query());
 
+        } elseif ($modelKey === 'doctors') {
+            $q = $modelClass::with(['school', 'healthFacility']);
+
+            if (request()->filled('specialization')) {
+                $q->where('specialization', request('specialization'));
+            }
+
+            if (request()->filled('school_id')) {
+                $q->where('school_id', request('school_id'));
+            }
+
+            if (request()->filled('health_facility_id')) {
+                $q->where('health_facility_id', request('health_facility_id'));
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('email', 'like', $term)
+                      ->orWhere('specialization', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+                        $items = $q->paginate(20)->appends(request()->query());
+
+        } elseif ($modelKey === 'doctors') {
+            $q = $modelClass::with(['school', 'healthFacility']);
+
+            if (request()->filled('specialization')) {
+                $q->where('specialization', request('specialization'));
+            }
+
+            if (request()->filled('school_id')) {
+                $q->where('school_id', request('school_id'));
+            }
+
+            if (request()->filled('health_facility_id')) {
+                $q->where('health_facility_id', request('health_facility_id'));
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('email', 'like', $term)
+                      ->orWhere('specialization', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+
+            // Export functionality
+            if (request('export') === 'csv') {
+                return $this->exportDoctorsCsv($items);
+            }
+
         } else {
             $items = $modelClass::latest()->paginate(20);
         }
@@ -141,7 +212,8 @@ class AdminModelController extends Controller
             $item = $modelClass::create($data);
         }
 
-        return redirect()->route('admin.model.index', $modelKey)->with('success', 'Created successfully');
+        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
+        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Created successfully');
     }
 
     public function edit($modelKey, $id)
@@ -188,7 +260,8 @@ class AdminModelController extends Controller
             return redirect($request->input('redirect_to'))->with('success', 'Updated successfully');
         }
 
-        return redirect()->route('admin.model.index', $modelKey)->with('success', 'Updated successfully');
+        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
+        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Updated successfully');
     }
 
     public function destroy($modelKey, $id)
@@ -199,7 +272,8 @@ class AdminModelController extends Controller
         $item = $modelClass::findOrFail($id);
         $item->delete();
 
-        return redirect()->route('admin.model.index', $modelKey)->with('success', 'Deleted successfully');
+        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
+        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Deleted successfully');
     }
 
     public function showDoctor($id)
@@ -211,7 +285,17 @@ class AdminModelController extends Controller
         $cancelled = $doctor->appointments()->where('status', 'cancelled')->count();
         $upcoming = $doctor->appointments()->whereIn('status', ['pending','scheduled'])->count();
 
-        return view('admin.doctors.show', compact('doctor','totalAppointments','completed','cancelled','upcoming'));
+        // Monthly appointment data for the current year
+        $monthlyData = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $count = $doctor->appointments()
+                ->whereYear('appointment_time', date('Y'))
+                ->whereMonth('appointment_time', $month)
+                ->count();
+            $monthlyData[] = $count;
+        }
+
+        return view('admin.doctors.show', compact('doctor','totalAppointments','completed','cancelled','upcoming','monthlyData'));
     }
 
     public function sendLoginLinkToDoctor(Request $request, $id)
@@ -244,30 +328,30 @@ class AdminModelController extends Controller
         return redirect()->back()->with('success', 'One-time login link sent to doctor email.');
     }
 
-    // Export appointments as CSV based on current filters
-    public function exportAppointmentsCsv(Request $request)
+    // Export doctors as CSV
+    public function exportDoctorsCsv($doctors)
     {
-        $q = \App\Models\Appointment::with(['doctor','student','school','healthFacility','patient']);
-        if ($request->filled('status')) $q->where('status', $request->status);
-        if ($request->filled('doctor_id')) $q->where('doctor_id', $request->doctor_id);
-        if ($request->filled('date_from')) $q->whereDate('appointment_time', '>=', $request->date_from);
-        if ($request->filled('date_to')) $q->whereDate('appointment_time', '<=', $request->date_to);
-
-        $items = $q->latest()->get();
-
-        $filename = 'appointments-' . now()->format('Ymd-His') . '.csv';
+        $filename = 'doctors-' . now()->format('Ymd-His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function() use ($items) {
+        $callback = function() use ($doctors) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['id','appointment_time','doctor','institution','patient','status','reason']);
-            foreach ($items as $i) {
-                $institution = $i->school->name ?? $i->healthFacility->name ?? '';
-                $patient = $i->student->name ?? $i->patient->name ?? '';
-                fputcsv($out, [$i->id, optional($i->appointment_time)->toDateTimeString(), $i->doctor->name ?? '', $institution, $patient, $i->status, $i->reason]);
+            fputcsv($out, ['id','name','email','specialization','contact','school','health_facility','meeting_slug','created_at']);
+            foreach ($doctors as $doctor) {
+                fputcsv($out, [
+                    $doctor->id,
+                    $doctor->name,
+                    $doctor->email,
+                    $doctor->specialization,
+                    $doctor->contact,
+                    $doctor->school->name ?? '',
+                    $doctor->healthFacility->name ?? '',
+                    $doctor->meeting_slug,
+                    $doctor->created_at
+                ]);
             }
             fclose($out);
         };

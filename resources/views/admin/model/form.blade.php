@@ -19,7 +19,13 @@
         $fields = (new $modelClass)->getFillable() ?: array_keys((new $modelClass)->getAttributes());
     @endphp
 
-    <form method="POST" action="{{ $item ? route('admin.model.update', [$modelKey, $item->id]) : route('admin.model.store', $modelKey) }}" @if($modelKey === 'doctors') enctype="multipart/form-data" @endif>
+    @php
+        $storeRoute = 'admin.model.store';
+        $updateRoute = 'admin.model.update';
+        $indexRoute = 'admin.model.index';
+    @endphp
+
+    <form method="POST" action="{{ $item ? route($updateRoute, [$modelKey, $item->id]) : route($storeRoute, $modelKey) }}" @if($modelKey === 'doctors') enctype="multipart/form-data" @endif>
         @csrf
         @if($item)
             @method('PUT')
@@ -101,7 +107,7 @@
 
         <div class="mt-3">
             <button class="btn btn-primary">Save</button>
-            <a href="{{ route('admin.model.index', $modelKey) }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route($indexRoute, $modelKey) }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>

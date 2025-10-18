@@ -126,6 +126,109 @@
             </div>
         </div>
     </div>
+
+    <!-- Annual Revenue & Appointments Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">Annual Revenue & Appointments Overview</h5>
+                    <small class="text-muted">Monthly data for {{ date('Y') }} (Sample Data)</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container annual-chart-container" style="position: relative; height: 400px; width: 100%; border: 2px solid #ddd; background: #f9f9f9;">
+                        <canvas id="annualChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Entity Distribution Chart -->
+        <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">Entity Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                    <div class="legend-text">
+                                        <strong>{{ $stats['doctors'] }}</strong><br>
+                                        <small>Doctors</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                                    <div class="legend-text">
+                                        <strong>{{ $stats['schools'] }}</strong><br>
+                                        <small>Schools</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                                    <div class="legend-text">
+                                        <strong>{{ $stats['health_facilities'] }}</strong><br>
+                                        <small>Health Facilities</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Gender Distribution Chart -->
+        <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">Patient Gender Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                        <canvas id="patientGenderChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                                    <div class="legend-text">
+                                        <strong>{{ $stats['patients_male'] ?? 0 }}</strong><br>
+                                        <small>Male Patients</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                                    <div class="legend-text">
+                                        <strong>{{ $stats['patients_female'] ?? 0 }}</strong><br>
+                                        <small>Female Patients</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -270,6 +373,51 @@
     margin-right: 8px;
 }
 
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Annual Chart Container - specific height */
+.annual-chart-container {
+    height: 400px !important;
+}
+
+/* Chart Legend Styles */
+.chart-legend {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    color: #4a5568;
+    text-align: center;
+}
+
+.legend-text strong {
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .stat-number {
@@ -287,4 +435,232 @@
     }
 }
 </style>
+
+{{-- Chart Scripts --}}
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Distribution Donut Chart
+    const ctx = document.getElementById('distributionChart');
+    if (ctx) {
+        const distributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Doctors', 'Schools', 'Health Facilities'],
+                datasets: [{
+                    data: [
+                        {{ $stats['doctors'] }},
+                        {{ $stats['schools'] }},
+                        {{ $stats['health_facilities'] }}
+                    ],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(240, 147, 251, 0.8)',
+                        'rgba(79, 172, 254, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(102, 126, 234, 1)',
+                        'rgba(240, 147, 251, 1)',
+                        'rgba(79, 172, 254, 1)'
+                    ],
+                    borderWidth: 2,
+                    hoverBackgroundColor: [
+                        'rgba(102, 126, 234, 0.9)',
+                        'rgba(240, 147, 251, 0.9)',
+                        'rgba(79, 172, 254, 0.9)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: false // Hide default legend, using custom legend below
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            const label = data.labels[tooltipItem.index] || '';
+                            const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
+                            const total = data.datasets[tooltipItem.datasetIndex].data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                },
+                cutoutPercentage: 60, // Creates donut effect
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+    }
+
+    // Patient Gender Distribution Donut Chart
+    const ctx2 = document.getElementById('patientGenderChart');
+    if (ctx2) {
+        const patientGenderChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Male Patients', 'Female Patients'],
+                datasets: [{
+                    data: [
+                        {{ $stats['patients_male'] ?? 0 }},
+                        {{ $stats['patients_female'] ?? 0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(79, 172, 254, 0.8)',
+                        'rgba(240, 147, 251, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(79, 172, 254, 1)',
+                        'rgba(240, 147, 251, 1)'
+                    ],
+                    borderWidth: 2,
+                    hoverBackgroundColor: [
+                        'rgba(79, 172, 254, 0.9)',
+                        'rgba(240, 147, 251, 0.9)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: false // Hide default legend, using custom legend below
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            const label = data.labels[tooltipItem.index] || '';
+                            const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
+                            const total = data.datasets[tooltipItem.datasetIndex].data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                },
+                cutoutPercentage: 60, // Creates donut effect
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+    }
+
+    // Annual Revenue & Appointments Bar Chart
+    const ctx3 = document.getElementById('annualChart');
+    if (ctx3) {
+        const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthlyAppointments = [5, 8, 12, 15, 10, 18, 22, 25, 20, 28, 30, 35];
+        const monthlyRevenue = [50000, 75000, 120000, 150000, 100000, 180000, 220000, 250000, 200000, 280000, 300000, 350000];
+
+        const annualChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Appointments',
+                    data: monthlyAppointments,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                    order: 2
+                }, {
+                    label: 'Revenue (UGX)',
+                    data: monthlyRevenue,
+                    backgroundColor: 'rgba(240, 147, 251, 0.8)',
+                    borderColor: 'rgba(240, 147, 251, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1',
+                    order: 1,
+                    type: 'line',
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(240, 147, 251, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (tooltipItem.datasetIndex === 1) {
+                                label += 'UGX ' + tooltipItem.yLabel.toLocaleString();
+                            } else {
+                                label += tooltipItem.yLabel;
+                            }
+                            return label;
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Month'
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Appointments'
+                        },
+                        gridLines: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        id: 'y'
+                    }, {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Revenue (UGX)'
+                        },
+                        gridLines: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return 'UGX ' + value.toLocaleString();
+                            }
+                        },
+                        id: 'y1'
+                    }]
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection
