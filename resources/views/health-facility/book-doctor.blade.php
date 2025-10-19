@@ -92,16 +92,20 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Date & Time</label>
+                                <input type="datetime-local" id="appointment_time" name="appointment_time" class="form-control" required>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Doctor</label>
-                                <select name="doctor_id" class="form-select form-control" required>
-                                    <option value="">Select Doctor</option>
+                                <select id="doctor_id" name="doctor_id" class="form-select form-control" required>
+                                    <option value="">Select Date First</option>
                                     @foreach($doctors as $doc)
-                                        <option value="{{ $doc->id }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+                                        <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Duration</label>
                                 <select name="duration_id" class="form-select form-control" required>
                                     <option value="">Select Duration</option>
@@ -110,11 +114,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Date & Time</label>
-                                <input type="datetime-local" name="appointment_time" class="form-control" required>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-12">
                                 <label class="form-label">Reason</label>
                                 <input type="text" name="reason" class="form-control" required>
                             </div>
@@ -130,3 +130,52 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const appointmentTimeInput = document.getElementById('appointment_time');
+    const doctorSelect = document.getElementById('doctor_id');
+    const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
+
+    appointmentTimeInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        if (!selectedDate || isNaN(selectedDate.getTime())) {
+            // Reset doctor options
+            doctorOptions.forEach(option => {
+                option.style.display = 'none';
+            });
+            doctorSelect.value = '';
+            return;
+        }
+
+        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+        // Fetch available doctors for this day
+        fetch(`/api/doctors/available?day=${dayOfWeek}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const availableDoctorIds = data.doctors.map(doctor => doctor.id.toString());
+
+                    doctorOptions.forEach(option => {
+                        if (availableDoctorIds.includes(option.value)) {
+                            option.style.display = 'block';
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    });
+
+                    // Reset selection if current selection is not available
+                    if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
+                        doctorSelect.value = '';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching available doctors:', error);
+            });
+    });
+});
+</script>
+@endpush
