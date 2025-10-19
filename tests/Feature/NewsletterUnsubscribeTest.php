@@ -70,7 +70,7 @@ class NewsletterUnsubscribeTest extends TestCase
             'is_active' => false,
         ]);
 
-        $this->postJson('/api/newsletter/subscribe', ['email' => $email])
+        $this->withoutMiddleware()->postJson('/api/newsletter/subscribe', ['email' => $email])
             ->assertStatus(200)
             ->assertJson([
                 'success' => true,
@@ -95,7 +95,7 @@ class NewsletterUnsubscribeTest extends TestCase
             'is_active' => false,
         ]);
 
-        $resp = $this->postJson('/api/newsletter/subscribe', ['email' => $email]);
+        $resp = $this->withoutMiddleware()->postJson('/api/newsletter/subscribe', ['email' => $email]);
         $resp->assertStatus(200)
             ->assertJson([
                 'success' => true,
@@ -119,7 +119,7 @@ class NewsletterUnsubscribeTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->postJson('/api/newsletter/subscribe', ['email' => $email])
+        $this->withoutMiddleware()->postJson('/api/newsletter/subscribe', ['email' => $email])
             ->assertStatus(200)
             ->assertJson([
                 'success' => true,

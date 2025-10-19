@@ -75,7 +75,19 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 use App\Http\Controllers\SchoolController;
 
-Route::get('/school-dashboard/{school}', [SchoolController::class, 'showDashboard'])->name('school.dashboard');
+Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
+    return view('school-dashboard', [
+        'school' => $school,
+        'studentsCount' => $school->students()->count(),
+        'appointmentsCount' => $school->appointments()->count(),
+        'labTestsCount' => $school->labTests()->count(),
+        'doctorsCount' => $school->doctors()->count(),
+        'students' => $school->students()->latest()->get(),
+        'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
+        'labTests' => $school->labTests()->with('patient')->latest()->get(),
+        'doctors' => Doctor::latest()->get()
+    ]);
+})->name('school.dashboard');
 
 
 Route::get('/students/{school}', function (App\Models\School $school) {
@@ -87,7 +99,7 @@ Route::get('/students/{school}', function (App\Models\School $school) {
 
 
 Route::delete('/students/{student}/delete', function ($studentId) {
-    $student = App\Models\Student::findOrFail($studentId);
+    $student = App\Models\Patient::findOrFail($studentId);
     $schoolId = $student->school_id;
 
     // Deleting the student will cascade and remove related appointments (handled in Student model)
@@ -99,29 +111,68 @@ Route::delete('/students/{student}/delete', function ($studentId) {
 Route::post('/students/create', function (Request $request) {
     try {
         $validated = $request->validate([
-            'name' => 'required',
-            'grade' => 'required',
-            'parent_contact' => 'required',
-            'birth_date' => 'required',
+            'patient_type' => 'required|in:new,existing',
+            'patient_type' => 'required|in:new,existing',
             'school_id' => 'required',
         ]);
+
+        if ($validated['patient_type'] === 'existing') {
+            // Handle existing patient
+            $existingValidation = $request->validate([
+                'patient_id' => 'required|string|exists:patients,patient_id',
+            ]);
+
+            $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
+
+            // Check if patient is already associated with this school
+            if ($patient->school_id == $validated['school_id']) {
+                return redirect()->route('students', ['school' => $validated['school_id']])
+                    ->with('error', 'Patient is already associated with this school.');
+            }
+
+            // Update patient with school association
+            $patient->update([
+                'school_id' => $validated['school_id'],
+                'grade' => $request->input('grade'), // Optional grade for existing patients
+            ]);
+
+            return redirect()->route('students', ['school' => $validated['school_id']])
+                ->with('success', 'Existing patient associated with school successfully.');
+        } else {
+            // Handle new patient
+            $newValidation = $request->validate([
+                'name' => 'required',
+                'gender' => 'required|in:male,female,other',
+                'grade' => 'required',
+                'parent_contact' => 'required',
+                'birth_date' => 'required|date',
+            ]);
+
+            // Use findOrCreate to check if student exists or create new one
+            $patient = App\Models\Patient::findOrCreate([
+                'name' => $newValidation['name'],
+                'birth_date' => $newValidation['birth_date'],
+                'gender' => $newValidation['gender'],
+                'parent_contact' => $newValidation['parent_contact'],
+            ], [
+                'school_id' => $validated['school_id'],
+                'grade' => $newValidation['grade'],
+            ]);
+
+            return redirect()->route('students', ['school' => $patient->school_id])
+                ->with('success', 'Student created successfully.');
+        }
     } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-            'errors' => $e->errors(),
-        ], 422);
+        return redirect()->back()
+            ->withErrors($e->errors())
+            ->withInput();
     }
-
-    $student = App\Models\Student::create($validated);
-
-    return redirect()->route('students', ['school' => $student->school_id]);
 })->name('students.create');
 
 
 Route::get('/lab-tests/{school}', function (App\Models\School $school) {
     // Paginate lab tests for the school (15 per page)
-    $labTests = $school->labTests()->with('student')->latest()->paginate(15);
+    $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
 
     return view('lab-tests', [
         'school' => $school,
@@ -161,7 +212,7 @@ Route::post('/lab-tests/{labTest}/complete', function (App\Models\LabTest $labTe
 Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
-        'appointments' => $school->appointments()->with(['student', 'doctor', 'duration'])->latest()->get(),
+        'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'patients' => $school->students()->latest()->get(),
         'doctors' => Doctor::latest()->get()
     ]);
@@ -209,7 +260,7 @@ Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
 Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
     $doctor = Doctor::findOrFail($doctorId);
     return view('meeting-link', [
-        'appointments' => $doctor->appointments()->with(['student', 'school', 'healthFacility', 'duration'])->latest()->get(),
+        'appointments' => $doctor->appointments()->with(['patient', 'school', 'healthFacility', 'duration'])->latest()->get(),
         'doctor' => $doctor
     ]);
 })->name('doctor.meeting-link');
@@ -308,30 +359,63 @@ Route::post('/appointments', [AppointmentController::class, 'store'])->name('app
 Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
 Route::delete('/patients/{patient}/delete', [PatientController::class, 'destroy'])->name('patients.delete');
 
+Route::get('/patients/create', [PatientController::class, 'createGeneral'])->name('patients.general.create');
+Route::post('/patients/general', [PatientController::class, 'storeGeneral'])->name('patients.general.store');
+
 
 Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalDocuments'])
     ->name('patient.maternal');
+
+Route::get('/patients/{patient}/profile', [PatientController::class, 'show'])->name('patients.profile');
     
 Route::post('/patients/create', function (Request $request) {
     try {
         $validated = $request->validate([
+            'patient_type' => 'required|in:new,existing',
             'health_facility_id' => 'required|exists:health_facilities,id',
-            'name' => 'required|string|max:255',
-            'gender' => 'required|string|in:male,female,other',
-            'birth_date' => 'required|date',
-            'contact_number' => 'nullable|string',
-            'medical_history' => 'nullable|string'
         ]);
 
-        $patient = App\Models\Patient::create($validated);
+        if ($validated['patient_type'] === 'existing') {
+            // Handle existing patient
+            $existingValidation = $request->validate([
+                'patient_id' => 'required|string|exists:patients,patient_id',
+            ]);
 
-        // After adding a patient, redirect to the patients list for this health facility
-        return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 500);
+            $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
+
+            // Check if patient is already associated with this health facility
+            if ($patient->health_facility_id == $validated['health_facility_id']) {
+                return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
+                    ->with('error', 'Patient is already associated with this health facility.');
+            }
+
+            // Update patient with health facility association
+            $patient->update([
+                'health_facility_id' => $validated['health_facility_id'],
+            ]);
+
+            return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
+                ->with('success', 'Existing patient associated with health facility successfully.');
+        } else {
+            // Handle new patient
+            $newValidation = $request->validate([
+                'name' => 'required|string|max:255',
+                'gender' => 'required|string|in:male,female,other',
+                'birth_date' => 'required|date',
+                'contact_number' => 'nullable|string'
+            ]);
+
+            $patient = App\Models\Patient::create(array_merge($newValidation, [
+                'health_facility_id' => $validated['health_facility_id']
+            ]));
+
+            return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
+                ->with('success', 'Patient created successfully.');
+        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return redirect()->back()
+            ->withErrors($e->errors())
+            ->withInput();
     }
 })->name('patients.create');
 

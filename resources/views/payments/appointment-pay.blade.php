@@ -26,7 +26,7 @@
           <div class="row mb-4 text-dark">
             <div class="col-12 col-md-7">
               <dl class="row small mb-0">
-                <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? optional($appointment->student)->name ?? optional($appointment->healthFacility)->name ?? '—' }}</dd>
+                <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? '—' }}</dd>
                 <dt class="col-4">Doctor</dt><dd class="col-8">{{ optional($appointment->doctor)->name ? 'Dr. ' . $appointment->doctor->name : '—' }}</dd>
                 <dt class="col-4">Time</dt><dd class="col-8">{{ optional($appointment->appointment_time)->format('D, M j, Y g:i A') }}</dd>
                 <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->duration ? number_format($appointment->duration->getPrice(), 0) . ' UGX' : '—' }}</dd>
@@ -53,7 +53,7 @@
               <label class="form-label">Payer Phone Number</label>
               <input id="phone_number" type="text" name="phone_number" class="form-control" placeholder="2567XXXXXXXX"
                      inputmode="numeric" maxlength="12" pattern="^2567\d{8}$" aria-describedby="msisdnHelp"
-                     value="{{ old('phone_number', $appointment->patient->contact_number ?? $appointment->student->parent_contact ?? $appointment->healthFacility->contact ?? '') }}" required>
+                     value="{{ old('phone_number', $appointment->patient->contact_number ?? $appointment->healthFacility->contact ?? '') }}" required>
               <div id="msisdnHelp" class="form-text">Enter MSISDN in international format without + (e.g. 2567XXXXXXXX)</div>
               <div class="invalid-feedback">Enter a valid number like 2567XXXXXXXX</div>
             </div>

@@ -38,6 +38,11 @@ class Doctor extends Authenticatable
         return $this->hasMany(DoctorAvailability::class);
     }
 
+    public function medicalHistories(): HasMany
+    {
+        return $this->hasMany(MedicalHistory::class);
+    }
+
     /**
      * Scope to get doctors available on a specific day
      */

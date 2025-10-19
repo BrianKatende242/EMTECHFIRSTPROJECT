@@ -35,7 +35,7 @@
                                     @foreach($appointments as $appointment)
                                     <tr>
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-                                        <td>{{ $appointment->student->name }}</td>
+                                        <td>{{ $appointment->patient->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
                                         <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
                                         <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
@@ -83,14 +83,14 @@
     <input type="hidden" name="school_id" value="{{ $school->id }}">
 
     <div class="mb-3">
-        <label for="student_id" class="form-label">Student</label>
-        <select id="student_id" class="form-control form-select" name="student_id" required>
+        <label for="patient_id" class="form-label">Student</label>
+        <select id="patient_id" class="form-control form-select" name="patient_id" required>
             <option value="">Select student</option>
             @foreach($patients as $patient)
             <option value="{{ $patient->id }}">{{ $patient->name }}</option>
             @endforeach
         </select>
-        @error('student_id')
+        @error('patient_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>
@@ -104,19 +104,6 @@
     </div>
 
     <div class="mb-3">
-        <label for="doctor_id" class="form-label">Doctor</label>
-        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
-            <option value="">Select Date First</option>
-            @foreach($doctors as $doctor)
-            <option value="{{ $doctor->id }}" data-specialization="{{ $doctor->specialization }}" style="display: none;">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
-            @endforeach
-        </select>
-        @error('doctor_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="mb-3">
         <label for="duration_id" class="form-label">Duration</label>
         <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
@@ -125,6 +112,19 @@
             @endforeach
         </select>
         @error('duration_id')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3">
+        <label for="doctor_id" class="form-label">Doctor</label>
+        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
+            <option value="">Select Date First</option>
+            @foreach($doctors ?? [] as $doc)
+                <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+            @endforeach
+        </select>
+        @error('doctor_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>

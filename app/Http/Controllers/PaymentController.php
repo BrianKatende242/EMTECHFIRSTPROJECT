@@ -24,7 +24,7 @@ class PaymentController extends Controller
             return back()->with('error', 'This appointment is not awaiting payment.');
         }
         // Load relations and pass sidebar context so menu renders
-        $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility', 'duration']);
+        $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
         $school = $appointment->school;
         $doctor = $appointment->doctor;
         $healthFacility = $appointment->healthFacility;
@@ -103,10 +103,10 @@ class PaymentController extends Controller
             'amount' => 'nullable|numeric',
         ]);
 
-        $appointment = Appointment::with(['patient', 'student', 'healthFacility'])->findOrFail($validated['appointment_id']);
+        $appointment = Appointment::with(['patient', 'healthFacility'])->findOrFail($validated['appointment_id']);
 
         // Determine payer phone and amount
-        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? $appointment->healthFacility->contact ?? null);
+        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->patient->parent_contact ?? $appointment->healthFacility->contact ?? null);
         if (!$phone) {
             $message = 'No phone number available for this appointment.';
             if ($request->expectsJson()) {

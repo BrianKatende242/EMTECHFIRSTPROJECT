@@ -17,6 +17,30 @@
                 }, 3000);
             </script>
         @endif
+
+        @if(session('success'))
+            <div class="alert alert-success mb-3" id="successAlert">
+                {{ session('success') }}
+            </div>
+            <script>
+                setTimeout(function() {
+                    var alert = document.getElementById('successAlert');
+                    if (alert) {
+                        alert.style.display = 'none';
+                    }
+                }, 3000);
+            </script>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger mb-3">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Student Management</h2>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudentModal"><i class="fa fa-plus"></i> New Student</button>
@@ -33,22 +57,62 @@
                     <div class="modal-body">
                         <form action="{{ route('students.create') }}" method="POST">
                             @csrf
-                            <div class="form-group">
-                                <label for="name">Name:</label>
-                                <input type="text" required class="form-control" id="name" name="name">
+                            
+                            <!-- Patient Type Selection -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Patient Type:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="patient_type" id="new_patient" value="new" checked>
+                                    <label class="form-check-label" for="new_patient">
+                                        New Student
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="patient_type" id="existing_patient" value="existing">
+                                    <label class="form-check-label" for="existing_patient">
+                                        Existing Patient (Enter Patient ID)
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="grade">Grade:</label>
-                                <input type="text" required class="form-control" id="grade" name="grade">
+
+                            <!-- Existing Patient Section -->
+                            <div id="existingPatientSection" style="display: none;">
+                                <div class="form-group">
+                                    <label for="patient_id">Patient ID:</label>
+                                    <input type="text" class="form-control" id="patient_id" name="patient_id" placeholder="e.g., P000001">
+                                    <small class="form-text text-muted">Enter the existing patient's ID to associate them with this school.</small>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="parent_contact">Parent Contact:</label>
-                                <input type="text" required class="form-control" id="parent_contact" name="parent_contact">
+
+                            <!-- New Patient Section -->
+                            <div id="newPatientSection">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input type="text" class="form-control" id="name" name="name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="gender">Gender:</label>
+                                    <select class="form-control" id="gender" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="grade">Grade:</label>
+                                    <input type="text" class="form-control" id="grade" name="grade">
+                                </div>
+                                <div class="form-group">
+                                    <label for="parent_contact">Parent Contact:</label>
+                                    <input type="text" class="form-control" id="parent_contact" name="parent_contact">
+                                </div>
+                                <div class="form-group">
+                                    <label for="birth_date">Birth Date:</label>
+                                    <input type="date" class="form-control" id="birth_date" name="birth_date">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="birth_date">Birth Date:</label>
-                                <input type="date" required class="form-control" id="birth_date" name="birth_date">
-                            </div>
+                            
                             <input type="text" name="school_id" value="{{ $school->id }}" hidden>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
@@ -64,6 +128,7 @@
                         <tr>
                             <th class="text-center">ID</th>
                             <th>Name</th>
+                            <th>Gender</th>
                             <th>Grade</th>
                             <th>Age</th>
                             <th>Parent Contact</th>
@@ -75,13 +140,14 @@
                         <tr>
                             <td class="text-center">{{ $student->id }}</td>
                             <td>{{ $student->name }}</td>
+                            <td>{{ ucfirst($student->gender ?? 'N/A') }}</td>
                             <td>{{ $student->grade }}</td>
                             <td>{{ \Carbon\Carbon::parse($student->birth_date)->age }}</td>
                             <td>{{ $student->parent_contact ?? 'N/A' }}</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1">
-                                    <i class="fa fa-edit"></i>
-                                </button>
+                                <a href="{{ route('patients.profile', ['patient' => $student->id]) }}" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="fa fa-user"></i> Profile
+                                </a>
                                 <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStudentModal" data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -132,6 +198,42 @@
             var form = deleteStudentModal.querySelector('#deleteStudentForm');
             modalStudentName.textContent = studentName;
             form.action = '/students/' + studentId + '/delete'; // Adjust route as needed
+        });
+
+        // Toggle patient type sections
+        document.querySelectorAll('input[name="patient_type"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var newPatientSection = document.getElementById('newPatientSection');
+                var existingPatientSection = document.getElementById('existingPatientSection');
+                var newPatientFields = newPatientSection.querySelectorAll('input, select');
+                var existingPatientFields = existingPatientSection.querySelectorAll('input');
+
+                if (this.value === 'existing') {
+                    newPatientSection.style.display = 'none';
+                    existingPatientSection.style.display = 'block';
+                    
+                    // Remove required attribute from new patient fields
+                    newPatientFields.forEach(function(field) {
+                        field.removeAttribute('required');
+                    });
+                    
+                    // Add required to patient_id field
+                    document.getElementById('patient_id').setAttribute('required', 'required');
+                } else {
+                    newPatientSection.style.display = 'block';
+                    existingPatientSection.style.display = 'none';
+                    
+                    // Add required attribute to new patient fields
+                    newPatientFields.forEach(function(field) {
+                        if (field.name !== 'school_id') { // Don't make hidden fields required
+                            field.setAttribute('required', 'required');
+                        }
+                    });
+                    
+                    // Remove required from patient_id field
+                    document.getElementById('patient_id').removeAttribute('required');
+                }
+            });
         });
     </script>
 @endsection

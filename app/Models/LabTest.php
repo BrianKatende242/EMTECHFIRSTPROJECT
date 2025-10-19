@@ -9,7 +9,7 @@ class LabTest extends Model
 {
     protected $fillable = [
         'school_id',
-        'student_id',
+        'patient_id',
         'test_type',
         'notes',
         'status',
@@ -21,8 +21,8 @@ class LabTest extends Model
         return $this->belongsTo(School::class);
     }
 
-    public function student(): BelongsTo
+    public function patient(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 }
