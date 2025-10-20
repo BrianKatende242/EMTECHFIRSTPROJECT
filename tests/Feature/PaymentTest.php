@@ -7,7 +7,6 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\School;
-use App\Models\Student;
 use App\Models\Duration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +17,7 @@ class PaymentTest extends TestCase
     use RefreshDatabase;
 
     private $appointment;
-    private $student;
+    private $patient;
     private $doctor;
     private $school;
 
@@ -33,12 +32,14 @@ class PaymentTest extends TestCase
             'contact' => '123456789'
         ]);
 
-        $this->student = Student::create([
+        $this->patient = Patient::create([
             'school_id' => $this->school->id,
-            'name' => 'Test Student',
+            'name' => 'Test Patient',
+            'gender' => 'male',
             'grade' => 'Grade 10',
             'birth_date' => '2008-01-01',
-            'parent_contact' => '256700000000'
+            'parent_contact' => '256700000000',
+            'contact_number' => '256700000000'
         ]);
 
         $this->doctor = Doctor::create([
@@ -58,7 +59,7 @@ class PaymentTest extends TestCase
 
         $this->appointment = Appointment::create([
             'school_id' => $this->school->id,
-            'student_id' => $this->student->id,
+            'patient_id' => $this->patient->id,
             'doctor_id' => $this->doctor->id,
             'duration_id' => $duration->id,
             'appointment_time' => now()->addDays(1),

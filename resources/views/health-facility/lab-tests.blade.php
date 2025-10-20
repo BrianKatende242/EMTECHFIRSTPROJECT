@@ -25,7 +25,7 @@
                             @foreach($labTests as $test)
                                 <tr>
                                     <td>{{ $test->created_at?->format('M d, Y') }}</td>
-                                    <td>{{ optional($test->student)->name ?? '—' }}</td>
+                                    <td>{{ optional($test->patient)->name ?? '—' }}</td>
                                     <td>{{ $test->test_type }}</td>
                                     <td>
                                         <span class="badge bg-{{ $test->status === 'completed' ? 'success' : ($test->status === 'processing' ? 'warning' : 'secondary') }}">
