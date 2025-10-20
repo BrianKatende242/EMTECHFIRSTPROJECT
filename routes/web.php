@@ -102,6 +102,12 @@ Route::delete('/students/{student}/delete', function ($studentId) {
     $student = App\Models\Patient::findOrFail($studentId);
     $schoolId = $student->school_id;
 
+    // Check if student has any appointments
+    if ($student->appointments()->count() > 0) {
+        return redirect()->route('students', ['school' => $schoolId])
+            ->with('error', 'Cannot delete student with existing appointments.');
+    }
+
     // Deleting the student will cascade and remove related appointments (handled in Student model)
     $student->delete();
 
@@ -245,12 +251,59 @@ Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController
 // Simple admin area (protected)
 Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+
+    // Individual model routes
+    Route::get('/doctors', [AdminModelController::class, 'index'])->name('admin.doctors.index');
+    Route::get('/doctors/create', [AdminModelController::class, 'create'])->name('admin.doctors.create');
+    Route::post('/doctors', [AdminModelController::class, 'store'])->name('admin.doctors.store');
+    Route::get('/doctors/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.doctors.edit');
+    Route::put('/doctors/{id}', [AdminModelController::class, 'update'])->name('admin.doctors.update');
+    Route::delete('/doctors/{id}', [AdminModelController::class, 'destroy'])->name('admin.doctors.destroy');
+
+    Route::get('/appointments', [AdminModelController::class, 'index'])->name('admin.appointments.index');
+    Route::get('/appointments/create', [AdminModelController::class, 'create'])->name('admin.appointments.create');
+    Route::post('/appointments', [AdminModelController::class, 'store'])->name('admin.appointments.store');
+    Route::get('/appointments/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.appointments.edit');
+    Route::put('/appointments/{id}', [AdminModelController::class, 'update'])->name('admin.appointments.update');
+    Route::delete('/appointments/{id}', [AdminModelController::class, 'destroy'])->name('admin.appointments.destroy');
+
+    Route::get('/payments', [AdminModelController::class, 'index'])->name('admin.payments.index');
+    Route::get('/payments/create', [AdminModelController::class, 'create'])->name('admin.payments.create');
+    Route::post('/payments', [AdminModelController::class, 'store'])->name('admin.payments.store');
+    Route::get('/payments/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.payments.edit');
+    Route::put('/payments/{id}', [AdminModelController::class, 'update'])->name('admin.payments.update');
+    Route::delete('/payments/{id}', [AdminModelController::class, 'destroy'])->name('admin.payments.destroy');
+
+    Route::get('/patients', [AdminModelController::class, 'index'])->name('admin.patients.index');
+    Route::get('/patients/create', [AdminModelController::class, 'create'])->name('admin.patients.create');
+    Route::post('/patients', [AdminModelController::class, 'store'])->name('admin.patients.store');
+    Route::get('/patients/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.patients.edit');
+    Route::put('/patients/{id}', [AdminModelController::class, 'update'])->name('admin.patients.update');
+    Route::delete('/patients/{id}', [AdminModelController::class, 'destroy'])->name('admin.patients.destroy');
+
+    Route::get('/schools', [AdminModelController::class, 'index'])->name('admin.schools.index');
+    Route::get('/schools/create', [AdminModelController::class, 'create'])->name('admin.schools.create');
+    Route::post('/schools', [AdminModelController::class, 'store'])->name('admin.schools.store');
+    Route::get('/schools/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.schools.edit');
+    Route::put('/schools/{id}', [AdminModelController::class, 'update'])->name('admin.schools.update');
+    Route::delete('/schools/{id}', [AdminModelController::class, 'destroy'])->name('admin.schools.destroy');
+
+    Route::get('/health-facilities', [AdminModelController::class, 'index'])->name('admin.health-facilities.index');
+    Route::get('/health-facilities/create', [AdminModelController::class, 'create'])->name('admin.health-facilities.create');
+    Route::post('/health-facilities', [AdminModelController::class, 'store'])->name('admin.health-facilities.store');
+    Route::get('/health-facilities/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.health-facilities.edit');
+    Route::put('/health-facilities/{id}', [AdminModelController::class, 'update'])->name('admin.health-facilities.update');
+    Route::delete('/health-facilities/{id}', [AdminModelController::class, 'destroy'])->name('admin.health-facilities.destroy');
+
+    // Generic model routes (fallback)
     Route::get('/{modelKey}', [AdminModelController::class, 'index'])->name('admin.model.index');
     Route::get('/{modelKey}/create', [AdminModelController::class, 'create'])->name('admin.model.create');
     Route::post('/{modelKey}', [AdminModelController::class, 'store'])->name('admin.model.store');
     // Appointments extras
     Route::post('/appointments/bulk', [AdminModelController::class, 'bulkUpdateAppointments'])->name('admin.appointments.bulk');
     Route::get('/appointments/export', [AdminModelController::class, 'exportAppointmentsCsv'])->name('admin.appointments.export');
+    // Payments extras
+    Route::post('/payments/bulk', [AdminModelController::class, 'bulkUpdatePayments'])->name('admin.payments.bulk');
     Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
     Route::get('/doctors/{id}', [AdminModelController::class, 'showDoctor'])->name('admin.doctors.show');
     Route::post('/doctors/{id}/send-login-link', [AdminModelController::class, 'sendLoginLinkToDoctor'])->name('admin.doctors.send-login');

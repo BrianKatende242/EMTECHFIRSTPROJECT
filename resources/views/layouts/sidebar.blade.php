@@ -92,31 +92,37 @@
         </a>
     </li>
     <li>
-        <a class="{{ request()->is('admin/doctors*') ? 'mm-active' : '' }}" href="{{ route('admin.model.index', 'doctors') }}">
+        <a class="{{ request()->routeIs('admin.doctors.index') ? 'mm-active' : '' }}" href="{{ route('admin.doctors.index') }}">
             <i class="fa fa-user-md"></i>
             <span class="nav-text">Doctors</span>
         </a>
     </li>
     <li>
-        <a class="{{ request()->is('admin/appointments*') ? 'mm-active' : '' }}" href="{{ route('admin.model.index', 'appointments') }}">
+        <a class="{{ request()->routeIs('admin.appointments.index') ? 'mm-active' : '' }}" href="{{ route('admin.appointments.index') }}">
             <i class="fa fa-calendar"></i>
             <span class="nav-text">Appointments</span>
         </a>
     </li>
     <li>
-        <a class="{{ request()->is('admin/students*') ? 'mm-active' : '' }}" href="{{ route('admin.model.index', 'students') }}">
-            <i class="fa fa-users"></i>
-            <span class="nav-text">Students</span>
+        <a class="{{ request()->routeIs('admin.payments.index') ? 'mm-active' : '' }}" href="{{ route('admin.payments.index') }}">
+            <i class="fa fa-credit-card"></i>
+            <span class="nav-text">Payments</span>
         </a>
     </li>
     <li>
-        <a class="{{ request()->is('admin/schools*') ? 'mm-active' : '' }}" href="{{ route('admin.model.index', 'schools') }}">
+        <a class="{{ request()->routeIs('admin.patients.index') ? 'mm-active' : '' }}" href="{{ route('admin.patients.index') }}">
+            <i class="fa fa-users"></i>
+            <span class="nav-text">Patients</span>
+        </a>
+    </li>
+    <li>
+        <a class="{{ request()->routeIs('admin.schools.index') ? 'mm-active' : '' }}" href="{{ route('admin.schools.index') }}">
             <i class="fa fa-building"></i>
             <span class="nav-text">Schools</span>
         </a>
     </li>
     <li>
-        <a class="{{ request()->is('admin/health-facilities*') ? 'mm-active' : '' }}" href="{{ route('admin.model.index', 'health-facilities') }}">
+        <a class="{{ request()->routeIs('admin.health-facilities.index') ? 'mm-active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
             <i class="fa fa-hospital-o"></i>
             <span class="nav-text">Health Facilities</span>
         </a>

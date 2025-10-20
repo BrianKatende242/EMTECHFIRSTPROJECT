@@ -10,7 +10,8 @@ class AdminModelController extends Controller
     protected $map = [
         'doctors' => \App\Models\Doctor::class,
         'appointments' => \App\Models\Appointment::class,
-        'students' => \App\Models\Student::class,
+        'payments' => \App\Models\Payment::class,
+        'patients' => \App\Models\Patient::class,
         'schools' => \App\Models\School::class,
         'health-facilities' => \App\Models\HealthFacility::class,
     ];
@@ -37,8 +38,14 @@ class AdminModelController extends Controller
         return $slug;
     }
 
-    public function index($modelKey)
+    public function index($modelKey = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.index'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
@@ -82,6 +89,110 @@ class AdminModelController extends Controller
             elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
 
             $items = $q->latest()->paginate(30)->appends(request()->query());
+
+        } elseif ($modelKey === 'payments') {
+            $q = $modelClass::with(['appointment.patient', 'appointment.doctor']);
+
+            if (request()->filled('status')) {
+                $q->where('status', request('status'));
+            }
+
+            if (request()->filled('appointment_id')) {
+                $q->where('appointment_id', request('appointment_id'));
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('reference_id', 'like', $term)
+                      ->orWhere('phone_number', 'like', $term)
+                      ->orWhere('amount', 'like', $term);
+                });
+            }
+
+            // Date range filter
+            if (request()->filled('date_from')) {
+                $q->whereDate('created_at', '>=', request('date_from'));
+            }
+            if (request()->filled('date_to')) {
+                $q->whereDate('created_at', '<=', request('date_to'));
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'amount_asc') $q->orderBy('amount', 'asc');
+            elseif ($sort === 'amount_desc') $q->orderBy('amount', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+
+        } elseif ($modelKey === 'patients') {
+            $q = $modelClass::with(['school', 'healthFacility', 'appointments']);
+
+            if (request()->filled('gender')) {
+                $q->where('gender', request('gender'));
+            }
+
+            if (request()->filled('school_id')) {
+                $q->where('school_id', request('school_id'));
+            }
+
+            if (request()->filled('health_facility_id')) {
+                $q->where('health_facility_id', request('health_facility_id'));
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('patient_id', 'like', $term)
+                      ->orWhere('contact_number', 'like', $term)
+                      ->orWhere('parent_contact', 'like', $term);
+                });
+            }
+
+            // Age range filter
+            if (request()->filled('min_age')) {
+                $q->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [request('min_age')]);
+            }
+            if (request()->filled('max_age')) {
+                $q->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [request('max_age')]);
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'age_asc') $q->orderByRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) ASC');
+            elseif ($sort === 'age_desc') $q->orderByRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) DESC');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+
+        } elseif ($modelKey === 'schools') {
+            $q = $modelClass::with(['students', 'doctors']);
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('email', 'like', $term)
+                      ->orWhere('contact', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'student_count_asc') $q->withCount('students')->orderBy('students_count', 'asc');
+            elseif ($sort === 'student_count_desc') $q->withCount('students')->orderBy('students_count', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
 
         } elseif ($modelKey === 'doctors') {
             $q = $modelClass::with(['school', 'healthFacility']);
@@ -163,11 +274,54 @@ class AdminModelController extends Controller
             $generatedSlug = $this->generateUniqueMeetingSlug();
         }
 
+        // Use dedicated view for doctors
+        if ($modelKey === 'doctors') {
+            $specializations = \App\Models\Doctor::select('specialization')->distinct()->pluck('specialization')->filter()->values();
+            $schools = \App\Models\School::pluck('name','id');
+            $hfs = \App\Models\HealthFacility::pluck('name','id');
+            return view('admin.doctors.index', compact('modelKey', 'items', 'generatedSlug', 'specializations', 'schools', 'hfs'));
+        }
+
+        // Use dedicated view for appointments
+        if ($modelKey === 'appointments') {
+            $statuses = ['pending', 'scheduled', 'completed', 'cancelled'];
+            $doctors = \App\Models\Doctor::pluck('name','id');
+            $schools = \App\Models\School::pluck('name','id');
+            $hfs = \App\Models\HealthFacility::pluck('name','id');
+            return view('admin.appointments.index', compact('modelKey', 'items', 'statuses', 'doctors', 'schools', 'hfs'));
+        }
+
+        // Use dedicated view for payments
+        if ($modelKey === 'payments') {
+            $statuses = ['pending', 'completed', 'failed', 'cancelled'];
+            $appointments = \App\Models\Appointment::with('patient')->get()->pluck('patient.name', 'id');
+            return view('admin.payments.index', compact('modelKey', 'items', 'statuses', 'appointments'));
+        }
+
+        // Use dedicated view for patients
+        if ($modelKey === 'patients') {
+            $genders = ['male', 'female', 'other'];
+            $schools = \App\Models\School::pluck('name','id');
+            $hfs = \App\Models\HealthFacility::pluck('name','id');
+            return view('admin.patients.index', compact('modelKey', 'items', 'genders', 'schools', 'hfs'));
+        }
+
+        // Use dedicated view for schools
+        if ($modelKey === 'schools') {
+            return view('admin.schools.index', compact('modelKey', 'items'));
+        }
+
         return view('admin.model.index', compact('modelKey', 'items', 'generatedSlug'));
     }
 
-    public function create($modelKey)
+    public function create($modelKey = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.create'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
@@ -179,8 +333,14 @@ class AdminModelController extends Controller
         return view('admin.model.form', ['modelKey' => $modelKey, 'item' => null, 'generatedSlug' => $generatedSlug]);
     }
 
-    public function store(Request $request, $modelKey)
+    public function store(Request $request, $modelKey = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.store'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
@@ -212,12 +372,18 @@ class AdminModelController extends Controller
             $item = $modelClass::create($data);
         }
 
-        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
-        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Created successfully');
+        $redirectRoute = 'admin.' . $modelKey . '.index';
+        return redirect()->route($redirectRoute)->with('success', 'Created successfully');
     }
 
-    public function edit($modelKey, $id)
+    public function edit($modelKey = null, $id = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.edit'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
@@ -225,8 +391,14 @@ class AdminModelController extends Controller
         return view('admin.model.form', compact('modelKey', 'item'));
     }
 
-    public function update(Request $request, $modelKey, $id)
+    public function update(Request $request, $modelKey = null, $id = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.update'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
@@ -260,20 +432,26 @@ class AdminModelController extends Controller
             return redirect($request->input('redirect_to'))->with('success', 'Updated successfully');
         }
 
-        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
-        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Updated successfully');
+        $redirectRoute = 'admin.' . $modelKey . '.index';
+        return redirect()->route($redirectRoute)->with('success', 'Updated successfully');
     }
 
-    public function destroy($modelKey, $id)
+    public function destroy($modelKey = null, $id = null)
     {
+        // If no modelKey provided, determine it from the route name
+        if (!$modelKey) {
+            $routeName = request()->route()->getName();
+            $modelKey = str_replace(['admin.', '.destroy'], '', $routeName);
+        }
+
         $modelClass = $this->modelFor($modelKey);
         abort_unless($modelClass, 404);
 
         $item = $modelClass::findOrFail($id);
         $item->delete();
 
-        $redirectRoute = $modelKey === 'doctors' ? 'admin.model.index' : 'admin.model.index';
-        return redirect()->route($redirectRoute, $modelKey)->with('success', 'Deleted successfully');
+        $redirectRoute = 'admin.' . $modelKey . '.index';
+        return redirect()->route($redirectRoute)->with('success', 'Deleted successfully');
     }
 
     public function showDoctor($id)
@@ -370,6 +548,21 @@ class AdminModelController extends Controller
 
         $status = $action === 'complete' ? 'completed' : 'cancelled';
         \App\Models\Appointment::whereIn('id', $ids)->update(['status' => $status, 'updated_at' => now()]);
+
+        return redirect()->back()->with('success', 'Bulk update applied');
+    }
+
+    // Bulk update payments (complete or fail)
+    public function bulkUpdatePayments(Request $request)
+    {
+        $action = $request->input('action');
+        $ids = $request->input('ids', []);
+        if (!in_array($action, ['complete','fail'])) {
+            return redirect()->back()->with('error', 'Invalid action');
+        }
+
+        $status = $action === 'complete' ? 'completed' : 'failed';
+        \App\Models\Payment::whereIn('id', $ids)->update(['status' => $status, 'updated_at' => now()]);
 
         return redirect()->back()->with('success', 'Bulk update applied');
     }

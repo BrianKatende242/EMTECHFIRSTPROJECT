@@ -1,0 +1,120 @@
+/* Admin Appointments Custom Styles */
+
+/* Header gradient background */
+.appointments-header-gradient {
+    background: linear-gradient(135deg, #00F8FF 0%, #00dcff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Search and filters card */
+.appointments-filters-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Form controls with custom border */
+.appointments-form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+/* Filter and clear buttons */
+.appointments-filter-btn {
+    border-radius: 10px;
+}
+
+.appointments-clear-btn {
+    border-radius: 10px;
+}
+
+/* Search field styling */
+#admin-search {
+    border-radius: 10px !important;
+    border: 2px solid #e9ecef !important;
+}
+
+/* Filter actions section */
+.appointments-filter-actions {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+/* Appointment cards */
+.appointment-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.appointment-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.appointment-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Patient info sections */
+.appointment-patient-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+}
+
+/* Doctor info sections */
+.appointment-doctor-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Details sections */
+.appointment-details-section {
+    background: rgba(0,0,0,0.05);
+    border-left: 3px solid #6c757d;
+}
+
+/* Institution sections */
+.appointment-institution-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+/* Payment sections */
+.appointment-payment-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+/* Card footer buttons */
+.appointment-card-btn {
+    border-radius: 8px;
+}
+
+/* Modal custom styles */
+.appointments-modal .modal-content {
+    border-radius: 15px;
+}
+
+.appointments-modal .modal-header {
+    border-radius: 15px 15px 0 0;
+}
+
+/* Bulk update modal */
+#bulkUpdateModal .form-check {
+    margin-bottom: 0.5rem;
+}
+
+#bulkUpdateModal .form-check-label {
+    font-size: 0.9rem;
+}
