@@ -19,12 +19,10 @@
     </title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="">
-    <link rel="stylesheet" href="{{ asset('vendor/owl-carousel/css/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/owl-carousel/css/owl.theme.default.min.css') }}">
-    <link href="{{ asset('vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/keti-theme.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/admin-dashboard.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('pollix/vendors/typicons/typicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('pollix/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('pollix/css/vertical-layout-light/style.css') }}">
+    <link rel="shortcut icon" href="{{ asset('pollix/images/favicon.png') }}" />
 
     {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
     @stack('styles')
@@ -34,251 +32,166 @@
 </head>
 
 <body>
-    @php
-        $currentUser = (isset($user) && $user) ? $user : (auth()->check() ? auth()->user() : null);
-    @endphp
-
-    <!--*******************
-        Preloader start
-    ********************-->
-    <div id="preloader" style="display: none;">
-        <div class="sk-three-bounce">
-            <div class="sk-child sk-bounce1"></div>
-            <div class="sk-child sk-bounce2"></div>
-            <div class="sk-child sk-bounce3"></div>
+  <div class="container-scroller">
+    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+      <div class="navbar-brand-wrapper d-flex justify-content-center">
+        <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
+          <a class="navbar-brand brand-logo" href="{{ url('/') }}"><img src="{{ asset('images/emoji-logo-white.svg') }}" alt="KETI AI" style="height:40px; width:auto;"></a>
+          <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}"><img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" style="height:30px; width:auto;"></a>
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="typcn typcn-th-menu"></span>
+          </button>
         </div>
-    </div>
-    <!--*******************
-        Preloader end
-    ********************-->
-
-
-    <!--**********************************
-        Main wrapper start
-    ***********************************-->
-    <div id="main-wrapper">
-
-        <!--**********************************
-            Nav header start
-        ***********************************-->
-        <div class="nav-header">
-            <a href="/" class="brand-logo d-flex justify-content-center align-items-center" style="height:80px;">
-                <img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" style="height:48px; width:auto; display:block;">
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+        <ul class="navbar-nav mr-lg-2">
+          <li class="nav-item nav-profile dropdown">
+            <a class="nav-link" href="#" data-toggle="dropdown" id="profileDropdown">
+              <img src="{{ asset('images/profile.png') }}" alt="profile"/>
+              <span class="nav-profile-name">{{ auth()->user()->name ?? 'User' }}</span>
             </a>
-
-            <div class="nav-control">
-                <div class="hamburger">
-                    <span class="line"></span><span class="line"></span><span class="line"></span>
+            <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+              <a class="dropdown-item" href="{{ route('profile.show') }}">
+                <i class="typcn typcn-user-outline"></i>
+                Profile
+              </a>
+              <div class="dropdown-divider"></div>
+              <form method="POST" action="{{ route('logout') }}" class="m-0">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                  <i class="typcn typcn-power-outline"></i>
+                  Logout
+                </button>
+              </form>
+            </div>
+          </li>
+          <li class="nav-item nav-user-status dropdown">
+              <p class="mb-0">Last login: {{ auth()->user() && auth()->user()->last_login_at ? auth()->user()->last_login_at->diffForHumans() : 'N/A' }}</p>
+          </li>
+        </ul>
+        <ul class="navbar-nav navbar-nav-right">
+          <li class="nav-item nav-date dropdown">
+            <a class="nav-link d-flex justify-content-center align-items-center" href="javascript:;">
+              <h6 class="date mb-0">Today : {{ now()->format('M d') }}</h6>
+              <i class="typcn typcn-calendar"></i>
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center" id="messageDropdown" href="#" data-toggle="dropdown">
+              <i class="typcn typcn-mail mx-0"></i>
+              <span class="count"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="messageDropdown">
+              <p class="mb-0 font-weight-normal float-left dropdown-header">Messages</p>
+              <a class="dropdown-item preview-item">
+                <div class="preview-thumbnail">
+                    <img src="{{ asset('pollix/images/faces/face4.jpg') }}" alt="image" class="profile-pic">
                 </div>
+                <div class="preview-item-content flex-grow">
+                  <h6 class="preview-subject ellipsis font-weight-normal">No new messages</h6>
+                  <p class="font-weight-light small-text text-muted mb-0">
+                    Check back later
+                  </p>
+                </div>
+              </a>
             </div>
-        </div>
-        <!--**********************************
-            Nav header end
-        ***********************************-->
-
-        <!--**********************************
-            Header start
-        ***********************************-->
-        <div class="header">
-            <div class="header-content">
-                <nav class="navbar navbar-expand">
-                    <div class="collapse navbar-collapse justify-content-between">
-                        <div class="header-left d-none d-lg-flex align-items-center ps-3 ps-lg-0">
-                            <div class="search_bar dropdown">
-                                <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
-                                    <i class="mdi mdi-magnify"></i>
-                                </span>
-                                <div class="dropdown-menu p-0 m-0">
-                                    <form>
-                                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="navbar-nav header-right">
-                            <!-- Mobile sidebar toggle on the right -->
-                            <li class="nav-item d-lg-none me-2">
-                                <div class="nav-control" role="button" aria-label="Toggle sidebar" aria-controls="quixnav" aria-expanded="false">
-                                    <div class="hamburger" style="margin-right: 10px;">
-                                        <span class="line"></span><span class="line"></span><span class="line"></span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="nav-item dropdown notification_dropdown">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-bell"></i>
-                                    <div class="pulse-css"></div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <ul class="list-unstyled">
-                                    </ul>
-                                    <a class="all-notification" href="#">See all notifications <i
-                                            class="ti-arrow-right"></i></a>
-                                </div>
-                            </li>
-                            <li class="nav-item dropdown header-profile">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <img src="{{ data_get($currentUser, 'profile_picture_url') ?: asset('images/profile.png') }}" alt="Profile" class="rounded-circle" style="width:36px; height:36px; object-fit:cover; border:2px solid #000000; box-shadow:0 1px 4px rgba(0,0,0,0.2);">
-                                </a>
-                                @php
-                                    // Centralized profile route: controllers will render the correct profile page
-                                    if (isset($doctor) && $doctor) {
-                                        $profileUrl = route('profile.show', ['doctor' => $doctor->id]);
-                                    } else {
-                                        $profileUrl = route('profile.show');
-                                    }
-                                    $isActiveProfile = request()->routeIs('profile*');
-                                @endphp
-
-                                <div class="dropdown-menu dropdown-menu-right text-dark">
-                                    <a href="{{ $profileUrl }}" class="dropdown-item {{ $isActiveProfile ? 'active' : '' }}">
-                                        <i class="icon-user" style="color: #333"></i>
-                                        <span class="ml-2">Profile</span>
-                                    </a>
-                                    <a href="" class="dropdown-item">
-                                        <i class="icon-envelope-open" style="color: #333"></i>
-                                        <span class="ml-2">Inbox </span>
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <form method="POST" action="{{ route('logout') }}" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="icon-key"></i>
-                                            <span class="ml-2">Logout</span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+          </li>
+          <li class="nav-item dropdown mr-0">
+            <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center" id="notificationDropdown" href="#" data-toggle="dropdown">
+              <i class="typcn typcn-bell mx-0"></i>
+              <span class="count"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+              <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
+              <a class="dropdown-item preview-item">
+                <div class="preview-thumbnail">
+                  <div class="preview-icon bg-success">
+                    <i class="typcn typcn-info mx-0"></i>
+                  </div>
+                </div>
+                <div class="preview-item-content">
+                  <h6 class="preview-subject font-weight-normal">Welcome to Dashboard</h6>
+                  <p class="font-weight-light small-text mb-0 text-muted">
+                    Just now
+                  </p>
+                </div>
+              </a>
             </div>
+          </li>
+        </ul>
+        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+          <span class="typcn typcn-th-menu"></span>
+        </button>
+      </div>
+    </nav>
+    <nav class="navbar-breadcrumb col-xl-12 col-12 d-flex flex-row p-0">
+      <div class="navbar-links-wrapper d-flex align-items-stretch" style="background-color: magenta;">
+        <div class="nav-link">
+          <a href="javascript:;"><i class="typcn typcn-calendar-outline"></i></a>
         </div>
-        <!--**********************************
-            Header end ti-comment-alt
-        ***********************************-->
-
-        <!--**********************************
-            Sidebar start
-        ***********************************-->
-        <div class="quixnav">
-            <div class="quixnav-scroll mt-4">
-                @include('layouts.sidebar')
+        <div class="nav-link">
+          <a href="javascript:;"><i class="typcn typcn-mail"></i></a>
+        </div>
+        <div class="nav-link">
+          <a href="javascript:;"><i class="typcn typcn-folder"></i></a>
+        </div>
+        <div class="nav-link">
+          <a href="javascript:;"><i class="typcn typcn-document-text"></i></a>
+        </div>
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end" style="background-color: magenta;">
+        <ul class="navbar-nav mr-lg-2">
+          <li class="nav-item ml-0">
+            <h4 class="mb-0">{{ isset($pageTitle) ? $pageTitle : 'Dashboard' }}</h4>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container-fluid page-body-wrapper">
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        @include('layouts.sidebar')
+      </nav>
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="row">
+            <div class="col-12">
+              @yield('content')
             </div>
+          </div>
         </div>
-        <!--**********************************
-            Sidebar end
-        ***********************************-->
-
-    <!-- Mobile overlay to close sidebar drawer -->
-    <div id="sidebar-overlay" class="d-lg-none" aria-hidden="true"></div>
-
-        <!--**********************************
-            Content body start
-        ***********************************-->
-        <div class="content-body">
-            <!-- row -->
-            <div class="container-fluid">
-                @yield('content')
-                
-
+        <footer class="footer">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © {{ date('Y') }} <a href="https://www.keti.ai/" class="text-muted" target="_blank">KETI AI</a>. All rights reserved.</span>
+              </div>
             </div>
-        </div>
-        <!--**********************************
-            Content body end
-        ***********************************-->
-
-
+          </div>
+        </footer>
+      </div>
     </div>
-    <!--**********************************
-        Main wrapper end
-    ***********************************-->
+  </div>
 
-    <!--**********************************
-        Scripts
-    ***********************************-->
-    <!-- Required vendors -->
-    <script src="{{ asset('vendor/global/global.min.js') }}"></script>
-    <script src="{{ asset('js/quixnav-init.js') }}"></script>
-    <script src="{{ asset('js/custom.min.js') }}"></script>
+  <script src="{{ asset('pollix/vendors/js/vendor.bundle.base.js') }}"></script>
+  <script src="{{ asset('pollix/vendors/chart.js/Chart.min.js') }}"></script>
+  <script src="{{ asset('pollix/js/off-canvas.js') }}"></script>
+  <script src="{{ asset('pollix/js/hoverable-collapse.js') }}"></script>
+  <script src="{{ asset('pollix/js/template.js') }}"></script>
+  <script src="{{ asset('pollix/js/settings.js') }}"></script>
+  <script src="{{ asset('pollix/js/todolist.js') }}"></script>
+  <script src="{{ asset('pollix/js/dashboard.js') }}"></script>
 
+  <script>
+    $(document).ready(function() {
+      $('#minimizeSidebar').on('click', function() {
+        $('body').toggleClass('sidebar-mini');
+        $('.sidebar').toggleClass('sidebar-mini');
+      });
+    });
+  </script>
 
-    <!-- Vectormap -->
-    <script src="{{ asset('vendor/raphael/raphael.min.js') }}"></script>
-    <script src="{{ asset('vendor/morris/morris.min.js') }}"></script>
-
-
-    <script src="{{ asset('vendor/circle-progress/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('vendor/chart.js/Chart.bundle.min.js') }}"></script>
-
-    <script src="{{ asset('vendor/gaugeJS/dist/gauge.min.js') }}"></script>
-
-    <!--  flot-chart js -->
-    <script src="{{ asset('vendor/flot/jquery.flot.js') }}"></script>
-    <script src="{{ asset('vendor/flot/jquery.flot.resize.js') }}"></script>
-
-    <!-- Owl Carousel -->
-    <script src="{{ asset('vendor/owl-carousel/js/owl.carousel.min.js') }}"></script>
-
-    <!-- Counter Up -->
-    <script src="{{ asset('vendor/jqvmap/js/jquery.vmap.min.js') }}"></script>
-    <script src="{{ asset('vendor/jqvmap/js/jquery.vmap.usa.js') }}"></script>
-    <script src="{{ asset('vendor/jquery.counterup/jquery.counterup.min.js') }}"></script>
-
-
-    <script src="{{ asset('js/dashboard/dashboard.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <style>
-        .sidebar-collapsed .sidebar-profile {
-            display: none !important;
-        }
-    </style>
-    <script>
-        // Toggle desktop collapse or mobile drawer for sidebar
-        document.addEventListener('DOMContentLoaded', function() {
-            var mainWrapper = document.getElementById('main-wrapper');
-            var navControls = document.querySelectorAll('.nav-control');
-            var overlay = document.getElementById('sidebar-overlay');
-
-            function isMobile() { return window.innerWidth < 992; } // Bootstrap lg breakpoint
-
-            function openDrawer() {
-                mainWrapper.classList.add('sidebar-open');
-                document.body.classList.add('sidebar-open');
-            }
-            function closeDrawer() {
-                mainWrapper.classList.remove('sidebar-open');
-                document.body.classList.remove('sidebar-open');
-            }
-
-            if (mainWrapper && navControls && navControls.length) {
-                navControls.forEach(function(ctrl){
-                    ctrl.addEventListener('click', function() {
-                        if (isMobile()) {
-                            if (mainWrapper.classList.contains('sidebar-open')) {
-                                closeDrawer();
-                                ctrl.setAttribute('aria-expanded', 'false');
-                            } else {
-                                openDrawer();
-                                ctrl.setAttribute('aria-expanded', 'true');
-                            }
-                        } else {
-                            mainWrapper.classList.toggle('sidebar-collapsed');
-                        }
-                    });
-                });
-            }
-
-            if (overlay) overlay.addEventListener('click', closeDrawer);
-            document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
-            window.addEventListener('resize', function() { if (!isMobile()) closeDrawer(); });
-        });
-    </script>
-
-    {{-- Allow pages to push additional scripts (charts, inline JS) --}}
-    @stack('scripts')
+  {{-- Allow pages to push additional scripts (charts, inline JS) --}}
+  @stack('scripts')
 
 </body>
 

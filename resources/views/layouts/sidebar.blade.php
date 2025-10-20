@@ -1,158 +1,144 @@
 @if(isset($school))
-<ul class="metismenu" id="menu">
-    <li class="nav-label first">Main Menu</li>
-    <li class="{{ request()->routeIs('school.dashboard') ? 'mm-active' : '' }}">
-            <a
-                href="{{ route('school.dashboard', ['school' => $school]) }}" aria-expanded="false">
-                <i class="fa fa-dashboard"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-    </li>
-    <li class="{{ request()->routeIs('students') ? 'mm-active' : '' }}">
-        <a href="{{ route('students', ['school' => $school]) }}" aria-expanded="false">
-            <i class="fa fa-users"></i>
-            <span class="nav-text">Students</span>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('school.dashboard') ? 'active' : '' }}" href="{{ route('school.dashboard', ['school' => $school]) }}">
+            <i class="typcn typcn-device-desktop menu-icon"></i>
+            <span class="menu-title">Dashboard</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('book-doctor') ? 'mm-active' : '' }}">
-        <a href="{{ route('book-doctor', ['school' => $school])}}" aria-expanded="false">
-            <i class="fa fa-user-md"></i>
-            <span class="nav-text">Book Doctor</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('students') ? 'active' : '' }}" href="{{ route('students', ['school' => $school]) }}">
+            <i class="typcn typcn-user menu-icon"></i>
+            <span class="menu-title">Students</span>
         </a>
     </li>
-    {{-- Lab Tests removed until laboratory functionality is available --}}
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('book-doctor') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school])}}">
+            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <span class="menu-title">Book Doctor</span>
+        </a>
+    </li>
 </ul>
 @elseif(isset($healthFacility))
-<ul class="metismenu" id="menu">
-    <li class="nav-label first">Health Facility</li>
-    <li class="{{ request()->routeIs('health-facility.dashboard') ? 'mm-active' : '' }}">
-        <a href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}" aria-expanded="false">
-            <i class="fa fa-dashboard"></i>
-            <span class="nav-text">Dashboard</span>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('health-facility.dashboard') ? 'active' : '' }}" href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}">
+            <i class="typcn typcn-device-desktop menu-icon"></i>
+            <span class="menu-title">Dashboard</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('health-facility.patients') ? 'mm-active' : '' }}">
-        <a href="{{ route('health-facility.patients', ['id' => $healthFacility->id]) }}" aria-expanded="false">
-            <i class="fa fa-users"></i>
-            <span class="nav-text">Patients</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('health-facility.patients') ? 'active' : '' }}" href="{{ route('health-facility.patients', ['id' => $healthFacility->id]) }}">
+            <i class="typcn typcn-user menu-icon"></i>
+            <span class="menu-title">Patients</span>
         </a>
     </li>
-    <li>
-        {{-- Add Patient via modal on Patients page; link removed from sidebar --}}
-    </li>
-    <li class="{{ request()->routeIs('health-facility.book-doctor') ? 'mm-active' : '' }}">
-        <a href="{{ route('health-facility.book-doctor', ['id' => $healthFacility->id]) }}" aria-expanded="false">
-            <i class="fa fa-user-md"></i>
-            <span class="nav-text">Book Doctor</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('health-facility.book-doctor') ? 'active' : '' }}" href="{{ route('health-facility.book-doctor', ['id' => $healthFacility->id]) }}">
+            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <span class="menu-title">Book Doctor</span>
         </a>
     </li>
-    {{-- Lab Tests removed until laboratory functionality is available --}}
 </ul>
 @elseif(isset($doctor))
-<ul class="metismenu" id="menu">
-    <li class="nav-label first">Doctor's Menu</li>
-    <li class="{{ request()->routeIs('doctor.dashboard') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
-            <i class="fa fa-dashboard"></i>
-            <span class="nav-text">Dashboard</span>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.dashboard') ? 'active' : '' }}" href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}">
+            <i class="typcn typcn-device-desktop menu-icon"></i>
+            <span class="menu-title">Dashboard</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('doctor.appointments') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.appointments', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
-            <i class="fa fa-calendar"></i>
-            <span class="nav-text">Appointments</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.appointments') ? 'active' : '' }}" href="{{ route('doctor.appointments', ['doctorId' => $doctor->id]) }}">
+            <i class="typcn typcn-calendar menu-icon"></i>
+            <span class="menu-title">Appointments</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('doctor.meeting-link') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
-            <i class="fa fa-video-camera"></i>
-            <span class="nav-text">Meeting link</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.meeting-link') ? 'active' : '' }}" href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}">
+            <i class="typcn typcn-video menu-icon"></i>
+            <span class="menu-title">Meeting link</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('doctor.availability') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}" aria-expanded="false">
-            <i class="fa fa-check"></i>
-            <span class="nav-text">My Availability</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}">
+            <i class="typcn typcn-tick menu-icon"></i>
+            <span class="menu-title">My Availability</span>
         </a>
     </li>
-
-    </li>
-
 </ul>
 @endif
 
 @php $currentUser = $user ?? auth()->user(); @endphp
 @if($currentUser && ($currentUser->is_admin ?? false))
-<ul class="metismenu mt-3" id="admin-menu">
-    <li class="nav-label">Admin</li>
-    <li>
-        <a class="{{ request()->is('admin') ? 'mm-active' : '' }}" href="{{ route('admin.index') }}" aria-expanded="false">
-            <i class="fa fa-cogs"></i>
-            <span class="nav-text">Dashboard</span>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ route('admin.index') }}">
+            <i class="typcn typcn-cog menu-icon"></i>
+            <span class="menu-title">Dashboard</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.doctors.index') ? 'mm-active' : '' }}" href="{{ route('admin.doctors.index') }}">
-            <i class="fa fa-user-md"></i>
-            <span class="nav-text">Doctors</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.doctors.index') ? 'active' : '' }}" href="{{ route('admin.doctors.index') }}">
+            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <span class="menu-title">Doctors</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.appointments.index') ? 'mm-active' : '' }}" href="{{ route('admin.appointments.index') }}">
-            <i class="fa fa-calendar"></i>
-            <span class="nav-text">Appointments</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.appointments.index') ? 'active' : '' }}" href="{{ route('admin.appointments.index') }}">
+            <i class="typcn typcn-calendar menu-icon"></i>
+            <span class="menu-title">Appointments</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.payments.index') ? 'mm-active' : '' }}" href="{{ route('admin.payments.index') }}">
-            <i class="fa fa-credit-card"></i>
-            <span class="nav-text">Payments</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+            <i class="typcn typcn-credit-card menu-icon"></i>
+            <span class="menu-title">Payments</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.patients.index') ? 'mm-active' : '' }}" href="{{ route('admin.patients.index') }}">
-            <i class="fa fa-users"></i>
-            <span class="nav-text">Patients</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.patients.index') ? 'active' : '' }}" href="{{ route('admin.patients.index') }}">
+            <i class="typcn typcn-user menu-icon"></i>
+            <span class="menu-title">Patients</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.schools.index') ? 'mm-active' : '' }}" href="{{ route('admin.schools.index') }}">
-            <i class="fa fa-building"></i>
-            <span class="nav-text">Schools</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.schools.index') ? 'active' : '' }}" href="{{ route('admin.schools.index') }}">
+            <i class="typcn typcn-home menu-icon"></i>
+            <span class="menu-title">Schools</span>
         </a>
     </li>
-    <li>
-        <a class="{{ request()->routeIs('admin.health-facilities.index') ? 'mm-active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
-            <i class="fa fa-hospital-o"></i>
-            <span class="nav-text">Health Facilities</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.health-facilities.index') ? 'active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
+            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <span class="menu-title">Health Facilities</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('doctor.all-availabilities') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.all-availabilities') }}" aria-expanded="false">
-            <i class="fa fa-users-md"></i>
-            <span class="nav-text">Doctor Availabilities</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.all-availabilities') ? 'active' : '' }}" href="{{ route('doctor.all-availabilities') }}">
+            <i class="typcn typcn-time menu-icon"></i>
+            <span class="menu-title">Doctor Availabilities</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('admin.contact-submissions') ? 'mm-active' : '' }}">
-        <a href="{{ route('admin.contact-submissions') }}" aria-expanded="false">
-            <i class="fa fa-envelope"></i>
-            <span class="nav-text">Contact Submissions</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.contact-submissions') ? 'active' : '' }}" href="{{ route('admin.contact-submissions') }}">
+            <i class="typcn typcn-mail menu-icon"></i>
+            <span class="menu-title">Contact Submissions</span>
         </a>
     </li>
 </ul>
 @elseif(isset($admin))
-<ul class="metismenu" id="menu">
-    <li class="nav-label first">Admin Menu</li>
-    <li class="{{ request()->routeIs('doctor.all-availabilities') ? 'mm-active' : '' }}">
-        <a href="{{ route('doctor.all-availabilities') }}" aria-expanded="false">
-            <i class="fa fa-users-md"></i>
-            <span class="nav-text">Doctor Availabilities</span>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.all-availabilities') ? 'active' : '' }}" href="{{ route('doctor.all-availabilities') }}">
+            <i class="typcn typcn-time menu-icon"></i>
+            <span class="menu-title">Doctor Availabilities</span>
         </a>
     </li>
-    <li class="{{ request()->routeIs('admin.contact-submissions') ? 'mm-active' : '' }}">
-        <a href="{{ route('admin.contact-submissions') }}" aria-expanded="false">
-            <i class="fa fa-envelope"></i>
-            <span class="nav-text">Contact Submissions</span>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.contact-submissions') ? 'active' : '' }}" href="{{ route('admin.contact-submissions') }}">
+            <i class="typcn typcn-mail menu-icon"></i>
+            <span class="menu-title">Contact Submissions</span>
         </a>
     </li>
 </ul>

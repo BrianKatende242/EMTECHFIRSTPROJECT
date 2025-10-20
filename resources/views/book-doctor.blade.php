@@ -12,7 +12,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Doctor Appointments</h2>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAppointmentModal"><i class="fa fa-plus"></i> New Appointment</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newAppointmentModal"><i class="fa fa-plus"></i> New Appointment</button>
                 </div>
                 <!-- Modal and form remain unchanged -->
                 <div>
@@ -75,7 +75,9 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="newAppointmentModalLabel">New Doctor Appointment</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                         <div class="modal-body">
                             <form action="{{ route('appointments.store') }}" method="POST">

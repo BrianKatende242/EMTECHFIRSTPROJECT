@@ -43,7 +43,7 @@
         @endif
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Student Management</h2>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudentModal"><i class="fa fa-plus"></i> New Student</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newStudentModal"><i class="fa fa-plus"></i> New Student</button>
                 </div>
 
         <!-- New Student Modal -->
@@ -52,7 +52,9 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="newStudentModalLabel">New Student</h5>
-                        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <form action="{{ route('students.create') }}" method="POST">
@@ -61,13 +63,13 @@
                             <!-- Patient Type Selection -->
                             <div class="form-group mb-3">
                                 <label class="form-label fw-bold">Patient Type:</label>
-                                <div class="form-check">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="patient_type" id="new_patient" value="new" checked>
                                     <label class="form-check-label" for="new_patient">
                                         New Student
                                     </label>
                                 </div>
-                                <div class="form-check">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="patient_type" id="existing_patient" value="existing">
                                     <label class="form-check-label" for="existing_patient">
                                         Existing Patient (Enter Patient ID)
@@ -148,7 +150,7 @@
                                 <a href="{{ route('patients.profile', ['patient' => $student->id]) }}" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="fa fa-user"></i> Profile
                                 </a>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStudentModal" data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
+                                <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#deleteStudentModal" data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </td>
@@ -171,7 +173,9 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteStudentModalLabel">Delete Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete <span id="studentName"></span>?</p>
@@ -180,7 +184,7 @@
                     <form id="deleteStudentForm" method="POST" action="">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
