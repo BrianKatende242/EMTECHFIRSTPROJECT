@@ -1,7 +1,7 @@
 @extends('layouts.base')
 
 @section('content')
-<div class="container py-4 card shadow-sm mb-4">
+<div class="row p-4 card shadow-sm mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Appointments</h2>
         <div>

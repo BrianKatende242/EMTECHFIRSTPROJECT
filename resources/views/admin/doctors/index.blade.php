@@ -5,16 +5,19 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm doctors-header-gradient">
+            <div class="card border-0 shadow-sm bg-primary">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-white">
                             <h1 class="h3 mb-1 fw-bold">Doctors Management</h1>
                             <p class="mb-0 opacity-85">Manage healthcare professionals and their information</p>
                         </div>
-                        <div>
+                        <div class="btn-group">
                             <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
-                                <i class="fa fa-plus me-2"></i>Register Doctor
+                                <i class="fa fa-plus me-2"></i>Register
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
+                                <i class="mdi mdi-export me-2"></i> <span>Export</span>
                             </button>
                         </div>
                     </div>
@@ -36,7 +39,7 @@
                     ->pluck('specialization')
                     ->sort();
             @endphp
-            <select id="specialization-filter" class="form-select">
+            <select id="specialization-filter" class="form-select form-control">
                 <option value="">All Specializations</option>
                 @foreach($specializations as $specialization)
                     <option value="{{ strtolower($specialization) }}">{{ $specialization }}</option>
@@ -148,7 +151,7 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge bg-success">
+                                <span class="badge bg-success text-white">
                                     <i class="fa fa-circle me-1" style="font-size: 0.5rem;"></i>Active
                                 </span>
                             </td>
@@ -160,10 +163,10 @@
                             <td class="text-center">
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('admin.doctors.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Profile">
-                                        <i class="fa fa-eye"></i>
+                                        <i class="mdi mdi-eye"></i>
                                     </a>
                                     <a href="{{ route('admin.model.edit', ['doctors', $doctor->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
-                                        <i class="fa fa-edit"></i>
+                                        <i class="mdi mdi-flag"></i>
                                     </a>
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="More Actions">

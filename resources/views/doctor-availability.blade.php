@@ -13,12 +13,12 @@ if (typeof Morris !== 'undefined') {
 <div class="row">
     <div class="col-12">
                 <div class="card">
-            <div class="card-header bg-secondary text-white position-relative overflow-hidden">
+            <div class="card-header bg-primary text-white position-relative overflow-hidden">
                 
                 <div class="d-flex align-items-center mb-2">
                     <div class="me-3" style="width: 60px; height: 60px; border-radius: 50%; margin-right: 1rem;">
                         <div class="avatar-circle bg-white text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 50%;">
-                            <i class="fa fa-user-md fa-2x"></i>
+                            <i class="mdi mdi-calendar-clock mdi-24px"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1">

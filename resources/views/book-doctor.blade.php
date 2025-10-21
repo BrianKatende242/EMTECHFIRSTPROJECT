@@ -12,7 +12,10 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Doctor Appointments</h2>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newAppointmentModal"><i class="fa fa-plus"></i> New Appointment</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#newAppointmentModal"><i class="mdi mdi-stethoscope"></i> Book Doctor</button>
+
+                    </div>
                 </div>
                 <!-- Modal and form remain unchanged -->
                 <div>
@@ -145,7 +148,6 @@
                         </div>
                     </div>
                 </div>
-        </div>
         </div>
 @endsection
 

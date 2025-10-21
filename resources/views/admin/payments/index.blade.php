@@ -16,9 +16,12 @@
                             <h1 class="h3 mb-1 fw-bold text-white">Payments Management</h1>
                             <p class="mb-0 opacity-85">Manage payment transactions and their details</p>
                         </div>
-                        <div class="d-flex gap-3">
+                        <div class="btn-group">
                             <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createPaymentModal">
-                                <i class="fa fa-plus me-3"></i> <span>Record Payment</span>
+                                <i class="fa fa-plus me-3"></i> <span>Record</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary outline btn-sm" data-bs-toggle="modal" data-bs-target="#createPaymentModal">
+                                <i class="mdi mdi-export me-3"></i> <span>Export</span>
                             </button>
                         </div>
                     </div>

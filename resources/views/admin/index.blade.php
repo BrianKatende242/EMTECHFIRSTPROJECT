@@ -12,77 +12,61 @@
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <!-- Doctors Card -->
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-doctors">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-user-md" aria-hidden="true"></i>
+         <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Doctors</div>
+                      <h5 class="mb-0">{{ $stats['doctors'] }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Doctors</div>
-                        <div class="stat-value">{{ $stats['doctors'] }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Doctors progress" aria-valuenow="{{ $stats['doctors'] }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-85"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-account-location icon-xl text-primary"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
         <!-- Schools Card -->
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-students">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-building" aria-hidden="true"></i>
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Schools</div>
+                      <h5 class="mb-0">{{ $stats['schools'] }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Schools</div>
-                        <div class="stat-value">{{ $stats['schools'] }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Schools progress" aria-valuenow="{{ $stats['schools'] }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-75"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-school icon-xl text-primary"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
         <!-- Health Facilities Card -->
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-labtests">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-hospital-o" aria-hidden="true"></i>
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Health Facilities</div>
+                      <h5 class="mb-0">{{ $stats['health_facilities'] }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Health Facilities</div>
-                        <div class="stat-value">{{ $stats['health_facilities'] }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Health Facilities progress" aria-valuenow="{{ $stats['health_facilities'] }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-65"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-hospital-building icon-xl text-primary"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
         <!-- Revenue Card -->
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-appointments">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-dollar" aria-hidden="true"></i>
+         <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Revenue</div>
+                      <h5 class="mb-0">UGX {{ number_format($stats['revenue'], 0) }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Revenue</div>
-                        <div class="stat-value">UGX {{ number_format($stats['revenue'], 0) }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Revenue progress" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-90"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-square-inc-cash icon-xl text-primary"></i>
+                  </div>
                 </div>
             </div>
         </div>
@@ -105,7 +89,6 @@
         </div>
     </div>
 
-    </div>
 
     <!-- Charts Row -->
     <div class="row mb-4">

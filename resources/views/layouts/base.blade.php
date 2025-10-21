@@ -18,11 +18,12 @@
         @endif
     </title>
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/ketiai-logo.svg') }}">
     <link rel="stylesheet" href="{{ asset('pollix/vendors/typicons/typicons.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('pollix/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/css/vertical-layout-light/style.css') }}">
-    <link rel="shortcut icon" href="{{ asset('pollix/images/favicon.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('images/ketiai-logo.svg') }}" />
 
     {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
     @stack('styles')
@@ -37,7 +38,7 @@
       <div class="navbar-brand-wrapper d-flex justify-content-center">
         <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
           <a class="navbar-brand brand-logo" href="{{ url('/') }}"><img src="{{ asset('images/emoji-logo-white.svg') }}" alt="KETI AI" style="height:40px; width:auto;"></a>
-          <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}"><img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" style="height:30px; width:auto;"></a>
+          <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}"><img src="{{ asset('images/ketiai-logo.svg') }}" alt="KETI AI" style="height:30px; width:auto;"></a>
           <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
             <span class="typcn typcn-th-menu"></span>
           </button>
@@ -72,8 +73,8 @@
         <ul class="navbar-nav navbar-nav-right">
           <li class="nav-item nav-date dropdown">
             <a class="nav-link d-flex justify-content-center align-items-center" href="javascript:;">
-              <h6 class="date mb-0">Today : {{ now()->format('M d') }}</h6>
-              <i class="typcn typcn-calendar"></i>
+              <h6 class="date mb-0">0 UGX</h6>
+              <i class="mdi mdi-wallet"></i>
             </a>
           </li>
           <li class="nav-item dropdown">

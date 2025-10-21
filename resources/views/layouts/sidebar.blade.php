@@ -14,8 +14,14 @@
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('book-doctor') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school])}}">
-            <i class="typcn typcn-heart-outline menu-icon"></i>
-            <span class="menu-title">Book Doctor</span>
+            <i class="mdi mdi-calendar-clock menu-icon"></i>
+            <span class="menu-title">Appointments</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('book-doctor') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school])}}">
+            <i class="mdi mdi-square-inc-cash menu-icon"></i>
+            <span class="menu-title">Transactions</span>
         </a>
     </li>
 </ul>
@@ -62,8 +68,14 @@
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}">
-            <i class="typcn typcn-tick menu-icon"></i>
+            <i class="mdi mdi-calendar-clock menu-icon"></i>
             <span class="menu-title">My Availability</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}">
+            <i class="mdi mdi-square-inc-cash menu-icon"></i>
+            <span class="menu-title">Transactions</span>
         </a>
     </li>
 </ul>
@@ -74,13 +86,13 @@
 <ul class="nav">
     <li class="nav-item">
         <a class="nav-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ route('admin.index') }}">
-            <i class="typcn typcn-cog menu-icon"></i>
+            <i class="mdi mdi-view-dashboard menu-icon"></i>
             <span class="menu-title">Dashboard</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('admin.doctors.index') ? 'active' : '' }}" href="{{ route('admin.doctors.index') }}">
-            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <i class="mdi mdi-stethoscope menu-icon"></i>
             <span class="menu-title">Doctors</span>
         </a>
     </li>
@@ -92,8 +104,14 @@
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
-            <i class="typcn typcn-credit-card menu-icon"></i>
+            <i class="mdi mdi-credit-card menu-icon"></i>
             <span class="menu-title">Payments</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+            <i class="mdi mdi-contrast menu-icon"></i>
+            <span class="menu-title">Transactions</span>
         </a>
     </li>
     <li class="nav-item">
@@ -104,19 +122,19 @@
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('admin.schools.index') ? 'active' : '' }}" href="{{ route('admin.schools.index') }}">
-            <i class="typcn typcn-home menu-icon"></i>
+            <i class="mdi mdi-school menu-icon"></i>
             <span class="menu-title">Schools</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('admin.health-facilities.index') ? 'active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
-            <i class="typcn typcn-heart-outline menu-icon"></i>
+            <i class="mdi mdi-hospital-building menu-icon"></i>
             <span class="menu-title">Health Facilities</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('doctor.all-availabilities') ? 'active' : '' }}" href="{{ route('doctor.all-availabilities') }}">
-            <i class="typcn typcn-time menu-icon"></i>
+            <i class="mdi mdi-clock menu-icon"></i>
             <span class="menu-title">Doctor Availabilities</span>
         </a>
     </li>

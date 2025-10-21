@@ -43,7 +43,10 @@
         @endif
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Student Management</h2>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newStudentModal"><i class="fa fa-plus"></i> New Student</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#newStudentModal"><i class="fa fa-plus"></i> Register</button>
+                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#newStudentModal"><i class="mdi mdi-cloud-upload"></i> <span>Import</span></button>
+                    </div>
                 </div>
 
         <!-- New Student Modal -->

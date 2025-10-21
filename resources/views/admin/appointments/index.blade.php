@@ -16,7 +16,7 @@
                             <h1 class="h3 mb-1 fw-bold text-white">Appointments Management</h1>
                             <p class="mb-0 opacity-85">Manage healthcare appointments and their details</p>
                         </div>
-                        <div class="d-flex gap-3">
+                        <div class="btn-group">
                             <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createAppointmentModal">
                                 <i class="fa fa-plus me-3"></i> <span>Schedule</span>
                             </button>
