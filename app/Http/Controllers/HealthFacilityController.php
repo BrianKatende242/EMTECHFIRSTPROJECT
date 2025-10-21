@@ -168,7 +168,7 @@ class HealthFacilityController extends Controller
         $genderLabels = ['Male', 'Female', 'Other', 'Unspecified'];
         $genderData = [$maleCount, $femaleCount, $otherCount, $unknownCount];
     
-        return view('Health-Facility-Instance', [
+        return view('health-facility.dashboard', [
             'healthFacility' => $healthFacility,
             'unreadMessages' => $unreadMessages,
             'allDoctors' => $allDoctors,
@@ -221,8 +221,26 @@ class HealthFacilityController extends Controller
         $labTests = collect();
         return view('health-facility/lab-tests', compact('healthFacility', 'labTests'));
     }
-    
 
+    public function transactions($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        // Get transactions/payments related to this health facility
+        // For now, we'll show appointments with payment status
+        $appointments = Appointment::where('health_facility_id', $id)
+            ->with(['patient', 'doctor', 'duration'])
+            ->latest()
+            ->paginate(15);
+        return view('health-facility/transactions', compact('healthFacility', 'appointments'));
+    }
+
+    public function staff($id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        // Get doctors associated with this health facility
+        $doctors = Doctor::where('health_facility_id', $id)->latest()->get();
+        return view('health-facility/staff', compact('healthFacility', 'doctors'));
+    }
 
     
 }

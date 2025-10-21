@@ -29,20 +29,32 @@
 <ul class="nav">
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('health-facility.dashboard') ? 'active' : '' }}" href="{{ route('health-facility.dashboard', ['id' => $healthFacility->id]) }}">
-            <i class="typcn typcn-device-desktop menu-icon"></i>
+            <i class="mdi mdi-view-dashboard menu-icon"></i>
             <span class="menu-title">Dashboard</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('health-facility.patients') ? 'active' : '' }}" href="{{ route('health-facility.patients', ['id' => $healthFacility->id]) }}">
-            <i class="typcn typcn-user menu-icon"></i>
+            <i class="mdi mdi-account-multiple menu-icon"></i>
             <span class="menu-title">Patients</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('health-facility.book-doctor') ? 'active' : '' }}" href="{{ route('health-facility.book-doctor', ['id' => $healthFacility->id]) }}">
-            <i class="typcn typcn-heart-outline menu-icon"></i>
-            <span class="menu-title">Book Doctor</span>
+            <i class="mdi mdi-calendar-plus menu-icon"></i>
+            <span class="menu-title">Appointments</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('health-facility.staff') ? 'active' : '' }}" href="{{ route('health-facility.staff', ['id' => $healthFacility->id]) }}">
+            <i class="mdi mdi-account-group menu-icon"></i>
+            <span class="menu-title">Staff</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('health-facility.transactions') ? 'active' : '' }}" href="{{ route('health-facility.transactions', ['id' => $healthFacility->id]) }}">
+            <i class="mdi mdi-square-inc-cash menu-icon"></i>
+            <span class="menu-title">Transactions</span>
         </a>
     </li>
 </ul>

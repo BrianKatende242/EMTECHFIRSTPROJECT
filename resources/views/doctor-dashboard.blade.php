@@ -25,75 +25,100 @@
 
         $pendingCount = $appointments->where('status', 'pending')->count();
 
-        // Prepare last 7 days labels and counts (including today)
-        $chartLabels = [];
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $d = \Carbon\Carbon::today()->subDays($i);
-            $chartLabels[] = $d->format('M d');
-            $count = $appointments->filter(function($a) use ($d) {
-                try {
-                    $at = \Carbon\Carbon::parse(data_get($a, 'appointment_time'));
-                    return $at->isSameDay($d);
-                } catch (\Exception $e) {
-                    return false;
+        // Prepare monthly labels and data for current year
+        $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $appointmentsData = array_fill(0, 12, 0);
+        $revenueData = array_fill(0, 12, 0);
+        $currentYear = \Carbon\Carbon::now()->year;
+        foreach ($appointments as $appt) {
+            try {
+                $date = \Carbon\Carbon::parse(data_get($appt, 'appointment_time'));
+                if ($date->year == $currentYear) {
+                    $month = $date->month - 1;
+                    $appointmentsData[$month]++;
+                    $revenue = $appt->duration ? $appt->duration->getPrice() : 0;
+                    $revenueData[$month] += $revenue;
                 }
-            })->count();
-            $chartData[] = $count;
+            } catch (\Exception $e) {
+                // Skip invalid dates
+            }
         }
 
-        $stats = $stats ?? ['total_appointments' => $appointments->count(), 'completed_appointments' => $appointments->where('status','completed')->count(), 'upcoming_appointments' => $upcomingAppointments->count()];
+        $genderCounts = [];
+        $uniquePatients = $appointments->pluck('patient')->filter()->unique('id');
+        foreach ($uniquePatients as $patient) {
+            if ($patient->gender) {
+                $gender = $patient->gender;
+                $genderCounts[$gender] = ($genderCounts[$gender] ?? 0) + 1;
+            }
+        }
     @endphp
 
     {{-- Summary cards --}}
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-2 text-muted">Total Appointments</h6>
-                    <h3 class="mb-1">{{ $stats['total_appointments'] ?? 0 }}</h3>
-                    <small class="text-muted">Patients: {{ $patientsCount }}</small>
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Total Appointments</div>
+                      <h5 class="mb-0">{{ $stats['total_appointments'] ?? 0 }}</h5>
+                    </div>
+                    <i class="mdi mdi-calendar-clock icon-xl text-primary"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-2 text-muted">Completed</h6>
-                    <h3 class="mb-1 text-success">{{ $stats['completed_appointments'] ?? 0 }}</h3>
-                    <small class="text-muted">This period</small>
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Completed</div>
+                      <h5 class="mb-0">{{ $stats['completed_appointments'] ?? 0 }}</h5>
+                    </div>
+                    <i class="mdi mdi-check-circle icon-xl text-success"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-2 text-muted">Upcoming</h6>
-                    <h3 class="mb-1 text-warning">{{ $stats['upcoming_appointments'] ?? 0 }}</h3>
-                    <small class="text-muted">Next appointments</small>
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Patients</div>
+                      <h5 class="mb-0">{{ $stats['patients'] ?? 0 }}</h5>
+                    </div>
+                    <i class="mdi mdi-account-group icon-xl text-info"></i>
+                  </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-2 text-muted">Pending</h6>
-                    <h3 class="mb-1 text-danger">{{ $pendingCount }}</h3>
-                    <small class="text-muted">Action required</small>
+                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                    <div>
+                      <div class="stat-label mb-2">Revenue</div>
+                      <h5 class="mb-0">UGX {{ number_format($stats['revenue'] ?? 0, 0) }}</h5>
+                    </div>
+                    <i class="mdi mdi-square-inc-cash icon-xl text-warning"></i>
+                  </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Appointments (Last 7 days)</h5>
-                    <div class="text-muted small">Updated: {{ now()->format('M d, Y') }}</div>
+                    <h5 class="mb-0">Appointments and Revenue (Annual)</h5>
+                    <div class="text-muted small">Year: {{ now()->year }}</div>
                 </div>
                 <div class="card-body" style="min-height:220px;">
                     <canvas id="appointmentsChart" height="160"></canvas>
@@ -131,7 +156,7 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Quick Actions</h5>
@@ -145,11 +170,14 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h5 class="mb-0">Notifications</h5>
+                    <h5 class="mb-0">Patient Distribution by Gender</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">You have <strong>{{ $notificationsCount ?? 0 }}</strong> notifications.</p>
-                    {{-- Placeholder list, can be wired to real notifications later --}}
+                    @if(count($genderCounts) > 0)
+                        <canvas id="genderChart" height="200"></canvas>
+                    @else
+                        <p class="text-muted">No patient gender data available.</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -178,7 +206,8 @@
             if (!ctx) return;
 
             var labels = {!! json_encode($chartLabels) !!};
-            var data = {!! json_encode($chartData) !!};
+            var appointmentsData = {!! json_encode($appointmentsData) !!};
+            var revenueData = {!! json_encode($revenueData) !!};
 
             if (typeof Chart === 'undefined') {
                 console.warn('Chart.js not loaded');
@@ -191,7 +220,7 @@
                     labels: labels,
                     datasets: [{
                         label: 'Appointments',
-                        data: data,
+                        data: appointmentsData,
                         backgroundColor: 'rgba(255, 0, 248, 0.12)', // KETI pink fill
                         borderColor: '#000000', // black line
                         pointBackgroundColor: '#FF00F8', // pink points
@@ -199,14 +228,105 @@
                         pointHoverBackgroundColor: '#000000',
                         pointHoverBorderColor: '#FF00F8',
                         fill: true,
-                        tension: 0.25
+                        tension: 0.25,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Revenue (UGX)',
+                        data: revenueData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.12)', // blue fill
+                        borderColor: '#36A2EB', // blue line
+                        pointBackgroundColor: '#36A2EB', // blue points
+                        pointBorderColor: '#000000', // black point border
+                        pointHoverBackgroundColor: '#000000',
+                        pointHoverBorderColor: '#36A2EB',
+                        fill: true,
+                        tension: 0.25,
+                        yAxisID: 'y1'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, precision:0 } }
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        yAxes: [{
+                            id: 'y',
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Appointments'
+                            }
+                        }, {
+                            id: 'y1',
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Revenue (UGX)'
+                            },
+                            gridLines: {
+                                drawOnChartArea: false,
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('genderChart');
+            if (!ctx) return;
+
+            var genderData = {!! json_encode($genderCounts) !!};
+            var labels = Object.keys(genderData);
+            var data = Object.values(genderData);
+
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded');
+                return;
+            }
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutoutPercentage: 50,
+                    legend: {
+                        position: 'bottom',
+                    }
                 }
             });
         });

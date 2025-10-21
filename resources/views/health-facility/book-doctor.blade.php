@@ -5,8 +5,8 @@
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="m-0">Book Doctor</h3>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookDoctorModal">
-                <i class="fa fa-calendar-plus me-2"></i> New Appointment
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#bookDoctorModal">
+                <i class="mdi mdi-calendar-plus me-2"></i> New Appointment
             </button>
         </div>
     </div>
@@ -53,7 +53,7 @@
                             <td>
                                 @if($appt->status === 'awaiting_payment')
                                     <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-credit-card me-1"></i> Pay
+                                        <i class="mdi mdi-credit-card me-1"></i> Pay
                                     </a>
                                 @else
                                     —
@@ -71,12 +71,12 @@
     </div>
 
     {{-- Book Doctor Modal --}}
-    <div class="modal fade" id="bookDoctorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="bookDoctorModal" tabindex="-1" role="dialog" aria-labelledby="bookDoctorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Book Appointment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="bookDoctorModalLabel">Book Appointment</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="appointment-form" action="{{ route('appointments.store') }}" method="POST">
                     @csrf
@@ -121,8 +121,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Book</button>
+                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Book</button>
                     </div>
                 </form>
             </div>

@@ -4,8 +4,8 @@
 <div class="container-fluid">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="m-0">Patients</h3>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-            <i class="fa fa-user-plus me-2"></i> Add Patient
+        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addPatientModal">
+            <i class="mdi mdi-account-plus me-2"></i> Add Patient
         </button>
     </div>
 
@@ -41,15 +41,15 @@
                             <td>{{ $patient->contact_number ?? 'N/A' }}</td>
                             <td class="text-end">
                                 <a href="{{ route('patients.profile', ['patient' => $patient->id]) }}" class="btn btn-sm btn-outline-primary me-1">
-                                    <i class="fa fa-user"></i> Profile
+                                    <i class="mdi mdi-account"></i> Profile
                                 </a>
                                 <button type="button"
                                         class="btn btn-sm btn-outline-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmDeleteModal"
+                                        data-toggle="modal"
+                                        data-target="#confirmDeleteModal"
                                         data-action="{{ route('patients.delete', ['patient' => $patient->id]) }}"
                                         data-name="{{ $patient->name }}">
-                                    <i class="fa fa-trash"></i> Delete
+                                    <i class="mdi mdi-delete"></i> Delete
                                 </button>
                             </td>
                         </tr>
@@ -64,12 +64,12 @@
     @endif
 </div>
 {{-- Add Patient Modal --}}
-<div class="modal fade" id="addPatientModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addPatientModal" tabindex="-1" role="dialog" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Patient</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="addPatientModalLabel">Add Patient</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" style="display: block !important;"></button>
             </div>
             <form method="POST" action="{{ route('patients.create') }}" id="patientForm">
                 @csrf
@@ -78,24 +78,20 @@
                     <!-- Patient Type Selection -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Patient Type</label>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="patient_type" id="newPatient" value="new" checked>
-                                    <label class="form-check-label" for="newPatient">
-                                        <strong>New Patient</strong><br>
-                                        <small class="text-muted">Create a new patient record</small>
-                                    </label>
-                                </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="form-check flex-fill">
+                                <input class="form-check-input" type="radio" name="patient_type" id="newPatient" value="new" checked>
+                                <label class="form-check-label" for="newPatient" style="word-wrap: break-word; hyphens: auto;">
+                                    <strong>New Patient</strong><br>
+                                    <small class="text-muted">Create a new patient record</small>
+                                </label>
                             </div>
-                            <div class="col-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="patient_type" id="existingPatient" value="existing">
-                                    <label class="form-check-label" for="existingPatient">
-                                        <strong>Existing Patient</strong><br>
-                                        <small class="text-muted">Associate existing patient by Patient ID</small>
-                                    </label>
-                                </div>
+                            <div class="form-check flex-fill">
+                                <input class="form-check-input" type="radio" name="patient_type" id="existingPatient" value="existing">
+                                <label class="form-check-label" for="existingPatient" style="word-wrap: break-word; hyphens: auto;">
+                                    <strong>Existing Patient</strong><br>
+                                    <small class="text-muted">Associate existing patient by Patient ID</small>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -143,8 +139,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Patient</button>
+                    <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Patient</button>
                 </div>
             </form>
         </div>
@@ -152,80 +148,82 @@
 </div>
 
         {{-- Confirm Delete Modal --}}
-        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-dark">
                         Are you sure you want to delete <strong id="deletePatientName">this patient</strong>? This action cannot be undone.
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
                         <form id="deletePatientForm" method="POST" action="">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     </div>
                 </div>
             </div>
-    
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var modalEl = document.getElementById('confirmDeleteModal');
-                    modalEl.addEventListener('show.bs.modal', function (event) {
-                        var button = event.relatedTarget;
-                        var action = button.getAttribute('data-action');
-                        var name = button.getAttribute('data-name');
-                        modalEl.querySelector('#deletePatientForm').setAttribute('action', action);
-                        modalEl.querySelector('#deletePatientName').textContent = name || 'this patient';
-                    });
-
-                    // Patient type selection functionality
-                    const newPatientRadio = document.getElementById('newPatient');
-                    const existingPatientRadio = document.getElementById('existingPatient');
-                    const newPatientSection = document.getElementById('newPatientSection');
-                    const existingPatientSection = document.getElementById('existingPatientSection');
-                    const patientForm = document.getElementById('patientForm');
-
-                    function togglePatientSections() {
-                        if (newPatientRadio.checked) {
-                            newPatientSection.classList.remove('d-none');
-                            existingPatientSection.classList.add('d-none');
-                            // Make new patient fields required
-                            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
-                                field.setAttribute('required', 'required');
-                            });
-                            // Remove required from existing patient fields
-                            document.querySelectorAll('#existingPatientSection input[required]').forEach(field => {
-                                field.removeAttribute('required');
-                            });
-                        } else {
-                            newPatientSection.classList.add('d-none');
-                            existingPatientSection.classList.remove('d-none');
-                            // Make existing patient ID required
-                            document.querySelector('#existingPatientSection input[name="patient_id"]').setAttribute('required', 'required');
-                            // Remove required from new patient fields
-                            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
-                                field.removeAttribute('required');
-                            });
-                        }
-                    }
-
-                    // Add event listeners
-                    newPatientRadio.addEventListener('change', togglePatientSections);
-                    existingPatientRadio.addEventListener('change', togglePatientSections);
-
-                    // Initialize on modal show
-                    document.getElementById('addPatientModal').addEventListener('show.bs.modal', function() {
-                        // Reset to new patient by default
-                        newPatientRadio.checked = true;
-                        togglePatientSections();
-                    });
-                });
-            </script>
         </div>
+    
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Patient type selection functionality
+    const newPatientRadio = document.getElementById('newPatient');
+    const existingPatientRadio = document.getElementById('existingPatient');
+    const newPatientSection = document.getElementById('newPatientSection');
+    const existingPatientSection = document.getElementById('existingPatientSection');
+    const patientForm = document.getElementById('patientForm');
+
+    function togglePatientSections() {
+        if (newPatientRadio && newPatientRadio.checked) {
+            if (newPatientSection) newPatientSection.classList.remove('d-none');
+            if (existingPatientSection) existingPatientSection.classList.add('d-none');
+            // Make new patient fields required
+            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
+                field.setAttribute('required', 'required');
+            });
+            // Remove required from existing patient fields
+            document.querySelectorAll('#existingPatientSection input[required]').forEach(field => {
+                field.removeAttribute('required');
+            });
+        } else if (existingPatientRadio && existingPatientRadio.checked) {
+            if (newPatientSection) newPatientSection.classList.add('d-none');
+            if (existingPatientSection) existingPatientSection.classList.remove('d-none');
+            // Make existing patient ID required
+            document.querySelector('#existingPatientSection input[name="patient_id"]').setAttribute('required', 'required');
+            // Remove required from new patient fields
+            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
+                field.removeAttribute('required');
+            });
+        }
+    }
+
+    // Add event listeners with null checks
+    if (newPatientRadio) newPatientRadio.addEventListener('change', togglePatientSections);
+    if (existingPatientRadio) existingPatientRadio.addEventListener('change', togglePatientSections);
+
+    // Initialize on modal show
+    document.getElementById('addPatientModal').addEventListener('show.bs.modal', function() {
+        // Reset to new patient by default
+        if (newPatientRadio) newPatientRadio.checked = true;
+        togglePatientSections();
+    });
+
+    var modalEl = document.getElementById('confirmDeleteModal');
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var action = button.getAttribute('data-action');
+        var name = button.getAttribute('data-name');
+        modalEl.querySelector('#deletePatientForm').setAttribute('action', action);
+        modalEl.querySelector('#deletePatientName').textContent = name || 'this patient';
+    });
+});
+</script>
+@endpush
 @endsection

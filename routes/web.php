@@ -404,6 +404,8 @@ Route::get('/health-facility/{id}/patients', [HealthFacilityController::class, '
 Route::get('/health-facility/{id}/patients/create', [HealthFacilityController::class, 'createPatient'])->name('health-facility.patients.create');
 Route::get('/health-facility/{id}/book-doctor', [HealthFacilityController::class, 'bookDoctor'])->name('health-facility.book-doctor');
 Route::get('/health-facility/{id}/lab-tests', [HealthFacilityController::class, 'labTests'])->name('health-facility.lab-tests');
+Route::get('/health-facility/{id}/transactions', [HealthFacilityController::class, 'transactions'])->name('health-facility.transactions');
+Route::get('/health-facility/{id}/staff', [HealthFacilityController::class, 'staff'])->name('health-facility.staff');
 
 Route::put('/health-facilities/{id}', [HealthFacilityController::class, 'updateHealthFacility'])->name('health-facilities.update');
 Route::post('/health-facilities/{id}/change-password', [HealthFacilityController::class, 'changePassword'])->name('health-facilities.change-password');

@@ -238,10 +238,11 @@ public function showDoctorDashboard($doctorId)
     ])->findOrFail($doctorId);
 
     // All appointments
-    $appointments = $doctor->appointments()->latest()->get();
+    $appointments = $doctor->appointments()->with('duration', 'patient')->latest()->get();
 
     // Upcoming appointments
     $upcomingAppointments = $doctor->appointments()
+        ->with('duration', 'patient')
         ->where('appointment_time', '>', now())
         ->orderBy('appointment_time')
         ->get();
