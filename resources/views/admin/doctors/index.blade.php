@@ -116,7 +116,7 @@
                             </td>
                             <td>
                                 @if($doctor->specialization)
-                                    <span class="badge bg-primary">{{ $doctor->specialization }}</span>
+                                    <span class="badge bg-primary text-white">{{ $doctor->specialization }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -358,6 +358,8 @@ document.addEventListener('DOMContentLoaded', function(){
     border-radius: 50%;
     font-size: 1rem;
     font-weight: bold;
+    border: 2px solid #e9ecef;
+    margin-right: 1.5rem !important;
 }
 
 .table-responsive {

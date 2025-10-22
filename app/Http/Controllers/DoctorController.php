@@ -97,12 +97,13 @@ class DoctorController extends Controller
      */
     public function getDoctorAppointments(Request $request)
     {
-        $doctorId = $request->route('doctorId');
-
-        $doctor = Doctor::findOrFail($doctorId);
+        $doctor = Auth::guard('doctor')->user();
+        if (!$doctor) {
+            return redirect()->route('login');
+        }
 
         // Paginate appointments 10 per page for the doctor's appointments list
-        $appointments = Appointment::where('doctor_id', $doctorId)
+        $appointments = Appointment::where('doctor_id', $doctor->id)
             ->with(['student', 'patient', 'duration'])
             ->latest()
             ->paginate(10);
@@ -227,15 +228,20 @@ class DoctorController extends Controller
 }
 
 
-public function showDoctorDashboard($doctorId)
+public function showDoctorDashboard()
 {
+    $doctor = Auth::guard('doctor')->user();
+    if (!$doctor) {
+        return redirect()->route('login');
+    }
+
     $doctor = Doctor::with([
         'appointments.student',
         'appointments.patient',
         'appointments.school',
         'appointments.duration',
         'availabilities' // ✅ Include availabilities here
-    ])->findOrFail($doctorId);
+    ])->findOrFail($doctor->id);
 
     // All appointments
     $appointments = $doctor->appointments()->with('duration', 'patient')->latest()->get();
@@ -331,9 +337,12 @@ public function update(Request $request, Doctor $doctor)
 
 
 
-public function updateMeetingLink(Request $request, $id)
+public function updateMeetingLink(Request $request)
 {
-    $doctor = Doctor::findOrFail($id);
+    $doctor = Auth::guard('doctor')->user();
+    if (!$doctor) {
+        return redirect()->route('login');
+    }
 
     $request->validate([
         'meeting_slug' => 'required|string|alpha_dash|unique:doctors,meeting_slug,' . $doctor->id,
@@ -417,8 +426,13 @@ public function uploadImage(Request $request, Doctor $doctor)
 }
 
 
-    public function sendLink(Request $request, Doctor $doctor)
+    public function sendLink(Request $request)
     {
+        $doctor = Auth::guard('doctor')->user();
+        if (!$doctor) {
+            return redirect()->route('login');
+        }
+
         $request->validate([
             'recipient_email' => 'required|email',
             'message' => 'nullable|string',
@@ -452,9 +466,13 @@ public function updateOnlineStatus(Request $request, Doctor $doctor)
     /**
      * Show availability management page for a specific doctor
      */
-    public function availability($doctorId)
+    public function availability()
     {
-        $doctor = Doctor::with('availabilities')->findOrFail($doctorId);
+        $doctor = Auth::guard('doctor')->user();
+        if (!$doctor) {
+            return redirect()->route('login');
+        }
+
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         return view('doctor-availability', [

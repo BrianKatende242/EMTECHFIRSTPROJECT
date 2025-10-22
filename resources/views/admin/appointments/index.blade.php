@@ -6,22 +6,19 @@
 
 @section('content')
 <div class="container-fluid px-3 py-2">
-    <!-- Header Section with Gradient Background -->
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm appointments-header-gradient">
+            <div class="card border-0 shadow-sm bg-primary">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-white">
-                            <h1 class="h3 mb-1 fw-bold text-white">Appointments Management</h1>
+                            <h1 class="h3 mb-1 fw-bold">Appointments Management</h1>
                             <p class="mb-0 opacity-85">Manage healthcare appointments and their details</p>
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createAppointmentModal">
-                                <i class="fa fa-plus me-3"></i> <span>Schedule</span>
-                            </button>
-                            <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#bulkUpdateModal">
-                                <i class="fa fa-tasks me-3"></i> <span>Bulk Update</span>
+                                <i class="mdi mdi-plus me-2"></i>Schedule
                             </button>
                         </div>
                     </div>
@@ -64,7 +61,7 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fa fa-check-circle me-2"></i>{{ session('success') }}
+            <i class="mdi mdi-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -80,10 +77,10 @@
              data-date="{{ $appointment->appointment_time->format('Y-m-d') }}">
             <div class="card h-100 shadow-sm border-0 appointment-card">
                 <!-- Card Header with Status Badge -->
-                <div class="card-header bg-gradient-primary text-white position-relative appointment-card-header">
+                <div class="card-header bg-primary text-white position-relative">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-white" style="font-size: 1rem;">Appointment #{{ $appointment->id }}</h6>
+                            <h6 class="mb-1 fw-bold" style="font-size: 1rem;">Appointment #{{ $appointment->id }}</h6>
                             <small class="opacity-85">{{ optional($appointment->appointment_time)->format('M j, Y g:i A') ?? '-' }}</small>
                         </div>
                         <!-- Status Badge -->
@@ -97,8 +94,8 @@
                                 ];
                                 $statusColor = $statusColors[$appointment->status] ?? 'secondary';
                             @endphp
-                            <span class="badge bg-{{ $statusColor }} rounded-pill px-2 py-1 appointment-status-badge">
-                                <i class="fa fa-circle me-1" style="font-size: 0.5rem;"></i>{{ ucfirst($appointment->status) }}
+                            <span class="badge bg-{{ $statusColor }} rounded-pill px-2 py-1">
+                                <i class="mdi mdi-circle me-1" style="font-size: 0.5rem;"></i>{{ ucfirst($appointment->status) }}
                             </span>
                         </div>
                     </div>
@@ -108,7 +105,7 @@
                     <!-- Patient Information -->
                     <div class="mb-3">
                         <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-user me-2"></i>Patient
+                            <i class="mdi mdi-account me-2"></i>Patient
                         </h6>
                         <div class="p-2 rounded appointment-patient-section">
                             <div class="fw-medium text-dark">{{ $appointment->patient->name ?? '-' }}</div>
@@ -121,7 +118,7 @@
                     <!-- Doctor Information -->
                     <div class="mb-3">
                         <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-user-md me-2"></i>Doctor
+                            <i class="mdi mdi-doctor me-2"></i>Doctor
                         </h6>
                         <div class="p-2 rounded appointment-doctor-section">
                             <div class="fw-medium text-dark">{{ $appointment->doctor->name ?? '-' }}</div>
@@ -134,7 +131,7 @@
                     <!-- Reason and Duration -->
                     <div class="mb-3">
                         <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-calendar-check me-2"></i>Details
+                            <i class="mdi mdi-calendar-check me-2"></i>Details
                         </h6>
                         <div class="row g-2">
                             <div class="col-12">
@@ -152,7 +149,7 @@
                     @if($appointment->school || $appointment->healthFacility)
                     <div class="mb-3">
                         <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-building me-2"></i>Institution
+                            <i class="mdi mdi-office-building me-2"></i>Institution
                         </h6>
                         <div class="p-2 rounded appointment-institution-section">
                             @if($appointment->school)
@@ -168,7 +165,7 @@
                     @if($appointment->payment_reference)
                     <div class="mb-3">
                         <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-credit-card me-2"></i>Payment
+                            <i class="mdi mdi-credit-card me-2"></i>Payment
                         </h6>
                         <div class="p-2 rounded appointment-payment-section">
                             <code class="small text-primary fw-medium">{{ $appointment->payment_reference }}</code>
@@ -179,12 +176,12 @@
                     <!-- Metadata -->
                     <div class="pt-2 border-top border-light">
                         <small class="text-muted d-block">
-                            <i class="fa fa-calendar-plus me-2"></i>
+                            <i class="mdi mdi-calendar-plus me-2"></i>
                             Created {{ optional($appointment->created_at)->format('M j, Y') ?? '-' }}
                         </small>
                         @if($appointment->updated_at && $appointment->updated_at != $appointment->created_at)
                         <small class="text-muted d-block">
-                            <i class="fa fa-edit me-2"></i>
+                            <i class="mdi mdi-pencil me-2"></i>
                             Updated {{ optional($appointment->updated_at)->format('M j, Y') ?? '-' }}
                         </small>
                         @endif
@@ -195,52 +192,27 @@
                 <div class="card-footer bg-white border-0 p-3">
                     <div class="row g-2">
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-info btn-sm fw-semibold px-3 appointment-card-btn" title="View/Edit" style="border-radius: 8px;">
-                                <i class="fa fa-eye me-1"></i>View
+                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View/Edit" style="border-radius: 8px;">
+                                <i class="mdi mdi-eye me-1"></i>View
                             </a>
                         </div>
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3 appointment-card-btn" title="Edit" style="border-radius: 8px;">
-                                <i class="fa fa-edit me-1"></i>Edit
+                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">
+                                <i class="mdi mdi-pencil me-1"></i>Edit
                             </a>
                         </div>
                         <div class="col-auto">
                             <div class="dropdown">
                                 <button class="btn btn-outline-primary btn-sm dropdown-toggle fw-semibold px-3" type="button" data-bs-toggle="dropdown" style="border-radius: 8px;">
-                                    <i class="fa fa-ellipsis-h"></i>
+                                    <i class="mdi mdi-dots-horizontal"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
-                                    @if($appointment->status !== 'completed')
-                                    <li>
-                                        <form action="{{ route('admin.appointments.bulk') }}" method="POST" style="display:inline-block">
-                                            @csrf
-                                            <input type="hidden" name="action" value="complete">
-                                            <input type="hidden" name="ids[]" value="{{ $appointment->id }}">
-                                            <button class="dropdown-item" type="submit" style="padding: 0.5rem 1rem;">
-                                                <i class="fa fa-check me-2 text-success"></i>Mark Complete
-                                            </button>
-                                        </form>
-                                    </li>
-                                    @endif
-                                    @if($appointment->status !== 'cancelled')
-                                    <li>
-                                        <form action="{{ route('admin.appointments.bulk') }}" method="POST" style="display:inline-block">
-                                            @csrf
-                                            <input type="hidden" name="action" value="cancel">
-                                            <input type="hidden" name="ids[]" value="{{ $appointment->id }}">
-                                            <button class="dropdown-item" type="submit" style="padding: 0.5rem 1rem;">
-                                                <i class="fa fa-times me-2 text-danger"></i>Cancel
-                                            </button>
-                                        </form>
-                                    </li>
-                                    @endif
-                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form action="{{ route('admin.model.destroy', ['appointments', $appointment->id]) }}" method="POST" style="display:inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this appointment?')" style="padding: 0.5rem 1rem;">
-                                                <i class="fa fa-trash me-2"></i>Delete
+                                                <i class="mdi mdi-delete me-2"></i>Delete
                                             </button>
                                         </form>
                                     </li>
@@ -255,7 +227,7 @@
         <div class="col-12">
             <div class="card border-0">
                 <div class="card-body text-center py-5">
-                    <i class="fa fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <i class="mdi mdi-calendar text-muted mb-3" style="font-size: 6rem;"></i>
                     <h5 class="text-muted">No appointments found</h5>
                     <p class="text-muted">Try adjusting your filters or schedule a new appointment.</p>
                 </div>
@@ -266,48 +238,6 @@
 
     <!-- Pagination -->
     <div class="mt-4">{{ $items->appends(request()->query())->links() }}</div>
-</div>
-
-<!-- Bulk Update Modal -->
-<div class="modal fade" id="bulkUpdateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Bulk Update Appointments</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('admin.appointments.bulk') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Select Appointments</label>
-                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                            @foreach($items as $appointment)
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="ids[]" value="{{ $appointment->id }}" id="appointment-{{ $appointment->id }}">
-                                <label class="form-check-label" for="appointment-{{ $appointment->id }}">
-                                    #{{ $appointment->id }} - {{ $appointment->patient->name ?? 'Unknown' }} ({{ ucfirst($appointment->status) }})
-                                </label>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Action</label>
-                        <select name="action" class="form-select" required>
-                            <option value="">Choose action...</option>
-                            <option value="complete">Mark as Completed</option>
-                            <option value="cancel">Cancel Appointments</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 
 <!-- Create Appointment Modal (Placeholder - would need full form implementation) -->

@@ -225,7 +225,7 @@ Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
 })->name('book-doctor');
 
 
-Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+Route::get('/doctor/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
 // Appointment actions
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
@@ -259,6 +259,8 @@ Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
     Route::get('/doctors/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.doctors.edit');
     Route::put('/doctors/{id}', [AdminModelController::class, 'update'])->name('admin.doctors.update');
     Route::delete('/doctors/{id}', [AdminModelController::class, 'destroy'])->name('admin.doctors.destroy');
+
+    Route::post('/users/send-invite', [AdminModelController::class, 'sendAdminInvite'])->name('admin.users.send-invite');
 
     Route::get('/appointments', [AdminModelController::class, 'index'])->name('admin.appointments.index');
     Route::get('/appointments/create', [AdminModelController::class, 'create'])->name('admin.appointments.create');
@@ -295,6 +297,8 @@ Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
     Route::put('/health-facilities/{id}', [AdminModelController::class, 'update'])->name('admin.health-facilities.update');
     Route::delete('/health-facilities/{id}', [AdminModelController::class, 'destroy'])->name('admin.health-facilities.destroy');
 
+    Route::get('/doctor-availabilities', [AdminModelController::class, 'index'])->name('admin.doctor-availabilities.index');
+
     // Generic model routes (fallback)
     Route::get('/{modelKey}', [AdminModelController::class, 'index'])->name('admin.model.index');
     Route::get('/{modelKey}/create', [AdminModelController::class, 'create'])->name('admin.model.create');
@@ -310,27 +314,30 @@ Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
     Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
     Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
 });
-Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
-    $doctor = Doctor::findOrFail($doctorId);
+Route::get('doctor/meeting-link/', function () {
+    $doctor = Auth::guard('doctor')->user();
+    if (!$doctor) {
+        return redirect()->route('login');
+    }
     return view('meeting-link', [
         'appointments' => $doctor->appointments()->with(['patient', 'school', 'healthFacility', 'duration'])->latest()->get(),
         'doctor' => $doctor
     ]);
-})->name('doctor.meeting-link');
+})->name('doctor.meeting-link')->middleware(['auth:doctor']);
 
 // Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
-Route::post('/doctor/{id}/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
-    ->name('doctor.update-meeting-link');
+Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
+    ->name('doctor.update-meeting-link')->middleware(['auth:doctor']);
 
 // Web route to send meeting link to an email (school/health facility)
-Route::post('/doctor/{doctor}/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
-    ->name('doctor.send-link');
+Route::post('/doctor/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
+    ->name('doctor.send-link')->middleware(['auth:doctor']);
 
 // Web route to update doctor availability (form submissions)
-Route::post('/doctor/{doctor}/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
-    ->name('doctor.update-availability');
+Route::post('/doctor/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
+    ->name('doctor.update-availability')->middleware(['auth:doctor']);
 
-Route::get('/doctor-dashboard/{doctorId}/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
+Route::get('/doctor-dashboard/availability', [DoctorController::class, 'availability'])->name('doctor.availability')->middleware(['auth:doctor']);
 
 Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilities'])->middleware('admin')->name('doctor.all-availabilities');
 
@@ -350,7 +357,7 @@ Route::get('/doctor-dashboard', function () {
 });
 
 
-Route::get('/doctor-dashboard/{doctorId}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
+Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard')->middleware(['auth:doctor']);
 
 // One-time login link consume route (public)
 Route::get('/one-time-login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('one-time-login.consume');

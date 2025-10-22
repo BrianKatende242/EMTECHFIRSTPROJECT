@@ -1,4 +1,68 @@
-@if(isset($school))
+@php $currentUser = $user ?? auth()->user(); @endphp
+@if($currentUser && ($currentUser->is_admin ?? false))
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ route('admin.index') }}">
+            <i class="mdi mdi-view-dashboard menu-icon"></i>
+            <span class="menu-title">Dashboard</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.doctors.index') ? 'active' : '' }}" href="{{ route('admin.doctors.index') }}">
+            <i class="mdi mdi-stethoscope menu-icon"></i>
+            <span class="menu-title">Doctors</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.appointments.index') ? 'active' : '' }}" href="{{ route('admin.appointments.index') }}">
+            <i class="typcn typcn-calendar menu-icon"></i>
+            <span class="menu-title">Appointments</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+            <i class="mdi mdi-credit-card menu-icon"></i>
+            <span class="menu-title">Payments</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+            <i class="mdi mdi-contrast menu-icon"></i>
+            <span class="menu-title">Transactions</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.patients.index') ? 'active' : '' }}" href="{{ route('admin.patients.index') }}">
+            <i class="typcn typcn-user menu-icon"></i>
+            <span class="menu-title">Patients</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ route('admin.model.index', 'users') }}">
+            <i class="mdi mdi-account-group menu-icon"></i>
+            <span class="menu-title">Company Admins</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.schools.index') ? 'active' : '' }}" href="{{ route('admin.schools.index') }}">
+            <i class="mdi mdi-school menu-icon"></i>
+            <span class="menu-title">Schools</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.health-facilities.index') ? 'active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
+            <i class="mdi mdi-hospital-building menu-icon"></i>
+            <span class="menu-title">Health Facilities</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('admin.doctor-availabilities.index') ? 'active' : '' }}" href="{{ route('admin.doctor-availabilities.index') }}">
+            <i class="mdi mdi-clock menu-icon"></i>
+            <span class="menu-title">Doctor Availabilities</span>
+        </a>
+    </li>
+</ul>
+@elseif(isset($school))
 <ul class="nav">
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('school.dashboard') ? 'active' : '' }}" href="{{ route('school.dashboard', ['school' => $school]) }}">
@@ -91,84 +155,12 @@
         </a>
     </li>
 </ul>
-@endif
-
-@php $currentUser = $user ?? auth()->user(); @endphp
-@if($currentUser && ($currentUser->is_admin ?? false))
-<ul class="nav">
-    <li class="nav-item">
-        <a class="nav-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ route('admin.index') }}">
-            <i class="mdi mdi-view-dashboard menu-icon"></i>
-            <span class="menu-title">Dashboard</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.doctors.index') ? 'active' : '' }}" href="{{ route('admin.doctors.index') }}">
-            <i class="mdi mdi-stethoscope menu-icon"></i>
-            <span class="menu-title">Doctors</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.appointments.index') ? 'active' : '' }}" href="{{ route('admin.appointments.index') }}">
-            <i class="typcn typcn-calendar menu-icon"></i>
-            <span class="menu-title">Appointments</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
-            <i class="mdi mdi-credit-card menu-icon"></i>
-            <span class="menu-title">Payments</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
-            <i class="mdi mdi-contrast menu-icon"></i>
-            <span class="menu-title">Transactions</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.patients.index') ? 'active' : '' }}" href="{{ route('admin.patients.index') }}">
-            <i class="typcn typcn-user menu-icon"></i>
-            <span class="menu-title">Patients</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.schools.index') ? 'active' : '' }}" href="{{ route('admin.schools.index') }}">
-            <i class="mdi mdi-school menu-icon"></i>
-            <span class="menu-title">Schools</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.health-facilities.index') ? 'active' : '' }}" href="{{ route('admin.health-facilities.index') }}">
-            <i class="mdi mdi-hospital-building menu-icon"></i>
-            <span class="menu-title">Health Facilities</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.all-availabilities') ? 'active' : '' }}" href="{{ route('doctor.all-availabilities') }}">
-            <i class="mdi mdi-clock menu-icon"></i>
-            <span class="menu-title">Doctor Availabilities</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.contact-submissions') ? 'active' : '' }}" href="{{ route('admin.contact-submissions') }}">
-            <i class="typcn typcn-mail menu-icon"></i>
-            <span class="menu-title">Contact Submissions</span>
-        </a>
-    </li>
-</ul>
 @elseif(isset($admin))
 <ul class="nav">
     <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.all-availabilities') ? 'active' : '' }}" href="{{ route('doctor.all-availabilities') }}">
+        <a class="nav-link {{ request()->routeIs('admin.doctor-availabilities.index') ? 'active' : '' }}" href="{{ route('admin.doctor-availabilities.index') }}">
             <i class="typcn typcn-time menu-icon"></i>
             <span class="menu-title">Doctor Availabilities</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('admin.contact-submissions') ? 'active' : '' }}" href="{{ route('admin.contact-submissions') }}">
-            <i class="typcn typcn-mail menu-icon"></i>
-            <span class="menu-title">Contact Submissions</span>
         </a>
     </li>
 </ul>

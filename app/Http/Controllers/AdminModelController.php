@@ -14,6 +14,8 @@ class AdminModelController extends Controller
         'patients' => \App\Models\Patient::class,
         'schools' => \App\Models\School::class,
         'health-facilities' => \App\Models\HealthFacility::class,
+        'doctor-availabilities' => \App\Models\Doctor::class,
+        'users' => \App\User::class,
     ];
 
     protected function modelFor($key)
@@ -194,6 +196,27 @@ class AdminModelController extends Controller
 
             $items = $q->paginate(20)->appends(request()->query());
 
+        } elseif ($modelKey === 'health-facilities') {
+            $q = $modelClass::with(['patients', 'doctors']);
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('email', 'like', $term)
+                      ->orWhere('contact', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+
         } elseif ($modelKey === 'doctors') {
             $q = $modelClass::with(['school', 'healthFacility']);
 
@@ -265,6 +288,26 @@ class AdminModelController extends Controller
                 return $this->exportDoctorsCsv($items);
             }
 
+        } elseif ($modelKey === 'users') {
+            $q = $modelClass::where('is_admin', true);
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('name', 'like', $term)
+                      ->orWhere('email', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
+            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+
         } else {
             $items = $modelClass::latest()->paginate(20);
         }
@@ -280,6 +323,11 @@ class AdminModelController extends Controller
             $schools = \App\Models\School::pluck('name','id');
             $hfs = \App\Models\HealthFacility::pluck('name','id');
             return view('admin.doctors.index', compact('modelKey', 'items', 'generatedSlug', 'specializations', 'schools', 'hfs'));
+        }
+
+        // Use dedicated view for users
+        if ($modelKey === 'users') {
+            return view('admin.users.index', compact('modelKey', 'items'));
         }
 
         // Use dedicated view for appointments
@@ -309,6 +357,17 @@ class AdminModelController extends Controller
         // Use dedicated view for schools
         if ($modelKey === 'schools') {
             return view('admin.schools.index', compact('modelKey', 'items'));
+        }
+
+        // Use dedicated view for health-facilities
+        if ($modelKey === 'health-facilities') {
+            return view('admin.health-facilities.index', compact('modelKey', 'items', 'generatedSlug'));
+        }
+
+        // Use dedicated view for doctor-availabilities
+        if ($modelKey === 'doctor-availabilities') {
+            $doctors = $modelClass::with(['availabilities', 'school', 'healthFacility'])->latest()->paginate(20)->appends(request()->query());
+            return view('admin.doctor-availabilities.index', compact('doctors'));
         }
 
         return view('admin.model.index', compact('modelKey', 'items', 'generatedSlug'));
@@ -367,6 +426,18 @@ class AdminModelController extends Controller
 
             $item = $modelClass::create($validated);
 
+        } elseif ($modelKey === 'users') {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email',
+                'password' => 'required|string|min:8',
+                'is_admin' => 'boolean',
+            ]);
+
+            $validated['password'] = bcrypt($validated['password']);
+
+            $item = $modelClass::create($validated);
+
         } else {
             $data = $request->except(['_token']);
             $item = $modelClass::create($data);
@@ -421,6 +492,21 @@ class AdminModelController extends Controller
             }
 
             // Do NOT allow manual meeting_slug updates; keep existing slug
+            $item->update($validated);
+        } elseif ($modelKey === 'users') {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $id,
+                'password' => 'nullable|string|min:8',
+                'is_admin' => 'boolean',
+            ]);
+
+            if (!empty($validated['password'])) {
+                $validated['password'] = bcrypt($validated['password']);
+            } else {
+                unset($validated['password']);
+            }
+
             $item->update($validated);
         } else {
             $data = $request->except(['_token', '_method']);
@@ -504,6 +590,31 @@ class AdminModelController extends Controller
         }
 
         return redirect()->back()->with('success', 'One-time login link sent to doctor email.');
+    }
+
+    public function sendAdminInvite(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|unique:admin_invites,email',
+        ]);
+
+        $token = \App\Models\AdminInvite::generateToken();
+
+        $invite = \App\Models\AdminInvite::create([
+            'email' => $validated['email'],
+            'token' => $token,
+            'expires_at' => now()->addDays(7), // expires in 7 days
+        ]);
+
+        $inviteUrl = url('/admin/register/' . $token);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($validated['email'])->send(new \App\Mail\AdminInviteMail($inviteUrl));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to send invite: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Admin invitation sent successfully.');
     }
 
     // Export doctors as CSV

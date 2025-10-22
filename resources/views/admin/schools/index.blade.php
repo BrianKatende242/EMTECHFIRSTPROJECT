@@ -55,157 +55,139 @@
         </div>
     @endif
 
-    <!-- Schools Cards Grid -->
-    <div class="row g-4" id="admin-schools-cards">
-        @forelse($items as $school)
-        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 school-card"
-             data-name="{{ strtolower($school->name ?? '') }}"
-             data-email="{{ strtolower($school->email ?? '') }}"
-             data-contact="{{ strtolower($school->contact ?? '') }}">
-            <div class="card h-100 shadow-sm border-0 school-card">
-                <!-- Card Header with School Info -->
-                <div class="card-header bg-gradient-primary text-white position-relative school-card-header">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-white" style="font-size: 1rem;">{{ $school->name }}</h6>
-                            <small class="opacity-85">{{ $school->students->count() }} students enrolled</small>
-                        </div>
-                        <!-- Status Badge -->
-                        <div class="ms-2">
-                            <span class="badge bg-success rounded-pill px-2 py-1 school-status-badge">
-                                <i class="fa fa-check-circle me-1"></i>Active
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-body p-3">
-                    <!-- Contact Information -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-address-card me-2"></i>Contact Information
-                        </h6>
-                        <div class="row g-2">
-                            @if($school->email)
-                            <div class="col-12">
-                                <div class="d-flex align-items-center p-2 rounded school-contact-section">
-                                    <i class="fa fa-envelope text-primary me-2" style="width: 16px;"></i>
-                                    <a href="mailto:{{ $school->email }}" class="text-decoration-none small text-dark fw-medium">{{ $school->email }}</a>
+    <!-- Schools Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fa fa-school me-2"></i>Schools List
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="schools-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">#</th>
+                            <th class="border-0">School</th>
+                            <th class="border-0">Contact</th>
+                            <th class="border-0">Students</th>
+                            <th class="border-0">Doctors</th>
+                            <th class="border-0">Address</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0">Created</th>
+                            <th class="border-0 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $school)
+                        <tr data-name="{{ strtolower($school->name ?? '') }}"
+                            data-email="{{ strtolower($school->email ?? '') }}"
+                            data-contact="{{ strtolower($school->contact ?? '') }}">
+                            <td>
+                                <strong>{{ $school->id }}</strong>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-4 bg-info text-white d-flex align-items-center justify-content-center">
+                                        {{ strtoupper(substr($school->name ?? 'S', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ $school->name ?? '-' }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                            @endif
-
-                            @if($school->contact)
-                            <div class="col-12">
-                                <div class="d-flex align-items-center p-2 rounded school-contact-section">
-                                    <i class="fa fa-phone text-success me-2" style="width: 16px;"></i>
-                                    <a href="tel:{{ $school->contact }}" class="text-decoration-none small text-dark fw-medium">{{ $school->contact }}</a>
-                                </div>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Statistics -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-chart-bar me-2"></i>Statistics
-                        </h6>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="p-2 rounded school-stats-section text-center">
+                            </td>
+                            <td>
+                                @if($school->email)
+                                    <div class="mb-1">
+                                        <i class="fa fa-envelope text-primary me-1"></i>
+                                        <a href="mailto:{{ $school->email }}" class="text-decoration-none">{{ $school->email }}</a>
+                                    </div>
+                                @endif
+                                @if($school->contact)
+                                    <div>
+                                        <i class="fa fa-phone text-success me-1"></i>
+                                        <a href="tel:{{ $school->contact }}" class="text-decoration-none">{{ $school->contact }}</a>
+                                    </div>
+                                @endif
+                                @if(!$school->email && !$school->contact)
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="text-center">
                                     <div class="fw-bold text-primary">{{ $school->students->count() }}</div>
-                                    <small class="text-muted">Students</small>
+                                    <small class="text-muted">enrolled</small>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-2 rounded school-stats-section text-center">
+                            </td>
+                            <td>
+                                <div class="text-center">
                                     <div class="fw-bold text-info">{{ $school->doctors->count() }}</div>
-                                    <small class="text-muted">Doctors</small>
+                                    <small class="text-muted">assigned</small>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Address Information -->
-                    @if($school->address)
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa fa-map-marker-alt me-2"></i>Location
-                        </h6>
-                        <div class="p-2 rounded school-address-section">
-                            <div class="small text-dark fw-medium">{{ $school->address }}</div>
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Metadata -->
-                    <div class="pt-2 border-top border-light">
-                        <small class="text-muted d-block">
-                            <i class="fa fa-calendar-plus me-2"></i>
-                            Created {{ optional($school->created_at)->format('M j, Y') ?? '-' }}
-                        </small>
-                        @if($school->updated_at && $school->updated_at != $school->created_at)
-                        <small class="text-muted d-block">
-                            <i class="fa fa-edit me-2"></i>
-                            Updated {{ optional($school->updated_at)->format('M j, Y') ?? '-' }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Enhanced Card Footer -->
-                <div class="card-footer bg-white border-0 p-3">
-                    <div class="row g-2">
-                        <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-outline-info btn-sm fw-semibold px-3 school-card-btn" title="View/Edit" style="border-radius: 8px;">
-                                <i class="fa fa-eye me-1"></i>View
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3 school-card-btn" title="Edit" style="border-radius: 8px;">
-                                <i class="fa fa-edit me-1"></i>Edit
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <div class="dropdown">
-                                <button class="btn btn-outline-primary btn-sm dropdown-toggle fw-semibold px-3" type="button" data-bs-toggle="dropdown" style="border-radius: 8px;">
-                                    <i class="fa fa-ellipsis-h"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow">
-                                    <li>
-                                        <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="dropdown-item" target="_blank">
-                                            <i class="fa fa-external-link me-2 text-info"></i>View Full Details
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form action="{{ route('admin.model.destroy', ['schools', $school->id]) }}" method="POST" style="display:inline-block">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this school?')" style="padding: 0.5rem 1rem;">
-                                                <i class="fa fa-trash me-2"></i>Delete
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            </td>
+                            <td>
+                                @if($school->address)
+                                    <span class="small">{{ Str::limit($school->address, 30) }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-success text-white">
+                                    <i class="fa fa-check-circle me-1"></i>Active
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ optional($school->created_at)->format('M j, Y') ?? '-' }}
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-sm btn-outline-info" title="View Profile">
+                                        <i class="mdi mdi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                        <i class="mdi mdi-pencil"></i>
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="More Actions">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="dropdown-item" target="_blank">
+                                                    <i class="fa fa-external-link me-2 text-info"></i>View Full Details
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="{{ route('admin.model.destroy', ['schools', $school->id]) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this school?')">
+                                                        <i class="fa fa-trash me-2"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <i class="fa fa-school fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No schools found</h5>
+                                <p class="text-muted">Try adjusting your filters or add a new school.</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
-        @empty
-        <div class="col-12">
-            <div class="card border-0">
-                <div class="card-body text-center py-5">
-                    <i class="fa fa-school fa-4x text-muted mb-3"></i>
-                    <h5 class="text-muted">No schools found</h5>
-                    <p class="text-muted">Try adjusting your filters or add a new school.</p>
-                </div>
-            </div>
-        </div>
-        @endforelse
     </div>
 
     <!-- Pagination -->
@@ -235,19 +217,22 @@ document.addEventListener('DOMContentLoaded', function(){
     const searchInput = document.getElementById('admin-search');
     const sortFilter = document.getElementById('sort-filter');
     const clearFiltersBtn = document.getElementById('clear-filters');
-    const cards = Array.from(document.querySelectorAll('#admin-schools-cards .school-card'));
+    const tableRows = Array.from(document.querySelectorAll('#schools-table tbody tr'));
 
     function filterSchools() {
         const q = (searchInput?.value || '').trim().toLowerCase();
 
-        cards.forEach(card => {
-            const name = card.getAttribute('data-name') || '';
-            const email = card.getAttribute('data-email') || '';
-            const contact = card.getAttribute('data-contact') || '';
+        tableRows.forEach(row => {
+            // Skip empty state row
+            if (row.querySelector('td[colspan]')) return;
+
+            const name = row.getAttribute('data-name') || '';
+            const email = row.getAttribute('data-email') || '';
+            const contact = row.getAttribute('data-contact') || '';
 
             const matchesSearch = !q || name.includes(q) || email.includes(q) || contact.includes(q);
 
-            card.style.display = matchesSearch ? '' : 'none';
+            row.style.display = matchesSearch ? '' : 'none';
         });
     }
 
@@ -255,10 +240,10 @@ document.addEventListener('DOMContentLoaded', function(){
         const sortValue = sortFilter?.value || '';
         if (!sortValue) return;
 
-        const container = document.getElementById('admin-schools-cards');
-        const cardsArray = Array.from(cards);
+        const tbody = document.querySelector('#schools-table tbody');
+        const rowsArray = Array.from(tableRows).filter(row => !row.querySelector('td[colspan]'));
 
-        cardsArray.sort((a, b) => {
+        rowsArray.sort((a, b) => {
             let aVal, bVal;
 
             switch(sortValue) {
@@ -283,8 +268,8 @@ document.addEventListener('DOMContentLoaded', function(){
             }
         });
 
-        // Re-append sorted cards
-        cardsArray.forEach(card => container.appendChild(card));
+        // Re-append sorted rows
+        rowsArray.forEach(row => tbody.appendChild(row));
     }
 
     function clearFilters() {

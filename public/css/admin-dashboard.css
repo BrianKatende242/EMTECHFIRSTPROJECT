@@ -366,6 +366,19 @@
     border-radius: 8px;
 }
 
+/* Avatar circle for patients table */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+    margin-right: 1.5rem !important;
+}
+
 /* Admin Schools Custom Styles */
 
 /* School cards */
@@ -418,4 +431,100 @@
 /* Card footer buttons */
 .school-card-btn {
     border-radius: 8px;
+}
+
+/* Admin Doctor Availabilities Custom Styles */
+
+/* Header gradient background */
+.doctor-availabilities-header-gradient {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Search and filters card */
+.doctor-availabilities-filters-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Form controls with custom border */
+.doctor-availabilities-form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+/* Filter and clear buttons */
+.doctor-availabilities-filter-btn {
+    border-radius: 10px;
+}
+
+.doctor-availabilities-clear-btn {
+    border-radius: 10px;
+}
+
+/* Doctor availabilities cards */
+.doctor-availability-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.doctor-availability-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.doctor-availability-card-header {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.doctor-availability-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Contact sections */
+.doctor-availability-contact-section {
+    background: rgba(0, 123, 255, 0.05);
+    border-left: 3px solid #007bff;
+}
+
+.doctor-availability-contact-section .mdi {
+    width: 16px;
+}
+
+/* Availability sections */
+.doctor-availability-schedule-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Specialization sections */
+.doctor-availability-specialization-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+.doctor-availability-specialization-section .mdi,
+.doctor-availability-schedule-section .mdi {
+    width: 16px;
+}
+
+/* Card footer buttons */
+.doctor-availability-card-btn {
+    border-radius: 8px;
+}
+
+/* Modal custom styles */
+.doctor-availabilities-modal .modal-content {
+    border-radius: 15px;
+}
+
+.doctor-availabilities-modal .modal-header {
+    border-radius: 15px 15px 0 0;
 }
