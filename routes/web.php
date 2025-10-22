@@ -360,7 +360,7 @@ Route::get('/doctor-dashboard', function () {
 Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard')->middleware(['auth:doctor']);
 
 // One-time login link consume route (public)
-Route::get('/one-time-login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('one-time-login.consume');
+Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
 
 // Centralized profile route (optional doctor id to preserve doctor context)
 Route::get('/profile/{doctor?}', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

@@ -8,63 +8,115 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cookie;
+use App\Models\OneTimeLoginToken;
 
 class OneTimeLoginController extends Controller
 {
     public function consume($token, Request $request)
     {
-        // find token record
-        $record = DB::table('one_time_logins')->where('token', $token)->first();
+        // Find token record
+        $record = OneTimeLoginToken::where('token', $token)->first();
 
         if (!$record) {
-            return response()->view('one-time-login.error', ['message' => 'Invalid or expired login link.', 'seconds' => 10]);
+            return response()->view('one-time-login.error', [
+                'message' => 'Invalid or expired login link.',
+                'seconds' => 10
+            ]);
         }
 
         if ($record->used) {
-            return response()->view('one-time-login.error', ['message' => 'This login link has already been used.', 'seconds' => 10]);
+            return response()->view('one-time-login.error', [
+                'message' => 'This login link has already been used.',
+                'seconds' => 10
+            ]);
         }
 
-        if ($record->expires_at && now()->greaterThan(
-            \Carbon\Carbon::parse($record->expires_at)
-        )) {
-            return response()->view('one-time-login.error', ['message' => 'This login link has expired.', 'seconds' => 10]);
+        if ($record->isExpired()) {
+            return response()->view('one-time-login.error', [
+                'message' => 'This login link has expired.',
+                'seconds' => 10
+            ]);
         }
 
-        // load doctor and log them in using the web guard
-        $doctor = \App\Models\Doctor::find($record->doctor_id);
-        if (!$doctor) {
-            return response()->view('one-time-login.error', ['message' => 'Doctor account not found.', 'seconds' => 10]);
+        // Get the user based on type
+        $user = null;
+        $redirectUrl = '';
+
+        switch ($record->user_type) {
+            case 'school':
+                $user = \App\Models\School::find($record->user_id);
+                $redirectUrl = url("/school-dashboard/{$user->id}");
+                break;
+            case 'doctor':
+                $user = \App\Models\Doctor::find($record->user_id);
+                $redirectUrl = url('/doctor/dashboard');
+                break;
+            case 'health_facility':
+                $user = \App\Models\HealthFacility::find($record->user_id);
+                $redirectUrl = url("/health-facility/dashboard/{$user->id}");
+                break;
+            default:
+                return response()->view('one-time-login.error', [
+                    'message' => 'Invalid user type.',
+                    'seconds' => 10
+                ]);
         }
 
-        // Flush other sessions for this doctor (best-effort)
-        $this->flushSessionsForDoctor($doctor);
+        if (!$user) {
+            return response()->view('one-time-login.error', [
+                'message' => 'User account not found.',
+                'seconds' => 10
+            ]);
+        }
 
-        // Ensure any currently authenticated user is logged out and session invalidated
-        try {
-            $guard = Auth::guard();
-            $guard->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        // Handle authentication based on user type
+        if ($record->user_type === 'doctor') {
+            // Flush other sessions for this doctor (best-effort)
+            $this->flushSessionsForDoctor($user);
 
-            // Forget remember-me recaller cookie if present
-            $recaller = $guard->getRecallerName();
-            if ($recaller) {
-                Cookie::queue(Cookie::forget($recaller));
+            // Ensure any currently authenticated user is logged out and session invalidated
+            try {
+                $guard = Auth::guard();
+                $guard->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                // Forget remember-me recaller cookie if present
+                $recaller = $guard->getRecallerName();
+                if ($recaller) {
+                    Cookie::queue(Cookie::forget($recaller));
+                }
+            } catch (\Exception $e) {
+                // ignore
             }
-        } catch (\Exception $e) {
-            // ignore
+
+            // Log the doctor in using the doctor guard
+            Auth::guard('doctor')->loginUsingId($user->id);
+        } else {
+            // For schools and health facilities, we might need to implement session-based auth
+            // For now, store user info in session
+            $request->session()->put('authenticated_user', [
+                'type' => $record->user_type,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ]);
         }
 
-    // Log the doctor in using the doctor guard so views/middleware detect the doctor
-    Auth::guard('doctor')->loginUsingId($doctor->id);
-    // Regenerate session to prevent fixation
-    $request->session()->regenerate();
+        // Regenerate session to prevent fixation
+        $request->session()->regenerate();
 
-    // mark token used
-    DB::table('one_time_logins')->where('id', $record->id)->update(['used' => true, 'updated_at' => now()]);
+        // Mark token as used
+        $record->markAsUsed();
 
-    // redirect to authenticated doctor dashboard path
-    return redirect(url('/doctor/dashboard'));
+        \Log::info('One-time login successful', [
+            'user_type' => $record->user_type,
+            'user_id' => $record->user_id,
+            'email' => $record->email
+        ]);
+
+        // Redirect to appropriate dashboard
+        return redirect($redirectUrl);
     }
 
     protected function flushSessionsForDoctor($doctor)
