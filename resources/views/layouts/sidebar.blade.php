@@ -125,33 +125,27 @@
 @elseif(isset($doctor))
 <ul class="nav">
     <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.dashboard') ? 'active' : '' }}" href="{{ route('doctor.dashboard', ['doctorId' => $doctor->id]) }}">
+        <a class="nav-link {{ request()->routeIs('doctor.dashboard') ? 'active' : '' }}" href="{{ route('doctor.dashboard') }}">
             <i class="typcn typcn-device-desktop menu-icon"></i>
             <span class="menu-title">Dashboard</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.appointments') ? 'active' : '' }}" href="{{ route('doctor.appointments', ['doctorId' => $doctor->id]) }}">
+        <a class="nav-link {{ request()->routeIs('doctor.appointments') ? 'active' : '' }}" href="{{ route('doctor.appointments') }}">
             <i class="typcn typcn-calendar menu-icon"></i>
             <span class="menu-title">Appointments</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.meeting-link') ? 'active' : '' }}" href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}">
+        <a class="nav-link {{ request()->routeIs('doctor.meeting-link') ? 'active' : '' }}" href="{{ route('doctor.meeting-link') }}">
             <i class="typcn typcn-video menu-icon"></i>
             <span class="menu-title">Meeting link</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}">
+        <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability') }}">
             <i class="mdi mdi-calendar-clock menu-icon"></i>
             <span class="menu-title">My Availability</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('doctor.availability') ? 'active' : '' }}" href="{{ route('doctor.availability', ['doctorId' => $doctor->id]) }}">
-            <i class="mdi mdi-square-inc-cash menu-icon"></i>
-            <span class="menu-title">Transactions</span>
         </a>
     </li>
 </ul>

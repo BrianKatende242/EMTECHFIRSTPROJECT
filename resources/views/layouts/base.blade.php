@@ -49,7 +49,13 @@
           <li class="nav-item nav-profile dropdown">
             <a class="nav-link" href="#" data-toggle="dropdown" id="profileDropdown">
               <img src="{{ asset('images/profile.png') }}" alt="profile"/>
-              <span class="nav-profile-name">{{ auth()->user()->name ?? 'User' }}</span>
+              <span class="nav-profile-name">
+                @if(isset($doctor))
+                  Dr. {{ $doctor->name }}
+                @else
+                  {{ auth()->user()->name ?? 'User' }}
+                @endif
+              </span>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
               <a class="dropdown-item" href="{{ route('profile.show') }}">
@@ -67,7 +73,13 @@
             </div>
           </li>
           <li class="nav-item nav-user-status dropdown">
-              <p class="mb-0">Last login: {{ auth()->user() && auth()->user()->last_login_at ? auth()->user()->last_login_at->diffForHumans() : 'N/A' }}</p>
+              <p class="mb-0">Last login: 
+                @if(isset($doctor))
+                  {{ $doctor->last_login_at ? $doctor->last_login_at->diffForHumans() : 'N/A' }}
+                @else
+                  {{ auth()->user() && auth()->user()->last_login_at ? auth()->user()->last_login_at->diffForHumans() : 'N/A' }}
+                @endif
+              </p>
           </li>
         </ul>
         <ul class="navbar-nav navbar-nav-right">

@@ -320,7 +320,6 @@ Route::get('doctor/meeting-link/', function () {
         return redirect()->route('login');
     }
     return view('meeting-link', [
-        'appointments' => $doctor->appointments()->with(['patient', 'school', 'healthFacility', 'duration'])->latest()->get(),
         'doctor' => $doctor
     ]);
 })->name('doctor.meeting-link')->middleware(['auth:doctor']);

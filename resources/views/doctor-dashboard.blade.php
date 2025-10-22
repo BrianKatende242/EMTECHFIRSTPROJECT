@@ -144,7 +144,7 @@
                                     </div>
                                     <div class="d-flex gap-2">
                                         <a href="{{ $meetingLink }}" target="_blank" class="btn btn-sm btn-success">Start</a>
-                                        <a href="/doctor/{{ $doctor->id }}/appointments" class="btn btn-sm btn-outline-secondary">View</a>
+                                        <a href="{{ route('doctor.appointments') }}" class="btn btn-sm btn-outline-secondary">View</a>
                                     </div>
                                 </li>
                             @endforeach

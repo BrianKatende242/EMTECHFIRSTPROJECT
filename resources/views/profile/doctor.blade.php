@@ -26,8 +26,8 @@
                             <dt class="col-sm-3">School</dt>
                             <dd class="col-sm-9">{{ $doctor->school->name ?? '—' }}</dd>
                         </dl>
-                        <a href="{{ route('doctor.meeting-link', ['doctorId' => $doctor->id]) }}" class="btn btn-sm btn-outline-secondary">Meeting Links</a>
-                        <a href="{{ url('/doctor/'.$doctor->id.'/appointments') }}" class="btn btn-sm btn-outline-primary">Appointments</a>
+                        <a href="{{ route('doctor.meeting-link') }}" class="btn btn-sm btn-outline-secondary">Meeting Links</a>
+                        <a href="{{ route('doctor.appointments') }}" class="btn btn-sm btn-outline-primary">Appointments</a>
                     </div>
                 </div>
             </div>
