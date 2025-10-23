@@ -6,8 +6,8 @@ use App\Models\Appointment;
 use App\Models\School;
 use App\Models\HealthFacility;
 use App\Models\Doctor;
-use App\Models\Student;
 use App\Models\Patient;
+use App\Models\Duration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -21,36 +21,37 @@ class AppointmentController extends Controller
     // Validate request
     $validator = Validator::make($request->all(), [
         'doctor_id' => 'required|exists:doctors,id',
-        'duration' => 'required|in:15,20,30,45,60',
-        'appointment_time' => [
-            'required',
-            'date',
-            function ($attribute, $value, $fail) {
-                if (now()->diffInHours(Carbon::parse($value)) < 1) {
-                    $fail('Appointments must be scheduled at least 1 hour in advance.');
-                }
-            }
-        ],
+        'duration_id' => 'required|exists:durations,id',
+        'appointment_time' => 'required|date|after:now',
         'reason' => 'required|string|max:500',
-        'health_facility_id' => 'required_without:school_id|exists:health_facilities,id',
-        'patient_id' => 'required_with:health_facility_id|exists:patients,id',
-        'school_id' => 'required_without:health_facility_id|exists:schools,id',
-        'student_id' => 'required_with:school_id|exists:students,id'
+        'patient_id' => 'required|exists:patients,id',
+        'school_id' => 'nullable|exists:schools,id',
+        'health_facility_id' => 'nullable|exists:health_facilities,id'
     ]);
 
     // Additional validation
     $validator->after(function ($validator) use ($request) {
-        if ($request->filled('health_facility_id')) {
-            $patient = Patient::find($request->patient_id);
-            if ($patient && $patient->health_facility_id != $request->health_facility_id) {
+        // Parse the appointment time
+        try {
+            $appointmentDateTime = Carbon::parse($request->appointment_time);
+
+            // Check if appointment is at least 1 hour in advance
+            if (now()->diffInHours($appointmentDateTime, false) < 1) {
+                $validator->errors()->add('appointment_time', 'Appointments must be scheduled at least 1 hour in advance.');
+            }
+        } catch (\Exception $e) {
+            $validator->errors()->add('appointment_time', 'Invalid date or time format.');
+            return;
+        }
+
+        // Validate patient belongs to the institution
+        $patient = Patient::find($request->patient_id);
+        if ($patient) {
+            if ($request->filled('health_facility_id') && $patient->health_facility_id != $request->health_facility_id) {
                 $validator->errors()->add('patient_id', 'Patient does not belong to this health facility');
             }
-        }
-        
-        if ($request->filled('school_id')) {
-            $student = Student::find($request->student_id);
-            if ($student && $student->school_id != $request->school_id) {
-                $validator->errors()->add('student_id', 'Student does not belong to this school');
+            if ($request->filled('school_id') && $patient->school_id != $request->school_id) {
+                $validator->errors()->add('patient_id', 'Patient does not belong to this school');
             }
         }
     });
@@ -64,17 +65,30 @@ class AppointmentController extends Controller
 
     // Create appointment
     try {
+    $appointmentDateTime = Carbon::parse($request->appointment_time);
+
     $appointment = Appointment::create([
             'doctor_id' => $request->doctor_id,
-            'appointment_time' => $request->appointment_time,
-            'duration' => (int)$request->duration,
+            'appointment_time' => $appointmentDateTime,
+            'duration_id' => $request->duration_id,
             'reason' => $request->reason,
             'status' => 'awaiting_payment',
             'health_facility_id' => $request->health_facility_id,
             'patient_id' => $request->patient_id,
-            'school_id' => $request->school_id,
-            'student_id' => $request->student_id
+            'school_id' => $request->school_id
         ]);
+
+        // Send confirmation if needed
+        $this->sendAppointmentConfirmation($appointment);
+
+        // Check if this is an AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment scheduled successfully',
+                'appointment' => $appointment->load(['patient', 'doctor'])
+            ]);
+        }
 
         // Redirect based on context
         if ($appointment->health_facility_id) {
@@ -89,11 +103,16 @@ class AppointmentController extends Controller
 
     } catch (\Exception $e) {
         \Log::error('Appointment creation failed: '.$e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Appointment creation failed',
-            'error' => $e->getMessage()
-        ], 500);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Appointment creation failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+        return redirect()->back()->with('error', 'Appointment creation failed');
     }
 }
     public function index(Request $request)
@@ -102,7 +121,7 @@ class AppointmentController extends Controller
         
         if ($request->has('school_id')) {
             $query->where('school_id', $request->school_id)
-                  ->with(['student', 'doctor']);
+                  ->with(['patient', 'doctor']);
         } 
         elseif ($request->has('health_facility_id')) {
             $query->where('health_facility_id', $request->health_facility_id)
@@ -126,7 +145,7 @@ class AppointmentController extends Controller
     public function checkStatus($referenceId)
     {
         $appointment = Appointment::where('payment_reference', $referenceId)
-            ->with(['student', 'patient', 'doctor'])
+            ->with(['patient', 'doctor'])
             ->firstOrFail();
 
         return response()->json([
@@ -167,24 +186,24 @@ class AppointmentController extends Controller
 
     protected function sendAppointmentConfirmation(Appointment $appointment)
     {
-        $user = $appointment->student ?? $appointment->patient;
+        $user = $appointment->patient;
         $institution = $appointment->school ?? $appointment->healthFacility;
         $doctor = $appointment->doctor;
         
         $message = "Appointment Confirmed:\n\n" .
-                   ($appointment->student ? "Student" : "Patient") . ": {$user->name}\n" .
+                   "Patient: {$user->name}\n" .
                    "Doctor: Dr. {$doctor->name}\n" .
                    "Type: " . ($doctor->specialization === 'General Practitioner' ? 'General' : 'Specialist') . "\n" .
-                   "Duration: {$appointment->duration} mins\n" .
+                   "Duration: {$appointment->duration->minutes} mins\n" .
                    "Time: {$appointment->appointment_time->format('D, M j, Y g:i A')}\n" .
                    "Reason: {$appointment->reason}";
 
         // Send to appropriate contacts
-        if ($appointment->student && $appointment->student->parent_contact) {
-            $this->sendSms($appointment->student->parent_contact, $message);
-        }
-        elseif ($appointment->patient && $appointment->patient->contact_number) {
-            $this->sendSms($appointment->patient->contact_number, $message);
+        if ($appointment->patient) {
+            $contactNumber = $appointment->patient->contact_number ?? $appointment->patient->parent_contact;
+            if ($contactNumber) {
+                $this->sendSms($contactNumber, $message);
+            }
         }
 
         // Send to institution

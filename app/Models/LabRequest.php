@@ -33,9 +33,9 @@ class LabRequest extends Model
         return $this->belongsTo(School::class);
     }
 
-    public function student(): BelongsTo
+    public function patient(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Patient::class, 'student_id');
     }
 
     public function labTest(): BelongsTo

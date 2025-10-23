@@ -35,10 +35,10 @@
                                     @foreach($appointments as $appointment)
                                     <tr>
                                         <td>{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-                                        <td>{{ $appointment->student->name }}</td>
+                                        <td>{{ $appointment->patient->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
-                                        <td>{{ $appointment->duration }} mins</td>
-                                        <td>{{ number_format($appointment->amount) }} UGX</td>
+                                        <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 
@@ -83,27 +83,14 @@
     <input type="hidden" name="school_id" value="{{ $school->id }}">
 
     <div class="mb-3">
-        <label for="student_id" class="form-label">Student</label>
-        <select id="student_id" class="form-control form-select" name="student_id" required>
+        <label for="patient_id" class="form-label">Student</label>
+        <select id="patient_id" class="form-control form-select" name="patient_id" required>
             <option value="">Select student</option>
             @foreach($patients as $patient)
             <option value="{{ $patient->id }}">{{ $patient->name }}</option>
             @endforeach
         </select>
-        @error('student_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="mb-3">
-        <label for="doctor_id" class="form-label">Doctor</label>
-        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
-            <option value="">Select doctor</option>
-            @foreach($doctors as $doctor)
-            <option value="{{ $doctor->id }}">{{ $doctor->name }} - {{ $doctor->specialization }}</option>
-            @endforeach
-        </select>
-        @error('doctor_id')
+        @error('patient_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>
@@ -117,16 +104,27 @@
     </div>
 
     <div class="mb-3">
-        <label for="duration" class="form-label">Duration (mins)</label>
-        <select id="duration" class="form-control form-select" name="duration" required>
+        <label for="duration_id" class="form-label">Duration</label>
+        <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
-            <option value="15">15 minutes</option>
-            <option value="20">20 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
+            @foreach(\App\Models\Duration::active()->get() as $duration)
+                                                    <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+            @endforeach
         </select>
-        @error('duration')
+        @error('duration_id')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3">
+        <label for="doctor_id" class="form-label">Doctor</label>
+        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
+            <option value="">Select Date First</option>
+            @foreach($doctors ?? [] as $doc)
+                <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+            @endforeach
+        </select>
+        @error('doctor_id')
             <div class="text-danger small">{{ $message }}</div>
         @enderror
     </div>
@@ -148,3 +146,52 @@
         </div>
         </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const appointmentTimeInput = document.getElementById('appointment_time');
+    const doctorSelect = document.getElementById('doctor_id');
+    const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
+
+    appointmentTimeInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        if (!selectedDate || isNaN(selectedDate.getTime())) {
+            // Reset doctor options
+            doctorOptions.forEach(option => {
+                option.style.display = 'none';
+            });
+            doctorSelect.value = '';
+            return;
+        }
+
+        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+        // Fetch available doctors for this day
+        fetch(`/api/doctors/available?day=${dayOfWeek}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const availableDoctorIds = data.doctors.map(doctor => doctor.id.toString());
+
+                    doctorOptions.forEach(option => {
+                        if (availableDoctorIds.includes(option.value)) {
+                            option.style.display = 'block';
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    });
+
+                    // Reset selection if current selection is not available
+                    if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
+                        doctorSelect.value = '';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching available doctors:', error);
+            });
+    });
+});
+</script>
+@endpush

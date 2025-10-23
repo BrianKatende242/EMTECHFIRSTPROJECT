@@ -24,10 +24,11 @@ class PaymentController extends Controller
             return back()->with('error', 'This appointment is not awaiting payment.');
         }
         // Load relations and pass sidebar context so menu renders
-        $appointment->load(['school', 'doctor', 'student', 'patient', 'healthFacility']);
+        $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
         $school = $appointment->school;
         $doctor = $appointment->doctor;
-        return view('payments/appointment-pay', compact('appointment', 'school', 'doctor'));
+        $healthFacility = $appointment->healthFacility;
+        return view('payments/appointment-pay', compact('appointment', 'school', 'doctor', 'healthFacility'));
     }
 
     // Initialize API User (one-time setup)
@@ -102,12 +103,16 @@ class PaymentController extends Controller
             'amount' => 'nullable|numeric',
         ]);
 
-        $appointment = Appointment::with(['patient', 'student'])->findOrFail($validated['appointment_id']);
+        $appointment = Appointment::with(['patient', 'healthFacility'])->findOrFail($validated['appointment_id']);
 
         // Determine payer phone and amount
-        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->student->parent_contact ?? null);
+        $phone = $validated['phone_number'] ?? ($appointment->patient->contact_number ?? $appointment->patient->parent_contact ?? $appointment->healthFacility->contact ?? null);
         if (!$phone) {
-            return back()->with('error', 'No phone number available for this appointment.');
+            $message = 'No phone number available for this appointment.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return back()->with('error', $message);
         }
 
         // Normalize phone to MSISDN digits without plus (e.g., 2567XXXXXXXX)
@@ -133,7 +138,7 @@ class PaymentController extends Controller
             }
         }
 
-        $amount = $validated['amount'] ?? ($appointment->amount ?? 1.00); // allow override on pay page
+        $amount = $validated['amount'] ?? ($appointment->duration ? $appointment->duration->getPrice() : 1.00); // allow override on pay page
 
         // External ID ties request to this appointment
         $externalId = 'appointment-' . $appointment->id . '-' . time();
@@ -141,7 +146,11 @@ class PaymentController extends Controller
     $result = $this->momoService->requestToPay($amount, $phone, $externalId, 'Appointment payment', 'KETI AI');
 
         if (!($result['success'] ?? false)) {
-            return back()->with('error', $result['message'] ?? 'Failed to initiate payment');
+            $message = $result['message'] ?? 'Failed to initiate payment';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return back()->with('error', $message);
         }
 
         // Store payment reference on appointment for tracking
@@ -149,7 +158,11 @@ class PaymentController extends Controller
         // Keep status as awaiting_payment until confirmed by callback or manual success
         $appointment->save();
 
-        return back()->with('success', 'Payment request sent. Please approve on your phone.');
+        $message = 'Payment request sent. Please approve on your phone.';
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message, 'redirect' => route('payment.appointment.success', $appointment->id)]);
+        }
+        return back()->with('success', $message);
     }
 
     // Mark appointment as paid (manual success landing)

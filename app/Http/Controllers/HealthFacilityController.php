@@ -208,7 +208,7 @@ class HealthFacilityController extends Controller
         $patients = Patient::where('health_facility_id', $id)->latest()->get();
         $doctors = Doctor::latest()->get();
         $appointments = Appointment::where('health_facility_id', $id)
-            ->with(['patient', 'doctor'])
+            ->with(['patient', 'doctor', 'duration'])
             ->latest()
             ->get();
         return view('health-facility/book-doctor', compact('healthFacility', 'patients', 'doctors', 'appointments'));

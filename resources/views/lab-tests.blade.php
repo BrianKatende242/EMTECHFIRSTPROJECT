@@ -24,7 +24,7 @@
                 @foreach($labTests as $labTest)
                 <tr>
                     <td>{{ $labTest->created_at->format('M d, Y') }}</td>
-                    <td>{{ $labTest->student->name }}</td>
+                    <td>{{ $labTest->patient->name }}</td>
                     <td>{{ $labTest->test_type }}</td>
                     <td>
                         <span class="badge bg-{{ 

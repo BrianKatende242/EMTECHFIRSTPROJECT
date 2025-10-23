@@ -8,18 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Appointment extends Model {
     protected $fillable = [
         'school_id',
-        'student_id',
+        'patient_id', // Unified patient reference (replaces student_id)
         'doctor_id',
-        'duration',
+        'duration_id',
         'appointment_time',
         'reason',
-        'patient_id',
         'health_facility_id',
         'status',
-        'school_id',       // nullable
-       'health_facility_id', // nullable
-       'patient_id',      // nullable
-       'student_id'       // nullable
+        'payment_reference',
+        // 'amount', // Removed - amount now comes from duration relationship
     ];
     
 
@@ -36,42 +33,49 @@ class Appointment extends Model {
     {
         return $this->belongsTo(School::class);
     }
-    
-    public function student(): BelongsTo
+
+    public function patient(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Patient::class);
     }
-    
+
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
 
-    public function healthFacility()
-{
-    return $this->belongsTo(HealthFacility::class);
-
-}
-
-    
-
-  
-    
-    public function patient(): BelongsTo
+    public function duration(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Duration::class);
+    }
+
+    public function healthFacility(): BelongsTo
+    {
+        return $this->belongsTo(HealthFacility::class);
     }
 
 
     // Helper method to get the institution (school or health facility)
     public function institution()
     {
-        return $this->school_id ? $this->school : $this->healthFacility;
+        return $this->school ?? $this->healthFacility;
     }
 
-    // Helper method to get the user (student or patient)
+    // Helper method to get the patient (unified)
     public function user()
     {
-        return $this->student_id ? $this->student : $this->patient;
+        return $this->patient;
+    }
+
+    // Check if this is a school appointment
+    public function isSchoolAppointment()
+    {
+        return !is_null($this->school_id);
+    }
+
+    // Check if this is a health facility appointment
+    public function isHealthFacilityAppointment()
+    {
+        return !is_null($this->health_facility_id);
     }
 }
