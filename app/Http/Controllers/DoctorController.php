@@ -216,7 +216,6 @@ class DoctorController extends Controller
 public function showDoctorDashboard($doctorId)
 {
     $doctor = Doctor::with([
-        'appointments.student',
         'appointments.patient',
         'appointments.school',
         'appointments.duration',
