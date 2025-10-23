@@ -187,10 +187,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.model.edit', ['health-facilities', $facility->id]) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                    <a href="{{ route('admin.health-facilities.edit', $facility->id) }}" class="btn btn-sm btn-outline-info" title="View Details">
                                         <i class="mdi mdi-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.model.edit', ['health-facilities', $facility->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                    <a href="{{ route('admin.health-facilities.edit', $facility->id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
                                         <i class="mdi mdi-pencil"></i>
                                     </a>
                                     <div class="dropdown">
@@ -199,13 +199,13 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
                                             <li>
-                                                <a href="{{ route('admin.model.edit', ['health-facilities', $facility->id]) }}" class="dropdown-item" target="_blank">
+                                                <a href="{{ route('admin.health-facilities.edit', $facility->id) }}" class="dropdown-item" target="_blank">
                                                     <i class="mdi mdi-open-in-new me-2 text-info"></i>View Full Details
                                                 </a>
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form action="{{ route('admin.model.destroy', ['health-facilities', $facility->id]) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('admin.health-facilities.destroy', $facility->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this health facility?')">
@@ -245,7 +245,7 @@
                 <h5 class="modal-title">Create Health Facility</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('admin.model.store', 'health-facilities') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.health-facilities.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     @if($errors->any())
