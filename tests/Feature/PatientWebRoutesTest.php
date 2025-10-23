@@ -25,6 +25,14 @@ class PatientWebRoutesTest extends TestCase
         $this->createTestDurations();
     }
 
+    protected function mockAuthenticatedSchool(School $school)
+    {
+        // Mock the getAuthenticatedSchool function to return our test school
+        $this->app->bind('getAuthenticatedSchool', function () use ($school) {
+            return $school;
+        });
+    }
+
     /** @test */
     public function it_can_display_students_page()
     {
@@ -101,9 +109,15 @@ class PatientWebRoutesTest extends TestCase
     /** @test */
     public function it_validates_web_student_creation()
     {
+        $school = School::create([
+            'name' => 'Test School',
+            'email' => 'test@school.com',
+            'contact' => '+256700000000',
+        ]);
+
         $response = $this->withoutMiddleware()->post('/students/create', [
             'patient_type' => 'new',
-            'school_id' => 1, // Add school_id so validation proceeds to check other fields
+            'school_id' => $school->id, // Use the created school's ID
             'name' => '',
             'gender' => 'invalid',
             'birth_date' => 'not-a-date',
@@ -136,7 +150,7 @@ class PatientWebRoutesTest extends TestCase
             'school_id' => $school->id,
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$student->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$student->id}/delete");
 
         $response->assertRedirect("/students/{$school->id}")
                 ->assertSessionHas('success', 'Student deleted successfully.');
@@ -179,7 +193,7 @@ class PatientWebRoutesTest extends TestCase
             'reason' => 'Medical checkup',
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$student->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$student->id}/delete");
 
         $response->assertRedirect("/students/{$school->id}")
                 ->assertSessionHas('error', 'Cannot delete student with existing appointments.');

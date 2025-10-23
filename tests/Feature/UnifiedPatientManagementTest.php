@@ -480,7 +480,7 @@ class UnifiedPatientManagementTest extends TestCase
             'gender' => 'male',
         ], ['school_id' => $school->id]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$patient->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$patient->id}/delete");
 
         $response->assertRedirect(route('students', ['school' => $school->id]))
                 ->assertSessionHas('success', 'Student deleted successfully.');
@@ -521,7 +521,7 @@ class UnifiedPatientManagementTest extends TestCase
             'duration_id' => $this->getGeneralDurationId(),
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$patient->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$patient->id}/delete");
 
         $response->assertRedirect(route('students', ['school' => $school->id]))
                 ->assertSessionHas('error', 'Cannot delete student with existing appointments.');

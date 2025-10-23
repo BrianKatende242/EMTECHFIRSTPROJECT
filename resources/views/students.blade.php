@@ -57,7 +57,7 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="{{ route('students') }}" id="filterForm">
+                        <form method="GET" action="{{ route('students', ['school' => $school->id]) }}" id="filterForm">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -113,7 +113,7 @@
                             @if(request()->hasAny(['search', 'grade', 'gender', 'min_age', 'max_age']))
                                 <div class="row mt-2">
                                     <div class="col-12">
-                                        <a href="{{ route('students') }}" class="btn btn-outline-secondary btn-sm">
+                                        <a href="{{ route('students', ['school' => $school->id]) }}" class="btn btn-outline-secondary btn-sm">
                                             <i class="fa fa-times"></i> Clear Filters
                                         </a>
                                         <small class="text-muted ml-2">
@@ -287,7 +287,7 @@
             var modalStudentName = deleteStudentModal.querySelector('#studentName');
             var form = deleteStudentModal.querySelector('#deleteStudentForm');
             modalStudentName.textContent = studentName;
-            form.action = '/students/' + studentId + '/delete'; // Adjust route as needed
+            form.action = '/students/' + {{ $school->id }} + '/' + studentId + '/delete'; // Adjust route as needed
         });
 
         // Toggle patient type sections

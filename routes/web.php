@@ -74,12 +74,7 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 use App\Http\Controllers\SchoolController;
 
-Route::get('/school-dashboard', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
     return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
@@ -94,12 +89,7 @@ Route::get('/school-dashboard', function () {
 })->name('school.dashboard');
 
 
-Route::get('/students', function (Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/students/{school}', function (Request $request, App\Models\School $school) {
     $query = $school->students();
 
     // Apply filters
@@ -134,31 +124,30 @@ Route::get('/students', function (Request $request) {
 })->name('students');
 
 
-Route::delete('/students/{student}/delete', function ($studentId) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::delete('/students/{school}/{student}/delete', function ($schoolId, $studentId) {
+    $school = App\Models\School::findOrFail($schoolId);
     $student = App\Models\Patient::findOrFail($studentId);
+
+    // Verify the student belongs to the school
+    if ($student->school_id !== $school->id) {
+        abort(403);
+    }
 
     // Check if student has any appointments
     if ($student->appointments()->count() > 0) {
-        return redirect()->route('students')
+        return redirect()->route('students', ['school' => $school->id])
             ->with('error', 'Cannot delete student with existing appointments.');
     }
 
     // Deleting the student will cascade and remove related appointments (handled in Student model)
     $student->delete();
 
-    return redirect()->route('students')->with('success', 'Student deleted successfully.');
+    return redirect()->route('students', ['school' => $school->id])->with('success', 'Student deleted successfully.');
 })->name('students.delete');
 
 Route::post('/students/create', function (Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
 
     try {
         $validated = $request->validate([
@@ -175,7 +164,7 @@ Route::post('/students/create', function (Request $request) {
 
             // Check if patient is already associated with this school
             if ($patient->school_id == $school->id) {
-                return redirect()->route('students')
+                return redirect()->route('students', ['school' => $school->id])
                     ->with('error', 'Patient is already associated with this school.');
             }
 
@@ -185,7 +174,7 @@ Route::post('/students/create', function (Request $request) {
                 'grade' => $request->input('grade'), // Optional grade for existing patients
             ]);
 
-            return redirect()->route('students')
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Existing patient associated with school successfully.');
         } else {
             // Handle new patient
@@ -208,7 +197,7 @@ Route::post('/students/create', function (Request $request) {
                 'grade' => $newValidation['grade'],
             ]);
 
-            return redirect()->route('students')
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Student created successfully.');
         }
     } catch (\Illuminate\Validation\ValidationException $e) {
@@ -219,12 +208,7 @@ Route::post('/students/create', function (Request $request) {
 })->name('students.create');
 
 
-Route::get('/lab-tests', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/lab-tests/{school}', function (App\Models\School $school) {
     // Paginate lab tests for the school (15 per page)
     $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
 
@@ -237,10 +221,8 @@ Route::get('/lab-tests', function () {
 
 // Handle lab test form submissions from web forms (redirect back to lab-tests page)
 Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
 
     $validated = $request->validate([
         'student_id' => 'required|exists:students,id',
@@ -253,48 +235,33 @@ Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
         'status' => 'pending'
     ]));
 
-    return redirect()->route('lab-tests')->with('success', 'Lab test requested successfully.');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test requested successfully.');
 })->name('lab-tests.store');
 
 // Delete a lab test (web)
-Route::delete('/lab-tests/{labTest}', function (App\Models\LabTest $labTest) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::delete('/lab-tests/{school}/{labTest}', function (App\Models\School $school, App\Models\LabTest $labTest) {
     // Verify the lab test belongs to the authenticated school
     if ($labTest->school_id !== $school->id) {
         abort(403);
     }
 
     $labTest->delete();
-    return redirect()->route('lab-tests')->with('success', 'Lab test deleted');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test deleted');
 })->name('lab-tests.destroy');
 
 // Mark a lab test as completed (web)
-Route::post('/lab-tests/{labTest}/complete', function (App\Models\LabTest $labTest) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::post('/lab-tests/{school}/{labTest}/complete', function (App\Models\School $school, App\Models\LabTest $labTest) {
     // Verify the lab test belongs to the authenticated school
     if ($labTest->school_id !== $school->id) {
         abort(403);
     }
 
     $labTest->update(['status' => 'completed']);
-    return redirect()->route('lab-tests')->with('success', 'Lab test marked completed');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test marked completed');
 })->name('lab-tests.complete');
 
 
-Route::get('/book-doctor', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/book-doctor/{school}', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),

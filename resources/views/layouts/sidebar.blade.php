@@ -59,25 +59,25 @@
 @elseif(isset($school))
 <ul class="nav">
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('school-dashboard') ? 'active' : '' }}" href="{{ route('school.dashboard') }}">
+        <a class="nav-link {{ request()->is('school-dashboard') ? 'active' : '' }}" href="{{ route('school.dashboard', ['school' => $school->id]) }}">
             <i class="typcn typcn-device-desktop menu-icon"></i>
             <span class="menu-title">Dashboard</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('students*') ? 'active' : '' }}" href="{{ route('students') }}">
+        <a class="nav-link {{ request()->is('students*') ? 'active' : '' }}" href="{{ route('students', ['school' => $school->id]) }}">
             <i class="typcn typcn-user menu-icon"></i>
             <span class="menu-title">Students</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('book-doctor*') ? 'active' : '' }}" href="{{ route('book-doctor') }}">
+        <a class="nav-link {{ request()->is('book-doctor*') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school->id]) }}">
             <i class="mdi mdi-calendar-clock menu-icon"></i>
             <span class="menu-title">Appointments</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('book-doctor*') ? 'active' : '' }}" href="{{ route('book-doctor') }}">
+        <a class="nav-link {{ request()->is('book-doctor*') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school->id]) }}">
             <i class="mdi mdi-square-inc-cash menu-icon"></i>
             <span class="menu-title">Transactions</span>
         </a>
