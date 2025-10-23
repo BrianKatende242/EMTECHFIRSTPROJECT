@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ asset('pollix/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/css/vertical-layout-light/style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="shortcut icon" href="{{ asset('images/ketiai-logo.svg') }}" />
 
     {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
@@ -189,6 +190,7 @@
 
   <script src="{{ asset('pollix/vendors/js/vendor.bundle.base.js') }}"></script>
   <script src="{{ asset('pollix/vendors/chart.js/Chart.min.js') }}"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="{{ asset('pollix/js/off-canvas.js') }}"></script>
   <script src="{{ asset('pollix/js/hoverable-collapse.js') }}"></script>
   <script src="{{ asset('pollix/js/template.js') }}"></script>

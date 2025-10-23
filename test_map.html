@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Map Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" />
+    <style>
+        #doctorMap {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Doctor Location Map Test</h1>
+    <div id="doctorMap"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    // Test data - Schools, Health Facilities, and Independent Doctors
+    const locations = [
+        ["Kampala International School", 0.3476, 32.5825, "school", "School", "Kampala"],
+        ["Entebbe General Hospital", 0.0562, 32.4794, "health_facility", "Health Facility", "Entebbe"],
+        ["Dr. John Doe", 0.4244, 33.2041, "doctor", "Independent Doctor", "Jinja"]
+    ];        // Color mapping for different location types
+        const locationColors = {
+            'school': '#667eea',
+            'health_facility': '#f093fb',
+            'doctor': '#95a5a6'
+        };
+
+        // Icon mapping for different location types
+        const locationIcons = {
+            'school': 'mdi-school',
+            'health_facility': 'mdi-hospital-building',
+            'doctor': 'mdi-doctor'
+        };
+
+        function initializeDoctorMap() {
+            const doctorMapElement = document.getElementById('doctorMap');
+            if (!doctorMapElement) {
+                console.error('Doctor map element not found!');
+                return;
+            }
+
+            console.log('Initializing doctor map...');
+
+            if (typeof L === 'undefined') {
+                console.error('Leaflet library not loaded!');
+                return;
+            }
+
+            try {
+                // Clear any existing map
+                if (doctorMapElement._leaflet_id) {
+                    doctorMapElement._leaflet_id = null;
+                }
+
+                // Initialize map centered on Uganda
+                const doctorMap = L.map('doctorMap').setView([1.3733, 32.2903], 7); // Uganda coordinates
+                console.log('Map initialized');
+
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 18,
+                }).addTo(doctorMap);
+                console.log('Tiles added');
+
+                console.log('Locations:', locations);
+
+                // Add markers for each location
+                locations.forEach(location => {
+                    const [locationName, lat, lng, type, entityType, city] = location;
+
+                    // Create custom icon
+                    const customIcon = L.divIcon({
+                        html: `<div style="background-color: ${locationColors[type]}; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                  <i class="mdi ${locationIcons[type]}" style="color: white; font-size: 14px;"></i>
+                               </div>`,
+                        className: 'custom-doctor-marker',
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+
+                    L.marker([lat, lng], { icon: customIcon })
+                        .addTo(doctorMap)
+                        .bindPopup(`
+                            <div style="text-align: center;">
+                                <strong>${locationName}</strong><br>
+                                <small>${entityType}</small><br>
+                                <small style="color: #666;">${city}</small><br>
+                                <span style="color: ${locationColors[type]};">●</span> ${entityType}
+                            </div>
+                        `);
+                });
+
+                // Add a legend
+                const legend = L.control({ position: 'bottomright' });
+                legend.onAdd = function(map) {
+                    const div = L.DomUtil.create('div', 'info legend');
+                    div.style.background = 'white';
+                    div.style.padding = '10px';
+                    div.style.borderRadius = '5px';
+                    div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    div.innerHTML = `
+                        <strong>Location Types</strong><br>
+                        <span style="color: #667eea;">●</span> Schools<br>
+                        <span style="color: #f093fb;">●</span> Health Facilities<br>
+                        <span style="color: #95a5a6;">●</span> Doctors
+                    `;
+                    return div;
+                };
+                legend.addTo(doctorMap);
+
+                console.log('Map initialization completed successfully');
+
+            } catch (error) {
+                console.error('Error initializing map:', error);
+            }
+        }
+
+        // Initialize map after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeDoctorMap, 100);
+        });
+    </script>
+</body>
+</html>

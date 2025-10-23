@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-3 py-2">
+    <!-- Page Header -->
     <div class="row mb-3">
         <div class="col-12">
             <h1 class="h2 mb-1">Dashboard</h1>
@@ -11,62 +12,54 @@
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
-        <!-- Doctors Card -->
-         <div class="col-lg-3 col-sm-6 mb-2">
+        <!-- Doctors -->
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
-                      <div class="stat-label mb-2">Doctors</div>
-                      <h5 class="mb-0">{{ $stats['doctors'] }}</h5>
+                        <div class="stat-label mb-2">Doctors</div>
+                        <h5 class="mb-0">{{ $stats['doctors'] }}</h5>
                     </div>
                     <i class="mdi mdi-account-location icon-xl text-primary"></i>
-                  </div>
                 </div>
             </div>
         </div>
 
-        <!-- Schools Card -->
+        <!-- Schools -->
         <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
-                      <div class="stat-label mb-2">Schools</div>
-                      <h5 class="mb-0">{{ $stats['schools'] }}</h5>
+                        <div class="stat-label mb-2">Schools</div>
+                        <h5 class="mb-0">{{ $stats['schools'] }}</h5>
                     </div>
                     <i class="mdi mdi-school icon-xl text-primary"></i>
-                  </div>
                 </div>
             </div>
         </div>
 
-        <!-- Health Facilities Card -->
+        <!-- Health Facilities -->
         <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
-                      <div class="stat-label mb-2">Health Facilities</div>
-                      <h5 class="mb-0">{{ $stats['health_facilities'] }}</h5>
+                        <div class="stat-label mb-2">Health Facilities</div>
+                        <h5 class="mb-0">{{ $stats['health_facilities'] }}</h5>
                     </div>
                     <i class="mdi mdi-hospital-building icon-xl text-primary"></i>
-                  </div>
                 </div>
             </div>
         </div>
 
-        <!-- Revenue Card -->
-         <div class="col-lg-3 col-sm-6 mb-2">
+        <!-- Revenue -->
+        <div class="col-lg-3 col-sm-6 mb-2">
             <div class="card">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between justify-content-md-center justify-content-xl-between flex-wrap">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
-                      <div class="stat-label mb-2">Revenue</div>
-                      <h5 class="mb-0">UGX {{ number_format($stats['revenue'], 0) }}</h5>
+                        <div class="stat-label mb-2">Revenue</div>
+                        <h5 class="mb-0">UGX {{ number_format($stats['revenue'], 0) }}</h5>
                     </div>
                     <i class="mdi mdi-square-inc-cash icon-xl text-primary"></i>
-                  </div>
                 </div>
             </div>
         </div>
@@ -74,62 +67,83 @@
 
     <!-- Annual Revenue & Appointments Chart -->
     <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
+        <div class="col-lg-8 col-md-12">
+            <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h5 class="mb-0">Annual Revenue & Appointments Overview</h5>
-                    <small class="text-muted">Monthly data for {{ date('Y') }} (Sample Data)</small>
+                    <small class="text-muted">Monthly data for {{ date('Y') }}</small>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container annual-chart-container" style="position: relative; height: 400px; width: 100%; border: 2px solid #ddd; background: #f9f9f9;">
+                    <div class="chart-container annual-chart-container">
                         <canvas id="annualChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Location Map -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">Location Distribution</h5>
+                    <small class="text-muted">Schools, Health Facilities & Doctors</small>
+                </div>
+                <div class="card-body p-0">
+                    <div id="doctorMap" style="height: 350px; width: 100%; border-radius: 0 0 15px 15px;"></div>
+                </div>
+                <div class="card-footer bg-white border-0 p-3">
+                    <div class="doctor-stats">
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="location-stat p-2 rounded" style="background: rgba(102, 126, 234, 0.1);">
+                                    <i class="mdi mdi-school text-primary d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <div class="fw-bold text-primary">{{ $stats['schools'] }}</div>
+                                    <small class="text-muted">Schools</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="location-stat p-2 rounded" style="background: rgba(240, 147, 251, 0.1);">
+                                    <i class="mdi mdi-hospital-building text-danger d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <div class="fw-bold text-danger">{{ $stats['health_facilities'] }}</div>
+                                    <small class="text-muted">Facilities</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="location-stat p-2 rounded" style="background: rgba(149, 165, 166, 0.1);">
+                                    <i class="mdi mdi-doctor text-muted d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <div class="fw-bold text-muted">{{ $stats['independent_doctors'] }}</div>
+                                    <small class="text-muted">Doctors</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Charts Row -->
+    <!-- Distribution Charts -->
     <div class="row mb-4">
-        <!-- Entity Distribution Chart -->
+        <!-- Entity Distribution -->
         <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h5 class="mb-0">Entity Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                    <div class="chart-container">
                         <canvas id="distributionChart"></canvas>
                     </div>
-                    <div class="chart-legend mt-3">
-                        <div class="row text-center">
+                    <div class="chart-legend mt-3 text-center">
+                        <div class="row">
                             <div class="col-4">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                                    <div class="legend-text">
-                                        <strong>{{ $stats['doctors'] }}</strong><br>
-                                        <small>Doctors</small>
-                                    </div>
-                                </div>
+                                <strong>{{ $stats['doctors'] }}</strong><br><small>Doctors</small>
                             </div>
                             <div class="col-4">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                                    <div class="legend-text">
-                                        <strong>{{ $stats['schools'] }}</strong><br>
-                                        <small>Schools</small>
-                                    </div>
-                                </div>
+                                <strong>{{ $stats['schools'] }}</strong><br><small>Schools</small>
                             </div>
                             <div class="col-4">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                                    <div class="legend-text">
-                                        <strong>{{ $stats['health_facilities'] }}</strong><br>
-                                        <small>Health Facilities</small>
-                                    </div>
-                                </div>
+                                <strong>{{ $stats['health_facilities'] }}</strong><br><small>Facilities</small>
                             </div>
                         </div>
                     </div>
@@ -137,35 +151,23 @@
             </div>
         </div>
 
-        <!-- Patient Gender Distribution Chart -->
+        <!-- Patient Gender Distribution -->
         <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h5 class="mb-0">Patient Gender Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                    <div class="chart-container">
                         <canvas id="patientGenderChart"></canvas>
                     </div>
-                    <div class="chart-legend mt-3">
-                        <div class="row text-center">
+                    <div class="chart-legend mt-3 text-center">
+                        <div class="row">
                             <div class="col-6">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                                    <div class="legend-text">
-                                        <strong>{{ $stats['patients_male'] ?? 0 }}</strong><br>
-                                        <small>Male Patients</small>
-                                    </div>
-                                </div>
+                                <strong>{{ $stats['patients_male'] ?? 0 }}</strong><br><small>Male Patients</small>
                             </div>
                             <div class="col-6">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                                    <div class="legend-text">
-                                        <strong>{{ $stats['patients_female'] ?? 0 }}</strong><br>
-                                        <small>Female Patients</small>
-                                    </div>
-                                </div>
+                                <strong>{{ $stats['patients_female'] ?? 0 }}</strong><br><small>Female Patients</small>
                             </div>
                         </div>
                     </div>
@@ -173,120 +175,57 @@
             </div>
         </div>
     </div>
+
 </div>
 
+{{-- ======================= STYLES ======================= --}}
 <style>
-/* Management Section */
 .card {
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     border: none;
 }
-
 .card-header {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     border-bottom: none;
     border-radius: 15px 15px 0 0 !important;
-    padding: 1rem 1.5rem;
 }
-
-.card-header h5 {
-    color: #2d3748;
-    font-weight: 600;
-    margin: 0;
-}
-
-.btn-outline-primary {
-    border: 2px solid;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    background: transparent;
-}
-
-.btn-outline-primary:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: transparent;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-outline-primary i {
-    margin-right: 8px;
-}
-
-/* Chart Container */
 .chart-container {
     position: relative;
     height: 350px;
     width: 100%;
-    margin: 0 auto;
 }
-
-/* Annual Chart Container - specific height */
 .annual-chart-container {
-    height: 400px !important;
+    height: 350px !important;
 }
-
-/* Chart Legend Styles */
-.chart-legend {
-    border-top: 1px solid #e9ecef;
-    padding-top: 1rem;
+.location-stat {
+    transition: all 0.3s ease;
 }
-
-.legend-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+.location-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.legend-text {
-    font-size: 0.85rem;
-    color: #4a5568;
-    text-align: center;
-}
-
-.legend-text strong {
-    font-size: 1.2rem;
-    color: #2d3748;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .stat-number {
-        font-size: 2rem;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-    }
-
-    .card-body {
-        padding: 1rem;
-    }
+.info.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 12px;
+    line-height: 1.4;
 }
 </style>
 
-{{-- Chart Scripts --}}
+{{-- ======================= SCRIPTS ======================= --}}
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Distribution Donut Chart
-    const ctx = document.getElementById('distributionChart');
-    if (ctx) {
-        const distributionChart = new Chart(ctx, {
+    const distCtx = document.getElementById('distributionChart');
+    if (distCtx) {
+        new Chart(distCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Doctors', 'Schools', 'Health Facilities'],
@@ -297,53 +236,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         {{ $stats['health_facilities'] }}
                     ],
                     backgroundColor: [
-                        'rgba(102, 126, 234, 0.8)',
-                        'rgba(240, 147, 251, 0.8)',
-                        'rgba(79, 172, 254, 0.8)'
+                        'rgba(102,126,234,0.8)',
+                        'rgba(240,147,251,0.8)',
+                        'rgba(79,172,254,0.8)'
                     ],
-                    borderColor: [
-                        'rgba(102, 126, 234, 1)',
-                        'rgba(240, 147, 251, 1)',
-                        'rgba(79, 172, 254, 1)'
-                    ],
-                    borderWidth: 2,
-                    hoverBackgroundColor: [
-                        'rgba(102, 126, 234, 0.9)',
-                        'rgba(240, 147, 251, 0.9)',
-                        'rgba(79, 172, 254, 0.9)'
-                    ]
+                    borderWidth: 2
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    display: false // Hide default legend, using custom legend below
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            const label = data.labels[tooltipItem.index] || '';
-                            const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
-                            const total = data.datasets[tooltipItem.datasetIndex].data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                            return `${label}: ${value} (${percentage}%)`;
-                        }
-                    }
-                },
-                cutoutPercentage: 60, // Creates donut effect
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
-                }
-            }
+            options: { cutoutPercentage: 60, responsive: true }
         });
     }
 
-    // Patient Gender Distribution Donut Chart
-    const ctx2 = document.getElementById('patientGenderChart');
-    if (ctx2) {
-        const patientGenderChart = new Chart(ctx2, {
+    // Patient Gender Chart
+    const genderCtx = document.getElementById('patientGenderChart');
+    if (genderCtx) {
+        new Chart(genderCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Male Patients', 'Female Patients'],
@@ -353,157 +260,111 @@ document.addEventListener('DOMContentLoaded', function() {
                         {{ $stats['patients_female'] ?? 0 }}
                     ],
                     backgroundColor: [
-                        'rgba(79, 172, 254, 0.8)',
-                        'rgba(240, 147, 251, 0.8)'
+                        'rgba(79,172,254,0.8)',
+                        'rgba(240,147,251,0.8)'
                     ],
-                    borderColor: [
-                        'rgba(79, 172, 254, 1)',
-                        'rgba(240, 147, 251, 1)'
-                    ],
-                    borderWidth: 2,
-                    hoverBackgroundColor: [
-                        'rgba(79, 172, 254, 0.9)',
-                        'rgba(240, 147, 251, 0.9)'
-                    ]
+                    borderWidth: 2
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    display: false // Hide default legend, using custom legend below
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            const label = data.labels[tooltipItem.index] || '';
-                            const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
-                            const total = data.datasets[tooltipItem.datasetIndex].data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                            return `${label}: ${value} (${percentage}%)`;
-                        }
-                    }
-                },
-                cutoutPercentage: 60, // Creates donut effect
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
-                }
-            }
+            options: { cutoutPercentage: 60, responsive: true }
         });
     }
 
-    // Annual Revenue & Appointments Bar Chart
-    const ctx3 = document.getElementById('annualChart');
-    if (ctx3) {
-        const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const monthlyAppointments = [5, 8, 12, 15, 10, 18, 22, 25, 20, 28, 30, 35];
-        const monthlyRevenue = [50000, 75000, 120000, 150000, 100000, 180000, 220000, 250000, 200000, 280000, 300000, 350000];
+    // Annual Revenue & Appointments Chart
+    const annualCtx = document.getElementById('annualChart');
+    if (annualCtx) {
+        const monthlyData = @json($monthlyData);
+        const labels = monthlyData.map(item => item.month);
+        const appointments = monthlyData.map(item => item.appointments);
+        const revenue = monthlyData.map(item => item.revenue);
 
-        const annualChart = new Chart(ctx3, {
+        new Chart(annualCtx, {
             type: 'bar',
             data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'Appointments',
-                    data: monthlyAppointments,
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderColor: 'rgba(102, 126, 234, 1)',
-                    borderWidth: 1,
-                    yAxisID: 'y',
-                    order: 2
-                }, {
-                    label: 'Revenue (UGX)',
-                    data: monthlyRevenue,
-                    backgroundColor: 'rgba(240, 147, 251, 0.8)',
-                    borderColor: 'rgba(240, 147, 251, 1)',
-                    borderWidth: 1,
-                    yAxisID: 'y1',
-                    order: 1,
-                    type: 'line',
-                    fill: false,
-                    tension: 0.4,
-                    pointBackgroundColor: 'rgba(240, 147, 251, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8
-                }]
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Appointments',
+                        data: appointments,
+                        backgroundColor: 'rgba(102,126,234,0.8)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Revenue (UGX)',
+                        data: revenue,
+                        type: 'line',
+                        borderColor: 'rgba(240,147,251,1)',
+                        backgroundColor: 'rgba(240,147,251,0.3)',
+                        fill: false,
+                        yAxisID: 'y1',
+                        tension: 0.4
+                    }
+                ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (tooltipItem.datasetIndex === 1) {
-                                label += 'UGX ' + tooltipItem.yLabel.toLocaleString();
-                            } else {
-                                label += tooltipItem.yLabel;
-                            }
-                            return label;
-                        }
-                    }
-                },
                 scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Month'
-                        }
-                    }],
-                    yAxes: [{
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Number of Appointments'
-                        },
-                        gridLines: {
-                            drawOnChartArea: false,
-                        },
-                        ticks: {
-                            beginAtZero: true
-                        },
-                        id: 'y'
-                    }, {
-                        type: 'linear',
-                        display: true,
+                    y: { beginAtZero: true, title: { display: true, text: 'Appointments' } },
+                    y1: {
+                        beginAtZero: true,
                         position: 'right',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Revenue (UGX)'
-                        },
-                        gridLines: {
-                            drawOnChartArea: false,
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                            callback: function(value) {
-                                return 'UGX ' + value.toLocaleString();
-                            }
-                        },
-                        id: 'y1'
-                    }]
-                },
-                animation: {
-                    duration: 2000,
-                    easing: 'easeInOutQuart'
+                        title: { display: true, text: 'Revenue (UGX)' }
+                    }
                 }
             }
         });
     }
+
+    // Doctor Location Map
+    function initializeDoctorMap() {
+        const mapEl = document.getElementById('doctorMap');
+        if (!mapEl) return;
+
+        if (mapEl._leaflet_id) mapEl.innerHTML = "";
+        const map = L.map('doctorMap').setView([1.3733, 32.2903], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const locations = @json($locations);
+        const colors = { school: '#667eea', health_facility: '#f093fb', doctor: '#95a5a6' };
+        const icons = { school: 'mdi-school', health_facility: 'mdi-hospital-building', doctor: 'mdi-doctor' };
+
+        locations.forEach(([name, lat, lng, type, entityType, city]) => {
+            const icon = L.divIcon({
+                html: `<div style="background:${colors[type]};border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid white;">
+                           <i class="mdi ${icons[type]}" style="color:white;font-size:14px;"></i>
+                       </div>`,
+                className: 'custom-doctor-marker'
+            });
+            L.marker([lat, lng], { icon })
+                .addTo(map)
+                .bindPopup(`<div style="text-align:center;">
+                    <strong>${name}</strong><br>
+                    <small>${entityType}</small><br>
+                    <small>${city}</small><br>
+                    <span style="color:${colors[type]};">●</span> ${entityType}
+                </div>`);
+        });
+
+        // Legend
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = `
+                <strong>Location Types</strong><br>
+                <span style="color:#667eea;">●</span> Schools<br>
+                <span style="color:#f093fb;">●</span> Health Facilities<br>
+                <span style="color:#95a5a6;">●</span> Doctors
+            `;
+            return div;
+        };
+        legend.addTo(map);
+    }
+
+    setTimeout(initializeDoctorMap, 100);
 });
 </script>
 @endpush
+
 @endsection
