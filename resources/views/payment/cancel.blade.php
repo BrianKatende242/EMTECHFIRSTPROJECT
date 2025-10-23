@@ -24,7 +24,7 @@
                         <div class="alert alert-warning">
                             <h5><i class="fas fa-exclamation-triangle me-2"></i>Appointment Not Confirmed</h5>
                             <hr>
-                            <p>The appointment for <strong>{{ $appointment->student->name }}</strong> with 
+                            <p>The appointment for <strong>{{ $appointment->patient->name }}</strong> with 
                             <strong>Dr. {{ $appointment->doctor->name }}</strong> has been cancelled due to incomplete payment.</p>
                         </div>
                         @endif

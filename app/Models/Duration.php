@@ -17,8 +17,8 @@ class Duration extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'general_price' => 'decimal:2',
-        'specialist_price' => 'decimal:2',
+        'general_price' => 'integer',
+        'specialist_price' => 'integer',
     ];
 
     public function appointments(): HasMany
@@ -47,5 +47,20 @@ class Duration extends Model
     public function getPrice(): float
     {
         return $this->type === 'general' ? $this->general_price : $this->specialist_price;
+    }
+
+    /**
+     * Get the price for this duration based on doctor specialization
+     */
+    public function getPriceForDoctor($doctor = null): float
+    {
+        if ($doctor && is_object($doctor)) {
+            // If doctor is provided, use specialization to determine price
+            $isSpecialist = !str_contains(strtolower($doctor->specialization ?? ''), 'general practitioner');
+            return $isSpecialist ? $this->specialist_price : $this->general_price;
+        }
+
+        // Fallback to the original logic
+        return $this->getPrice();
     }
 }

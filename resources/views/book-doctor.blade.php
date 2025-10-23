@@ -41,7 +41,7 @@
                                         <td>{{ $appointment->patient->name }}</td>
                                         <td>Dr. {{ $appointment->doctor->name }}</td>
                                         <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins' : '—' }}</td>
-                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPrice()) . ' UGX' : '—' }}</td>
+                                        <td>{{ $appointment->duration ? number_format($appointment->duration->getPriceForDoctor($appointment->doctor)) . ' UGX' : '—' }}</td>
                                         <td>{{ $appointment->reason }}</td>
                                         <td>
                                             <span class="badge bg-{{ 
@@ -113,7 +113,12 @@
         <select id="duration_id" class="form-control form-select" name="duration_id" required>
             <option value="">Select Duration</option>
             @foreach(\App\Models\Duration::active()->get() as $duration)
-                                                    <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+                <option value="{{ $duration->id }}-general" data-duration-id="{{ $duration->id }}" data-type="general" data-price="{{ $duration->general_price }}">
+                    {{ $duration->minutes }} minutes - General: UGX {{ number_format($duration->general_price, 0) }}
+                </option>
+                <option value="{{ $duration->id }}-specialist" data-duration-id="{{ $duration->id }}" data-type="specialist" data-price="{{ $duration->specialist_price }}">
+                    {{ $duration->minutes }} minutes - Specialist: UGX {{ number_format($duration->specialist_price, 0) }}
+                </option>
             @endforeach
         </select>
         @error('duration_id')
@@ -156,7 +161,40 @@
 document.addEventListener('DOMContentLoaded', function() {
     const appointmentTimeInput = document.getElementById('appointment_time');
     const doctorSelect = document.getElementById('doctor_id');
+    const durationSelect = document.getElementById('duration_id');
     const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
+    const durationOptions = durationSelect.querySelectorAll('option[data-duration-id]');
+
+    // Function to filter duration options based on selected doctor
+    function filterDurationOptions() {
+        const selectedDoctorOption = doctorSelect.options[doctorSelect.selectedIndex];
+        const doctorSpecialization = selectedDoctorOption ? selectedDoctorOption.getAttribute('data-specialization') : null;
+
+        // Show/hide duration options based on doctor type
+        durationOptions.forEach(option => {
+            const optionType = option.getAttribute('data-type');
+            const isGeneralDoctor = doctorSpecialization && doctorSpecialization.toLowerCase().includes('general practitioner');
+
+            if (optionType === 'general' && isGeneralDoctor) {
+                option.style.display = 'block';
+            } else if (optionType === 'specialist' && !isGeneralDoctor && doctorSpecialization) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Reset duration selection if current selection is not available
+        if (durationSelect.value) {
+            const selectedOption = durationSelect.querySelector(`option[value="${durationSelect.value}"]`);
+            if (selectedOption && selectedOption.style.display === 'none') {
+                durationSelect.value = '';
+            }
+        }
+    }
+
+    // Filter duration options when doctor is selected
+    doctorSelect.addEventListener('change', filterDurationOptions);
 
     appointmentTimeInput.addEventListener('change', function() {
         const selectedDate = new Date(this.value);
@@ -166,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 option.style.display = 'none';
             });
             doctorSelect.value = '';
+            filterDurationOptions(); // Also reset duration options
             return;
         }
 
@@ -190,12 +229,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
                         doctorSelect.value = '';
                     }
+
+                    // Filter duration options after doctor availability is loaded
+                    filterDurationOptions();
                 }
             })
             .catch(error => {
                 console.error('Error fetching available doctors:', error);
             });
     });
+
+    // Handle form submission to extract duration_id and type
+    const appointmentForm = document.querySelector('form[action*="appointments.store"]');
+    if (appointmentForm) {
+        appointmentForm.addEventListener('submit', function(e) {
+            const durationValue = durationSelect.value;
+            if (durationValue) {
+                const selectedOption = durationSelect.querySelector(`option[value="${durationValue}"]`);
+                if (selectedOption) {
+                    const durationId = selectedOption.getAttribute('data-duration-id');
+                    const type = selectedOption.getAttribute('data-type');
+
+                    // Create hidden inputs for duration_id and consultation_type
+                    const durationIdInput = document.createElement('input');
+                    durationIdInput.type = 'hidden';
+                    durationIdInput.name = 'duration_id';
+                    durationIdInput.value = durationId;
+                    appointmentForm.appendChild(durationIdInput);
+
+                    const typeInput = document.createElement('input');
+                    typeInput.type = 'hidden';
+                    typeInput.name = 'consultation_type';
+                    typeInput.value = type;
+                    appointmentForm.appendChild(typeInput);
+
+                    // Update the original select to have the correct value
+                    durationSelect.value = durationId;
+                }
+            }
+        });
+    }
+
+    // Initial filter of duration options
+    filterDurationOptions();
 });
 </script>
 @endpush

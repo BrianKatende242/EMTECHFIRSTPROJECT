@@ -392,6 +392,14 @@ Route::prefix('admin')->middleware('admin')->group(function(){
 
     Route::get('/doctor-availabilities', [AdminModelController::class, 'index'])->name('admin.doctor-availabilities.index');
 
+    Route::get('/durations', [AdminModelController::class, 'index'])->name('admin.durations.index');
+    Route::get('/durations/create', [AdminModelController::class, 'create'])->name('admin.durations.create');
+    Route::post('/durations', [AdminModelController::class, 'store'])->name('admin.durations.store');
+    Route::post('/durations/seed', [AdminModelController::class, 'seedDurations'])->name('admin.durations.seed');
+    Route::get('/durations/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.durations.edit');
+    Route::put('/durations/{id}', [AdminModelController::class, 'update'])->name('admin.durations.update');
+    Route::delete('/durations/{id}', [AdminModelController::class, 'destroy'])->name('admin.durations.destroy');
+
     // Generic model routes (fallback)
     Route::get('/{modelKey}', [AdminModelController::class, 'index'])->name('admin.model.index');
     Route::get('/{modelKey}/create', [AdminModelController::class, 'create'])->name('admin.model.create');

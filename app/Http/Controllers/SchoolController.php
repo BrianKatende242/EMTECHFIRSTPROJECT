@@ -104,7 +104,7 @@ public function showDashboard($id)
 
     $students = $school->students()->latest()->get();
     $labTests = $school->labTests()->with('student')->latest()->get();
-    $appointments = $school->appointments()->with(['student', 'doctor'])->latest()->get();
+    $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
     $doctors = $school->doctors()->latest()->get();
 
     return view('school-dashboard', [

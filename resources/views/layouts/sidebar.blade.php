@@ -61,6 +61,12 @@
             <span class="menu-title">Doctor Availabilities</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('admin/durations*') ? 'active' : '' }}" href="{{ route('admin.durations.index') }}">
+            <i class="mdi mdi-timer menu-icon"></i>
+            <span class="menu-title">Durations</span>
+        </a>
+    </li>
 </ul>
 @elseif(isset($school))
 <ul class="nav">

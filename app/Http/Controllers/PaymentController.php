@@ -291,7 +291,7 @@ class PaymentController extends Controller
             }
         }
 
-        $amount = $validated['amount'] ?? ($appointment->duration ? $appointment->duration->getPrice() : 1.00); // allow override on pay page
+        $amount = $validated['amount'] ?? ($appointment->duration ? $appointment->duration->getPriceForDoctor($appointment->doctor) : 1.00); // allow override on pay page
 
         try {
             $data = [

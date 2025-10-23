@@ -29,12 +29,12 @@
                 <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? '—' }}</dd>
                 <dt class="col-4">Doctor</dt><dd class="col-8">{{ optional($appointment->doctor)->name ? 'Dr. ' . $appointment->doctor->name : '—' }}</dd>
                 <dt class="col-4">Time</dt><dd class="col-8">{{ optional($appointment->appointment_time)->format('D, M j, Y g:i A') }}</dd>
-                <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->duration ? number_format($appointment->duration->getPrice(), 0) . ' UGX' : '—' }}</dd>
+                <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->duration ? number_format($appointment->duration->getPriceForDoctor($appointment->doctor), 0) . ' UGX' : '—' }}</dd>
                 <dt class="col-4">Status</dt><dd class="col-8"><span class="badge bg-warning text-dark">{{ $appointment->status }}</span></dd>
               </dl>
               @if($appointment->duration)
               <div class="mt-2">
-                <span class="amount-chip">UGX {{ number_format($appointment->duration->getPrice(), 0) }}</span>
+                <span class="amount-chip">UGX {{ number_format($appointment->duration->getPriceForDoctor($appointment->doctor), 0) }}</span>
               </div>
               @endif
             </div>
@@ -58,7 +58,7 @@
               <div class="invalid-feedback">Enter a valid number like 2567XXXXXXXX</div>
             </div>
 
-            <input type="hidden" name="amount" value="{{ old('amount', $appointment->duration ? $appointment->duration->getPrice() : '') }}">
+            <input type="hidden" name="amount" value="{{ old('amount', $appointment->duration ? $appointment->duration->getPriceForDoctor($appointment->doctor) : '') }}">
 
             
       <div class="d-flex justify-content-between mb-1">

@@ -236,7 +236,7 @@ public function showDoctorDashboard()
     }
 
     $doctor = Doctor::with([
-        'appointments.student',
+        'appointments.patient',
         'appointments.patient',
         'appointments.school',
         'appointments.duration',

@@ -16,6 +16,7 @@ class AdminModelController extends Controller
         'schools' => \App\Models\School::class,
         'health-facilities' => \App\Models\HealthFacility::class,
         'doctor-availabilities' => \App\Models\Doctor::class,
+        'durations' => \App\Models\Duration::class,
         'users' => \App\User::class,
     ];
 
@@ -54,7 +55,7 @@ class AdminModelController extends Controller
 
         // Special handling for appointments: allow filters and eager loads
         if ($modelKey === 'appointments') {
-            $q = $modelClass::with(['doctor', 'student', 'school', 'healthFacility', 'patient']);
+            $q = $modelClass::with(['doctor', 'school', 'healthFacility', 'patient']);
 
             if (request()->filled('status')) {
                 $q->where('status', request('status'));
@@ -365,7 +366,7 @@ class AdminModelController extends Controller
 
         // Use dedicated view for appointments
         if ($modelKey === 'appointments') {
-            $statuses = ['pending', 'scheduled', 'completed', 'cancelled'];
+            $statuses = ['pending', 'scheduled', 'confirmed', 'completed', 'cancelled'];
             $doctors = \App\Models\Doctor::pluck('name','id');
             $schools = \App\Models\School::pluck('name','id');
             $hfs = \App\Models\HealthFacility::pluck('name','id');
@@ -408,6 +409,42 @@ class AdminModelController extends Controller
         if ($modelKey === 'doctor-availabilities') {
             $doctors = $modelClass::with(['availabilities', 'school', 'healthFacility'])->latest()->paginate(20)->appends(request()->query());
             return view('admin.doctor-availabilities.index', compact('doctors'));
+        }
+
+        // Use dedicated view for durations
+        if ($modelKey === 'durations') {
+            $q = $modelClass::query();
+
+            if (request()->filled('type')) {
+                $q->where('type', request('type'));
+            }
+
+            if (request()->filled('is_active')) {
+                $q->where('is_active', request('is_active') === '1');
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('minutes', 'like', $term)
+                      ->orWhere('general_price', 'like', $term)
+                      ->orWhere('specialist_price', 'like', $term);
+                });
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'minutes_asc') $q->orderBy('minutes', 'asc');
+            elseif ($sort === 'minutes_desc') $q->orderBy('minutes', 'desc');
+            elseif ($sort === 'general_price_asc') $q->orderBy('general_price', 'asc');
+            elseif ($sort === 'general_price_desc') $q->orderBy('general_price', 'desc');
+            elseif ($sort === 'specialist_price_asc') $q->orderBy('specialist_price', 'asc');
+            elseif ($sort === 'specialist_price_desc') $q->orderBy('specialist_price', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
+            return view('admin.durations.index', compact('modelKey', 'items'));
         }
 
         return view('admin.model.index', compact('modelKey', 'items', 'generatedSlug'));
@@ -492,6 +529,17 @@ class AdminModelController extends Controller
             ]);
 
             $validated['password'] = bcrypt($validated['password']);
+
+            $item = $modelClass::create($validated);
+
+        } elseif ($modelKey === 'durations') {
+            $validated = $request->validate([
+                'minutes' => 'required|integer|min:1|max:480', // Max 8 hours
+                'type' => 'nullable|string|in:general,specialist',
+                'general_price' => 'required|integer|min:0|max:999999',
+                'specialist_price' => 'required|integer|min:0|max:999999',
+                'is_active' => 'boolean',
+            ]);
 
             $item = $modelClass::create($validated);
 
@@ -586,6 +634,17 @@ class AdminModelController extends Controller
             }
 
             $item->update($validated);
+        } elseif ($modelKey === 'durations') {
+            $validated = $request->validate([
+                'minutes' => 'required|integer|min:1|max:480', // Max 8 hours
+                'type' => 'nullable|string|in:general,specialist',
+                'general_price' => 'required|integer|min:0|max:999999',
+                'specialist_price' => 'required|integer|min:0|max:999999',
+                'is_active' => 'boolean',
+            ]);
+
+            $item->update($validated);
+
         } else {
             $data = $request->except(['_token', '_method']);
             $item->update($data);
@@ -776,5 +835,62 @@ class AdminModelController extends Controller
         \App\Models\Payment::whereIn('id', $ids)->update(['status' => $status, 'updated_at' => now()]);
 
         return redirect()->back()->with('success', 'Bulk update applied');
+    }
+
+    // Seed default durations
+    public function seedDurations(Request $request)
+    {
+        // First, set duration_id to null for all appointments to avoid foreign key constraint
+        \App\Models\Appointment::query()->update(['duration_id' => null]);
+
+        // Then delete all existing durations
+        \App\Models\Duration::query()->delete();
+
+        $defaultDurations = [
+            [
+                'minutes' => 15,
+                'general_price' => 25000,
+                'specialist_price' => 40000,
+                'type' => 'general',
+                'is_active' => true,
+            ],
+            [
+                'minutes' => 30,
+                'general_price' => 50000,
+                'specialist_price' => 75000,
+                'type' => 'general',
+                'is_active' => true,
+            ],
+            [
+                'minutes' => 45,
+                'general_price' => 75000,
+                'specialist_price' => 112500,
+                'type' => 'general',
+                'is_active' => true,
+            ],
+            [
+                'minutes' => 60,
+                'general_price' => 100000,
+                'specialist_price' => 150000,
+                'type' => 'general',
+                'is_active' => true,
+            ],
+            [
+                'minutes' => 90,
+                'general_price' => 150000,
+                'specialist_price' => 225000,
+                'type' => 'general',
+                'is_active' => true,
+            ],
+        ];
+
+        $created = 0;
+
+        foreach ($defaultDurations as $durationData) {
+            \App\Models\Duration::create($durationData);
+            $created++;
+        }
+
+        return redirect()->back()->with('success', "Seeding completed: All existing durations deleted, {$created} new durations created. Note: Existing appointments have been unlinked from durations.");
     }
 }
