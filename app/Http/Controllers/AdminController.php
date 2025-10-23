@@ -14,12 +14,8 @@ class AdminController extends Controller
             'schools' => \App\Models\School::count(),
             'health_facilities' => \App\Models\HealthFacility::count(),
             'revenue' => \App\Models\Transaction::where('status', 'successful')->sum('amount'),
-            'patients_male' => \App\Models\Appointment::whereHas('patient', function($query) {
-                $query->where('gender', 'male');
-            })->distinct('patient_id')->count(),
-            'patients_female' => \App\Models\Appointment::whereHas('patient', function($query) {
-                $query->where('gender', 'female');
-            })->distinct('patient_id')->count(),
+            'patients_male' => \App\Models\Patient::where('gender', 'male')->count(),
+            'patients_female' => \App\Models\Patient::where('gender', 'female')->count(),
             'independent_doctors' => \App\Models\Doctor::whereNull('school_id')->whereNull('health_facility_id')->count(),
             'doctors_by_location' => [
                 'schools' => \App\Models\Doctor::whereNotNull('school_id')->count(),
