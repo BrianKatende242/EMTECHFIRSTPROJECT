@@ -10,7 +10,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-2 text-center">
                             <div class="patient-avatar">
-                                <i class="typcn typcn-user fa-4x text-primary"></i>
+                                <i class="mdi mdi-account icon-xl text-primary"></i>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -51,47 +51,47 @@
 
     <!-- Quick Stats -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-info">
-                <div class="inner">
-                    <h3>{{ $patient->appointments->count() }}</h3>
-                    <p>Total Appointments</p>
-                </div>
-                <div class="icon">
-                    <i class="typcn typcn-calendar"></i>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-success">
-                <div class="inner">
-                    <h3>{{ $patient->labTests->count() }}</h3>
-                    <p>Lab Tests</p>
-                </div>
-                <div class="icon">
-                    <i class="typcn typcn-beaker"></i>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Total Appointments</div>
+                        <h5 class="mb-0">{{ $patient->appointments->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-calendar icon-xl text-primary"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-warning">
-                <div class="inner">
-                    <h3>{{ $patient->maternalDocuments->count() }}</h3>
-                    <p>Maternal Documents</p>
-                </div>
-                <div class="icon">
-                    <i class="typcn typcn-document"></i>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Lab Tests</div>
+                        <h5 class="mb-0">{{ $patient->labTests->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-flask icon-xl text-success"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-danger">
-                <div class="inner">
-                    <h3>{{ $patient->appointments->where('status', 'completed')->count() }}</h3>
-                    <p>Completed Appointments</p>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Maternal Documents</div>
+                        <h5 class="mb-0">{{ $patient->maternalDocuments->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-file-document icon-xl text-warning"></i>
                 </div>
-                <div class="icon">
-                    <i class="typcn typcn-tick"></i>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Completed Appointments</div>
+                        <h5 class="mb-0">{{ $patient->appointments->where('status', 'completed')->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-check-circle icon-xl text-info"></i>
                 </div>
             </div>
         </div>
@@ -519,74 +519,19 @@
     padding: 0.375rem 0.5rem;
 }
 
-/* Small Stats Boxes */
-.small-box {
-    border-radius: 0.375rem;
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    margin-bottom: 20px;
-    position: relative;
-    display: block;
-    color: #fff;
-    transition: transform 0.2s ease-in-out;
+/* Stat Label Styling */
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.small-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,.15);
-}
-
-.small-box .inner {
-    padding: 15px;
-}
-
-.small-box .inner h3 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    white-space: nowrap;
-    padding: 0;
-    line-height: 1;
-}
-
-.small-box .inner p {
-    font-size: 0.9rem;
-    margin: 0;
-    opacity: 0.9;
-}
-
-.small-box .icon {
-    color: rgba(0,0,0,0.15);
-    z-index: 0;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    font-size: 70px;
-    transition: all .3s linear;
-}
-
-.small-box:hover .icon {
-    transform: scale(1.1);
-}
-
-.small-box.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-}
-
-.small-box.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
-}
-
-.small-box.bg-warning {
-    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
-    color: #212529 !important;
-}
-
-.small-box.bg-warning .icon {
-    color: rgba(0,0,0,0.2);
-}
-
-.small-box.bg-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%) !important;
+/* Icon XL Styling */
+.icon-xl {
+    font-size: 2.5rem;
+    opacity: 0.8;
 }
 
 /* Print Styles */
@@ -717,21 +662,19 @@ dl.row dd {
     }
 }
 
-/* Copy Button Styling */
-.copy-btn {
-    padding: 0.125rem 0.25rem;
-    font-size: 0.75rem;
-    line-height: 1;
-    border-radius: 0.25rem;
-    transition: all 0.2s ease-in-out;
+/* Stat Label Styling */
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.copy-btn:hover {
-    transform: scale(1.05);
-}
-
-.copy-btn i {
-    font-size: 0.75rem;
+/* Icon XL Styling */
+.icon-xl {
+    font-size: 2.5rem;
+    opacity: 0.8;
 }
 
 .timeline::before {
