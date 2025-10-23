@@ -296,6 +296,15 @@ Route::prefix('momo')->group(function () {
     Route::post('/callback', [PaymentController::class, 'handleCallback']);
 });
 
+// MarzPay Payment Routes
+Route::prefix('marzpay')->group(function () {
+    Route::post('/collect', [PaymentController::class, 'requestPayment'])->name('api.marzpay.collect');
+    Route::post('/send', [PaymentController::class, 'sendPayment'])->name('api.marzpay.send');
+    Route::get('/status/{referenceId}', [PaymentController::class, 'paymentStatus'])->name('api.marzpay.status');
+    Route::get('/balance', [PaymentController::class, 'accountBalance'])->name('api.marzpay.balance');
+    Route::post('/webhook', [PaymentController::class, 'handleCallback'])->name('api.marzpay.webhook');
+});
+
 
 
 // School Actions Routes

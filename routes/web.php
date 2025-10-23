@@ -577,3 +577,22 @@ Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showApp
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
+
+// MarzPay API Routes (public webhook endpoint)
+Route::post('/marzpay/webhook', [PaymentController::class, 'handleCallback'])->name('marzpay.webhook');
+
+// MarzPay Payment Routes (authenticated)
+Route::prefix('api/payments')->middleware('auth')->group(function () {
+    Route::post('/collect', [PaymentController::class, 'requestPayment'])->name('api.payments.collect');
+    Route::post('/send', [PaymentController::class, 'sendPayment'])->name('api.payments.send');
+    Route::get('/status/{referenceId}', [PaymentController::class, 'paymentStatus'])->name('api.payments.status');
+    Route::get('/balance', [PaymentController::class, 'accountBalance'])->name('api.payments.balance');
+});
+
+// MarzPay Test Routes (no auth for testing)
+Route::prefix('test/payments')->group(function () {
+    Route::post('/collect', [PaymentController::class, 'requestPayment'])->name('test.payments.collect');
+    Route::post('/send', [PaymentController::class, 'sendPayment'])->name('test.payments.send');
+    Route::get('/status/{referenceId}', [PaymentController::class, 'paymentStatus'])->name('test.payments.status');
+    Route::get('/balance', [PaymentController::class, 'accountBalance'])->name('test.payments.balance');
+});

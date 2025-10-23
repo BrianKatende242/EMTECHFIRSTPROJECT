@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Appointment extends Model {
+    use HasFactory;
     protected $fillable = [
         'school_id',
         'patient_id', // Unified patient reference (replaces student_id)
@@ -16,6 +18,7 @@ class Appointment extends Model {
         'health_facility_id',
         'status',
         'payment_reference',
+        'payment_status',
         // 'amount', // Removed - amount now comes from duration relationship
     ];
     

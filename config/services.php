@@ -43,6 +43,14 @@ return [
     'env' => env('MTN_MOMO_ENV', 'sandbox'),
 ],
 
+    'marzpay' => [
+        'base_url' => env('MARZPAY_BASE_URL', 'https://wallet.wearemarz.com/api/v1'),
+        'api_key' => env('MARZPAY_API_KEY'),
+        'api_secret' => env('MARZPAY_API_SECRET'),
+        'auth_header' => env('MARZPAY_AUTH_HEADER'),
+        'webhook_secret' => env('MARZPAY_WEBHOOK_SECRET'),
+    ],
+
 
     'stripe' => [
         'model' => App\User::class,
