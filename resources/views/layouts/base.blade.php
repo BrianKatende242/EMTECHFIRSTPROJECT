@@ -50,7 +50,9 @@
             <a class="nav-link" href="#" data-toggle="dropdown" id="profileDropdown">
               <img src="{{ asset('images/profile.png') }}" alt="profile"/>
               <span class="nav-profile-name">
-                @if(isset($doctor))
+                @if(auth()->user() && auth()->user()->is_admin)
+                  Admin - {{ auth()->user()->name }}
+                @elseif(isset($doctor))
                   Dr. {{ $doctor->name }}
                 @else
                   {{ auth()->user()->name ?? 'User' }}

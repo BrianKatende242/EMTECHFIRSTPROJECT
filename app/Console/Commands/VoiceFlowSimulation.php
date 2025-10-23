@@ -19,14 +19,15 @@ class VoiceFlowSimulation extends Command
     protected $signature = 'voiceflow:simulate
                             {--type= : User type (school, doctor, health-facility)}
                             {--email= : Email address to test}
-                            {--auto-verify : Automatically verify OTP after sending}';
+                            {--action= : Action to perform (login, register)}
+                            {--auto-verify : Automatically verify OTP after sending (login only)}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Simulate VoiceFlow login process for testing purposes';
+    protected $description = 'Simulate VoiceFlow authentication process (login/register) for testing purposes';
 
     /**
      * Base URL for API calls
@@ -52,6 +53,26 @@ class VoiceFlowSimulation extends Command
 
         $this->info('✅ Server is running');
 
+        // Ask if user wants to register or login
+        $action = $this->option('action') ?: $this->choice(
+            'What would you like to do?',
+            ['login', 'register'],
+            0
+        );
+
+        if ($action === 'register') {
+            return $this->handleRegistration();
+        }
+
+        // Continue with login flow
+        return $this->handleLogin();
+    }
+
+    /**
+     * Handle login simulation
+     */
+    protected function handleLogin()
+    {
         // Get user type
         $userType = $this->option('type') ?: $this->choice(
             'Select user type to simulate:',
@@ -108,8 +129,20 @@ class VoiceFlowSimulation extends Command
             }
         } else {
             // Manual verification
-            if ($this->confirm('Would you like to verify the OTP now?')) {
-                $enteredOtp = $this->ask('Enter OTP code:');
+            $this->info('🔍 To verify the OTP manually, you can:');
+            $this->info('   1. Use --auto-verify flag next time');
+            $this->info('   2. Or verify manually by calling the API:');
+            $endpoint = match($userType) {
+                'school' => '/api/voiceflow/verify-otp',
+                'doctor' => '/api/voiceflow/verify-doctor-otp',
+                'health-facility' => '/api/voiceflow/verify-health-facility-otp',
+                default => '/api/voiceflow/verify-otp'
+            };
+            $this->info("      curl -X POST {$this->baseUrl}{$endpoint} -d 'email={$email}&otp={$otp}'");
+            
+            $enteredOtp = $this->ask('Enter OTP code to verify (or press Enter to skip):');
+            
+            if (!empty($enteredOtp)) {
                 $verifyResponse = $this->verifyOtp($email, $enteredOtp, $userType);
 
                 if ($verifyResponse['success']) {
@@ -122,11 +155,114 @@ class VoiceFlowSimulation extends Command
                 } else {
                     $this->error('❌ OTP verification failed: ' . ($verifyResponse['message'] ?? 'Unknown error'));
                 }
+            } else {
+                $this->info('⏭️  OTP verification skipped.');
             }
         }
 
-        $this->info('🎉 VoiceFlow simulation completed!');
+        $this->info('🎉 VoiceFlow login simulation completed!');
         return 0;
+    }
+
+    /**
+     * Handle registration simulation
+     */
+    protected function handleRegistration()
+    {
+        $this->info('📝 Registration Simulation');
+        $this->info('========================');
+
+        // Get user type
+        $userType = $this->choice(
+            'Select user type to register:',
+            ['school', 'doctor', 'health-facility'],
+            0
+        );
+
+        $this->info("Registering as: {$userType}");
+
+        // Collect registration data based on user type
+        $registrationData = $this->collectRegistrationData($userType);
+
+        // Simulate registration API call
+        $this->info('📤 Sending registration request...');
+        $registerResponse = $this->registerUser($userType, $registrationData);
+
+        if (isset($registerResponse['success']) && $registerResponse['success'] === false) {
+            $this->error('❌ Registration failed: ' . ($registerResponse['message'] ?? 'Unknown error'));
+            return 1;
+        }
+
+        $this->info('✅ Registration successful!');
+        if (isset($registerResponse['message'])) {
+            $this->info('📧 ' . $registerResponse['message']);
+        }
+
+        $this->info('🎉 VoiceFlow registration simulation completed!');
+        return 0;
+    }
+
+    /**
+     * Collect registration data for the user type
+     */
+    protected function collectRegistrationData(string $userType): array
+    {
+        $data = [];
+
+        switch ($userType) {
+            case 'school':
+                $data['name'] = $this->ask('School name:');
+                $data['email'] = $this->ask('School email:');
+                $data['contact'] = $this->ask('School contact:');
+                break;
+
+            case 'doctor':
+                $data['name'] = $this->ask('Doctor name:');
+                $data['email'] = $this->ask('Doctor email:');
+                $data['contact'] = $this->ask('Doctor contact:');
+                $data['specialization'] = $this->ask('Specialization:');
+                break;
+
+            case 'health-facility':
+                $data['name'] = $this->ask('Health facility name:');
+                $data['email'] = $this->ask('Health facility email:');
+                $data['contact'] = $this->ask('Health facility contact:');
+                break;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Register user via API
+     */
+    protected function registerUser(string $userType, array $data): array
+    {
+        try {
+            $endpoint = match($userType) {
+                'school' => '/api/register-school',
+                'doctor' => '/api/register-doctor',
+                'health-facility' => '/api/register-health-facility',
+                default => '/api/register-school'
+            };
+
+            $response = Http::timeout(10)->post($this->baseUrl . $endpoint, $data);
+
+            if ($response->successful()) {
+                $json = $response->json();
+                return $json ?: ['success' => false, 'message' => 'Invalid JSON response'];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'HTTP ' . $response->status() . ': ' . $response->body()
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Request failed: ' . $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -135,14 +271,14 @@ class VoiceFlowSimulation extends Command
     protected function isServerRunning(): bool
     {
         try {
-            // Try the root endpoint first (more reliable)
+            // Try the root endpoint - accept redirects as indication server is running
             $response = Http::timeout(5)->get($this->baseUrl);
-            return $response->successful();
+            return $response->status() >= 200 && $response->status() < 400;
         } catch (\Exception $e) {
             // Try alternative health check
             try {
                 $response = Http::timeout(5)->get($this->baseUrl . '/api/health');
-                return $response->successful();
+                return $response->status() >= 200 && $response->status() < 400;
             } catch (\Exception $e) {
                 return false;
             }
@@ -205,14 +341,21 @@ class VoiceFlowSimulation extends Command
 
             if ($response->successful()) {
                 $json = $response->json();
-                return $json ?: ['success' => false, 'message' => 'Invalid JSON response'];
+                if (!$json) {
+                    return ['success' => false, 'message' => 'Invalid JSON response'];
+                }
+                // Debug: log the response
+                $this->info("Debug: Response for {$userType}: " . json_encode($json));
+                return $json;
             } else {
+                $this->error("Debug: HTTP error for {$userType}: " . $response->status() . ' - ' . $response->body());
                 return [
                     'success' => false,
                     'message' => 'HTTP ' . $response->status() . ': ' . $response->body()
                 ];
             }
         } catch (\Exception $e) {
+            $this->error("Debug: Exception for {$userType}: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Request failed: ' . $e->getMessage()

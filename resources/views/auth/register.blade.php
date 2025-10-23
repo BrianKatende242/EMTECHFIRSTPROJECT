@@ -1,220 +1,394 @@
 @extends('layouts.auth')
 
-@section('title', 'Admin Registration')
-
+@section('title','Admin Registration')
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card">
-            <div class="card-header text-center">
-                <h4 class="mb-0 text-white">Admin Registration</h4>
-            </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7 col-xl-6">
+                <div class="card shadow-lg border-0 rounded-3">
+                    <!-- Header -->
+                    <div class="card-header bg-magenta text-white text-center py-4">
+                        <div class="mb-3">
+                            <img src="{{ asset('images/emoji-logo-black.svg') }}" alt="KETI AI" class="img-fluid" style="height: 50px; width: auto;">
+                        </div>
+                        <h2 class="h4 mb-0 fw-bold">Admin Registration</h2>
+                        <p class="mb-0 opacity-75">Create your admin account</p>
+                    </div>
 
-            <div class="card-body">
-                <!-- Alert container for AJAX responses -->
-                <div id="alert-container" class="mb-3" style="display: none;">
-                    <div id="alert-message" class="alert" role="alert"></div>
+                    <!-- Body -->
+                    <div class="card-body p-4 p-lg-5 py-5">
+                        <!-- Error / Status container (used by server render and AJAX) -->
+                        <div id="registerErrors">
+                            @if($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            @if(session('status'))
+                                <div class="alert alert-success">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Registration Form -->
+                        <form id="registerForm" method="POST" action="{{ route('register') }}" novalidate>
+                            @csrf
+
+                            @if(isset($invite))
+                                <input type="hidden" name="invite_token" value="{{ $invite->token }}">
+                            @endif
+
+                            <!-- Name Field -->
+                            <div class="mb-4">
+                                <label for="name" class="form-label fw-bold text-muted mb-3">Full Name</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-light">
+                                        <i class="mdi mdi-account text-muted"></i>
+                                    </span>
+                                    <input type="text"
+                                           id="name"
+                                           name="name"
+                                           class="form-control form-control-lg @error('name') is-invalid @enderror"
+                                           value="{{ old('name') }}"
+                                           placeholder="Enter your full name"
+                                           required
+                                           autocomplete="name"
+                                           autofocus>
+                                </div>
+                                @error('name')
+                                    <div class="text-danger small mt-1">
+                                        <i class="mdi mdi-alert-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Email Field -->
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-bold text-muted mb-3">Email Address</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-light">
+                                        <i class="mdi mdi-email text-muted"></i>
+                                    </span>
+                                    <input type="email"
+                                           id="email"
+                                           name="email"
+                                           class="form-control form-control-lg @error('email') is-invalid @enderror"
+                                           value="{{ old('email', $email ?? '') }}"
+                                           placeholder="Enter your email address"
+                                           required
+                                           autocomplete="email"
+                                           {{ isset($email) ? 'readonly' : '' }}>
+                                </div>
+                                @error('email')
+                                    <div class="text-danger small mt-1">
+                                        <i class="mdi mdi-alert-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-bold text-muted mb-3">Password</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-light">
+                                        <i class="mdi mdi-lock text-muted"></i>
+                                    </span>
+                                    <input type="password"
+                                           id="password"
+                                           name="password"
+                                           class="form-control form-control-lg @error('password') is-invalid @enderror"
+                                           placeholder="Enter your password"
+                                           required
+                                           autocomplete="new-password">
+                                </div>
+                                @error('password')
+                                    <div class="text-danger small mt-1">
+                                        <i class="mdi mdi-alert-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- Confirm Password Field -->
+                            <div class="mb-4">
+                                <label for="password_confirmation" class="form-label fw-bold text-muted mb-3">Confirm Password</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-light">
+                                        <i class="mdi mdi-lock-check text-muted"></i>
+                                    </span>
+                                    <input type="password"
+                                           id="password_confirmation"
+                                           name="password_confirmation"
+                                           class="form-control form-control-lg"
+                                           placeholder="Confirm your password"
+                                           required
+                                           autocomplete="new-password">
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4">
+                                <button type="submit" id="registerBtn" class="btn btn-dark btn-lg w-100 fw-bold rounded-3 py-3">
+                                    <span class="btn-text">
+                                        <i class="mdi mdi-account-plus me-2"></i>Create Account
+                                    </span>
+                                    <span class="btn-loading d-none">
+                                        <i class="mdi mdi-loading mdi-spin me-2"></i>Creating Account...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer bg-light text-center py-3">
+                        <small class="text-muted">
+                            <i class="mdi mdi-shield me-1"></i>
+                            © {{ date('Y') }} KETI AI. Secure admin access only.
+                        </small>
+                    </div>
                 </div>
-
-                <form id="register-form" method="POST" action="{{ route('register') }}">
-                    @csrf
-
-                    @if(isset($invite))
-                        <input type="hidden" name="invite_token" value="{{ $invite->token }}">
-                    @endif
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">{{ __('Name') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Enter your full name">
-                        </div>
-                        <div id="name-error" class="invalid-feedback d-block" style="display: none;"></div>
-                        @error('name')
-                            <div class="invalid-feedback d-block">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label">{{ __('E-Mail Address') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $email ?? '') }}" required autocomplete="email" {{ isset($email) ? 'readonly' : '' }} placeholder="Enter your email address">
-                        </div>
-                        <div id="email-error" class="invalid-feedback d-block" style="display: none;"></div>
-                        @error('email')
-                            <div class="invalid-feedback d-block">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">{{ __('Password') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="Enter your password">
-                        </div>
-                        <div id="password-error" class="invalid-feedback d-block" style="display: none;"></div>
-                        @error('password')
-                            <div class="invalid-feedback d-block">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="password-confirm" class="form-label">{{ __('Confirm Password') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm your password">
-                        </div>
-                        <div id="password-confirm-error" class="invalid-feedback d-block" style="display: none;"></div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" id="register-btn" class="btn btn-primary btn-lg">
-                            <span id="btn-text">
-                                <i class="fas fa-user-plus me-2"></i>{{ __('Register') }}
-                            </span>
-                            <span id="btn-loading" style="display: none;">
-                                <i class="fas fa-spinner fa-spin me-2"></i>Registering...
-                            </span>
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-</div>
-@endsection
 
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('register-form');
-    const submitBtn = document.getElementById('register-btn');
-    const btnText = document.getElementById('btn-text');
-    const btnLoading = document.getElementById('btn-loading');
-    const alertContainer = document.getElementById('alert-container');
-    const alertMessage = document.getElementById('alert-message');
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const btnText = registerBtn.querySelector('.btn-text');
+    const btnLoading = registerBtn.querySelector('.btn-loading');
 
-    // Clear any existing server-side validation errors on page load
-    clearErrors();
+    // Form validation
+    const inputs = registerForm.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Clear previous errors and alerts
-        clearErrors();
-        hideAlert();
-
-        // Show loading state
-        setLoading(true);
-
-        // Get form data
-        const formData = new FormData(form);
-
-        // Send AJAX request
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
             }
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            return response.json().catch(() => {
-                console.error('Failed to parse JSON response');
-                throw new Error('Invalid response format');
-            });
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            setLoading(false);
-
-            if (data.success) {
-                // Success - redirect or show success message
-                showAlert('Registration successful! Redirecting...', 'success');
-                setTimeout(() => {
-                    window.location.href = '{{ route("login") }}';
-                }, 2000);
-            } else {
-                // Handle validation errors or general error messages
-                if (data.errors) {
-                    displayErrors(data.errors);
-                } else if (data.message) {
-                    showAlert(data.message, 'danger');
-                } else {
-                    showAlert('Registration failed. Please try again.', 'danger');
-                }
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            console.error('Error:', error);
-            showAlert('An error occurred. Please try again.', 'danger');
         });
     });
 
-    function setLoading(loading) {
-        submitBtn.disabled = loading;
-        btnText.style.display = loading ? 'none' : 'inline';
-        btnLoading.style.display = loading ? 'inline' : 'none';
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let message = '';
+
+        if (field.type === 'text' && field.name === 'name') {
+            if (!value) {
+                isValid = false;
+                message = 'Name is required.';
+            } else if (value.length < 2) {
+                isValid = false;
+                message = 'Name must be at least 2 characters long.';
+            }
+        } else if (field.type === 'email') {
+            if (!value) {
+                isValid = false;
+                message = 'Email address is required.';
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                isValid = emailRegex.test(value);
+                message = isValid ? '' : 'Please enter a valid email address.';
+            }
+        } else if (field.type === 'password') {
+            if (field.name === 'password') {
+                if (!value) {
+                    isValid = false;
+                    message = 'Password is required.';
+                } else if (value.length < 8) {
+                    isValid = false;
+                    message = 'Password must be at least 8 characters long.';
+                }
+            } else if (field.name === 'password_confirmation') {
+                const password = document.getElementById('password').value;
+                if (!value) {
+                    isValid = false;
+                    message = 'Please confirm your password.';
+                } else if (value !== password) {
+                    isValid = false;
+                    message = 'Passwords do not match.';
+                }
+            }
+        }
+
+        field.classList.toggle('is-invalid', !isValid);
+        field.classList.toggle('is-valid', isValid && value.length > 0);
+
+        // Update or create feedback element
+        let feedback = field.parentElement.parentElement.querySelector('.text-danger');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'text-danger small mt-1';
+            field.parentElement.parentElement.appendChild(feedback);
+        }
+
+        if (message) {
+            feedback.innerHTML = `<i class="mdi mdi-alert-circle me-1"></i>${message}`;
+            feedback.style.display = 'block';
+        } else {
+            feedback.style.display = 'none';
+        }
+
+        return isValid;
     }
 
-    function showAlert(message, type) {
-        alertMessage.textContent = message;
-        alertMessage.className = `alert alert-${type}`;
-        alertContainer.style.display = 'block';
+    // Form submission
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-        // Auto-hide success messages after 5 seconds
-        if (type === 'success') {
-            setTimeout(() => {
-                hideAlert();
-            }, 5000);
+        // Validate all fields
+        let isFormValid = true;
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isFormValid = false;
+            }
+        });
+
+        if (!isFormValid) {
+            return;
+        }
+
+        // Show loading state
+        registerBtn.disabled = true;
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+
+        // Clear previous errors inside registerErrors container
+        const errorsContainer = document.getElementById('registerErrors');
+        if (errorsContainer) {
+            errorsContainer.innerHTML = '';
+        }
+
+        try {
+            const formData = new FormData(this);
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Success - redirect to login
+                window.location.href = '{{ route("login") }}';
+            } else {
+                // Show errors
+                showErrors(data.errors || data.message);
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            showErrors('An unexpected error occurred. Please try again.');
+        } finally {
+            // Reset loading state
+            registerBtn.disabled = false;
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+        }
+    });
+
+    function showErrors(errors) {
+        // Clear previous errors
+        const errorsContainer = document.getElementById('registerErrors');
+        if (errorsContainer) {
+            errorsContainer.innerHTML = '';
+        }
+
+        let errorHtml = '';
+
+        if (typeof errors === 'string') {
+            errorHtml = `<div class="alert alert-danger">${errors}</div>`;
+        } else if (typeof errors === 'object' && errors !== null) {
+            const errorMessages = [];
+            for (const field in errors) {
+                const messages = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+                errorMessages.push(...messages);
+            }
+
+            if (errorMessages.length > 0) {
+                errorHtml = `<div class="alert alert-danger">
+                    <ul class="mb-0">
+                        ${errorMessages.map(msg => `<li>${msg}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+        }
+
+        if (errorHtml && errorsContainer) {
+            errorsContainer.innerHTML = errorHtml;
         }
     }
 
-    function hideAlert() {
-        alertContainer.style.display = 'none';
-    }
-
-    function displayErrors(errors) {
-        Object.keys(errors).forEach(field => {
-            const errorElement = document.getElementById(`${field}-error`);
-            if (errorElement) {
-                errorElement.textContent = errors[field][0];
-                errorElement.style.display = 'block';
-
-                // Add is-invalid class to the input
-                const input = document.getElementById(field);
-                if (input) {
-                    input.classList.add('is-invalid');
-                }
-            }
-        });
-    }
-
-    function clearErrors() {
-        // Hide all error messages
-        const errorElements = document.querySelectorAll('.invalid-feedback');
-        errorElements.forEach(element => {
-            element.style.display = 'none';
-        });
-
-        // Remove is-invalid classes
-        const invalidInputs = document.querySelectorAll('.is-invalid');
-        invalidInputs.forEach(input => {
-            input.classList.remove('is-invalid');
-        });
+    // Auto-focus first empty field
+    const firstEmptyField = Array.from(inputs).find(input => !input.value);
+    if (firstEmptyField) {
+        firstEmptyField.focus();
     }
 });
 </script>
-@endpush
+@endsection
+
+<style>
+/* Magenta background for registration header */
+.bg-magenta {
+    background-color: #FF00FF !important; /* Magenta color */
+}
+
+/* Auth link styling */
+.auth-link {
+    color: #6c757d !important;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    color: #495057 !important;
+    text-decoration: underline;
+}
+
+/* Form validation styling */
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.was-validated .form-control:valid,
+.form-control.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='m2.3 6.73L.82 4.78l1.11-1.05L2.3 4.6l3.4-3.55L6.82 2.5z'/%3e%3c/svg%3e");
+}
+
+/* Button loading state */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Focus states */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+</style>

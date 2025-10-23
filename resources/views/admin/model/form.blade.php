@@ -20,12 +20,19 @@
     @endphp
 
     @php
-        $storeRoute = 'admin.model.store';
-        $updateRoute = 'admin.model.update';
-        $indexRoute = 'admin.model.index';
+        // Use specific routes for schools if they exist
+        if ($modelKey === 'schools') {
+            $storeRoute = 'admin.schools.store';
+            $updateRoute = 'admin.schools.update';
+            $indexRoute = 'admin.schools.index';
+        } else {
+            $storeRoute = 'admin.model.store';
+            $updateRoute = 'admin.model.update';
+            $indexRoute = 'admin.model.index';
+        }
     @endphp
 
-    <form method="POST" action="{{ $item ? route($updateRoute, [$modelKey, $item->id]) : route($storeRoute, $modelKey) }}" @if($modelKey === 'doctors') enctype="multipart/form-data" @endif>
+    <form method="POST" action="{{ $item ? route($updateRoute, [$modelKey, $item->id]) : route($storeRoute, $modelKey) }}" @if(in_array($modelKey, ['doctors', 'schools'])) enctype="multipart/form-data" @endif>
         @csrf
         @if($item)
             @method('PUT')
@@ -90,6 +97,34 @@
                         <button type="button" id="copy-meeting-url" class="btn btn-outline-secondary">Copy</button>
                     </div>
                     <div id="copy-feedback" class="small text-success mt-1" style="display:none">Copied to clipboard</div>
+                </div>
+            </div>
+        @elseif($modelKey === 'schools')
+            <div class="row g-2">
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Name</label>
+                    <input name="name" class="form-control" required value="{{ old('name', $item->name ?? '') }}">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Email</label>
+                    <input name="email" type="email" class="form-control" value="{{ old('email', $item->email ?? '') }}">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Contact</label>
+                    <input name="contact" class="form-control" value="{{ old('contact', $item->contact ?? '') }}">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Address</label>
+                    <input name="address" class="form-control" value="{{ old('address', $item->address ?? '') }}">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">School Logo/Image</label>
+                    @if(!empty($item->file_url))
+                        <div class="mb-2">
+                            <img src="{{ $item->file_url }}" alt="school logo" style="max-height:80px;">
+                        </div>
+                    @endif
+                    <input name="file_url" type="file" accept="image/*" class="form-control">
                 </div>
             </div>
         @else

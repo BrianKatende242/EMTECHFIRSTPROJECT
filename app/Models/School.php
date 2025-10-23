@@ -10,7 +10,7 @@ class School extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'contact', 'file_url'];
+    protected $fillable = ['name', 'email', 'contact', 'address', 'file_url'];
     
     public function students(): HasMany
     {

@@ -17,7 +17,7 @@
                             <p class="mb-0 opacity-85">Manage school information and records</p>
                         </div>
                         <div class="d-flex gap-3">
-                            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createSchoolModal">
+                            <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#createSchoolModal">
                                 <i class="fa fa-plus me-3"></i> <span>Add School</span>
                             </button>
                         </div>
@@ -51,7 +51,7 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fa fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-dismiss="alert"></button>
         </div>
     @endif
 
@@ -144,25 +144,25 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-sm btn-outline-info" title="View Profile">
+                                    <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-sm btn-outline-info" title="View Profile">
                                         <i class="mdi mdi-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                    <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
                                         <i class="mdi mdi-pencil"></i>
                                     </a>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="More Actions">
+                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" title="More Actions">
                                             <i class="fa fa-ellipsis-h"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
                                             <li>
-                                                <a href="{{ route('admin.model.edit', ['schools', $school->id]) }}" class="dropdown-item" target="_blank">
+                                                <a href="{{ route('admin.schools.edit', $school->id) }}" class="dropdown-item" target="_blank">
                                                     <i class="fa fa-external-link me-2 text-info"></i>View Full Details
                                                 </a>
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form action="{{ route('admin.model.destroy', ['schools', $school->id]) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this school?')">

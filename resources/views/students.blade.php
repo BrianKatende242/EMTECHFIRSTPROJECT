@@ -49,6 +49,83 @@
                     </div>
                 </div>
 
+                <!-- Filter Section -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fa fa-filter"></i> Filters
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('students') }}" id="filterForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="search">Search by Name:</label>
+                                        <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="Enter student name">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="grade">Grade:</label>
+                                        <select class="form-control" id="grade" name="grade">
+                                            <option value="">All Grades</option>
+                                            @php
+                                                $allGrades = $school->students()->pluck('grade')->unique()->filter()->sort();
+                                            @endphp
+                                            @foreach($allGrades as $gradeOption)
+                                                <option value="{{ $gradeOption }}" {{ request('grade') == $gradeOption ? 'selected' : '' }}>{{ $gradeOption }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="gender">Gender:</label>
+                                        <select class="form-control" id="gender" name="gender">
+                                            <option value="">All Genders</option>
+                                            <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                                            <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                                            <option value="other" {{ request('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="min_age">Min Age:</label>
+                                        <input type="number" class="form-control" id="min_age" name="min_age" value="{{ request('min_age') }}" min="1" max="25" placeholder="Min age">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="max_age">Max Age:</label>
+                                        <input type="number" class="form-control" id="max_age" name="max_age" value="{{ request('max_age') }}" min="1" max="25" placeholder="Max age">
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @if(request()->hasAny(['search', 'grade', 'gender', 'min_age', 'max_age']))
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <a href="{{ route('students') }}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fa fa-times"></i> Clear Filters
+                                        </a>
+                                        <small class="text-muted ml-2">
+                                            Showing {{ $students->count() }} of {{ $school->students()->count() }} students
+                                        </small>
+                                    </div>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+
         <!-- New Student Modal -->
         <div class="modal fade" id="newStudentModal" tabindex="-1" role="dialog" aria-labelledby="newStudentModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -161,6 +238,11 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $students->appends(request()->query())->links() }}
+                </div>
             </div>
         @else
             <div class="alert alert-info text-dark">
@@ -193,6 +275,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>

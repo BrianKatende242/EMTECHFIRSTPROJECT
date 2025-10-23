@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use App\Models\Doctor;
+use App\Models\School;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -65,5 +66,29 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('doctor', $doctor);
             }
         });
+
+        // Share $school with all views when available (session-based auth)
+        View::composer('*', function ($view) {
+            // If a controller/view already set a school variable, don't overwrite it
+            $existing = $view->getData()['school'] ?? null;
+            if ($existing) {
+                return;
+            }
+
+            $school = null;
+
+            // Check session for authenticated user
+            $authenticatedUser = session('authenticated_user');
+            if ($authenticatedUser && $authenticatedUser['type'] === 'school') {
+                $school = School::find($authenticatedUser['id']);
+            }
+
+            if ($school) {
+                $view->with('school', $school);
+            }
+        });
+
+        // Register helper function to get authenticated school
+        // Note: This function is now defined in app/Helpers/SchoolHelper.php and autoloaded
     }
 }

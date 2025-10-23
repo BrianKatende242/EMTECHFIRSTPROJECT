@@ -426,6 +426,23 @@ class AdminModelController extends Controller
 
             $item = $modelClass::create($validated);
 
+        } elseif ($modelKey === 'schools') {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255|unique:schools,email',
+                'contact' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'file_url' => 'nullable|file|image|max:2048',
+            ]);
+
+            // handle file upload
+            if ($request->hasFile('file_url')) {
+                $path = $request->file('file_url')->store('schools', 'public');
+                $validated['file_url'] = '/storage/' . $path;
+            }
+
+            $item = $modelClass::create($validated);
+
         } elseif ($modelKey === 'users') {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -493,6 +510,21 @@ class AdminModelController extends Controller
 
             // Do NOT allow manual meeting_slug updates; keep existing slug
             $item->update($validated);
+        } elseif ($modelKey === 'schools') {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255|unique:schools,email,' . $id,
+                'contact' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'file_url' => 'nullable|file|image|max:2048',
+            ]);
+
+            if ($request->hasFile('file_url')) {
+                $path = $request->file('file_url')->store('schools', 'public');
+                $validated['file_url'] = '/storage/' . $path;
+            }
+
+            $item->update($validated);
         } elseif ($modelKey === 'users') {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -534,6 +566,28 @@ class AdminModelController extends Controller
         abort_unless($modelClass, 404);
 
         $item = $modelClass::findOrFail($id);
+
+        // Special validation for schools - prevent deletion if they have related records
+        if ($modelKey === 'schools') {
+            $school = $item;
+            
+            if ($school->students()->count() > 0) {
+                return redirect()->back()->with('error', 'Cannot delete school that has students associated with it.');
+            }
+            
+            if ($school->appointments()->count() > 0) {
+                return redirect()->back()->with('error', 'Cannot delete school that has appointments associated with it.');
+            }
+            
+            if ($school->labTests()->count() > 0) {
+                return redirect()->back()->with('error', 'Cannot delete school that has lab tests associated with it.');
+            }
+            
+            if ($school->doctors()->count() > 0) {
+                return redirect()->back()->with('error', 'Cannot delete school that has doctors associated with it.');
+            }
+        }
+
         $item->delete();
 
         $redirectRoute = 'admin.' . $modelKey . '.index';

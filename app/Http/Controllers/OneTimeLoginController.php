@@ -45,7 +45,7 @@ class OneTimeLoginController extends Controller
         switch ($record->user_type) {
             case 'school':
                 $user = \App\Models\School::find($record->user_id);
-                $redirectUrl = url("/school-dashboard/{$user->id}");
+                $redirectUrl = url("/school-dashboard");
                 break;
             case 'doctor':
                 $user = \App\Models\Doctor::find($record->user_id);
