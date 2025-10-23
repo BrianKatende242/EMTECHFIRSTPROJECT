@@ -61,7 +61,7 @@
               </span>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-              <a class="dropdown-item" href="{{ route('profile.show') }}">
+              <a class="dropdown-item" href="{{ route('user.profile') }}">
                 <i class="typcn typcn-user-outline"></i>
                 Profile
               </a>

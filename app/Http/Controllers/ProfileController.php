@@ -11,9 +11,37 @@ class ProfileController extends Controller
     {
         // If a doctor id was provided in the URL, try to load that doctor (preserve context)
         if ($doctorId) {
-            $doctor = \App\Models\Doctor::find($doctorId);
+            $doctor = \App\Models\Doctor::with(['school', 'healthFacility', 'appointments' => function($q) {
+                $q->latest()->take(5);
+            }, 'availabilities'])->find($doctorId);
+
             if ($doctor) {
-                return view('profile.doctor', compact('doctor'));
+                // Calculate statistics
+                $totalAppointments = $doctor->appointments()->count();
+                $completedAppointments = $doctor->appointments()->where('status', 'completed')->count();
+                $upcomingAppointments = $doctor->appointments()->whereIn('status', ['pending', 'scheduled'])->count();
+                $cancelledAppointments = $doctor->appointments()->where('status', 'cancelled')->count();
+
+                // Get recent appointments
+                $recentAppointments = $doctor->appointments()->with('patient')->latest()->take(5)->get();
+
+                // Get availability summary
+                $availabilitySummary = [];
+                $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                foreach ($days as $day) {
+                    $availability = $doctor->availabilities()->where('day', $day)->first();
+                    $availabilitySummary[$day] = $availability ? $availability->available : false;
+                }
+
+                return view('profile.doctor', compact(
+                    'doctor',
+                    'totalAppointments',
+                    'completedAppointments',
+                    'upcomingAppointments',
+                    'cancelledAppointments',
+                    'recentAppointments',
+                    'availabilitySummary'
+                ));
             }
         }
 

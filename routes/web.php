@@ -463,7 +463,10 @@ Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard']
 Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
 
 // Centralized profile route (optional doctor id to preserve doctor context)
-Route::get('/profile/{doctor?}', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+Route::get('/doctors/{doctor}', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+
+// Current user profile route
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('user.profile');
 
 
 // In your web.php routes file, add this route

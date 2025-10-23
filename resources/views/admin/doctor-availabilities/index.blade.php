@@ -209,7 +209,7 @@
                                     <a href="{{ route('doctor.availability', $doctor->id) }}" class="btn btn-sm btn-outline-primary" title="Manage Availability">
                                         <i class="mdi mdi-calendar-edit"></i>
                                     </a>
-                                    <a href="{{ route('admin.doctors.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                    <a href="{{ route('profile.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Details">
                                         <i class="mdi mdi-eye"></i>
                                     </a>
                                     <div class="dropdown">

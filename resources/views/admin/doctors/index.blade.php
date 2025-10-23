@@ -162,7 +162,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.doctors.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Profile">
+                                    <a href="{{ route('profile.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Profile">
                                         <i class="mdi mdi-eye"></i>
                                     </a>
                                     <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">

@@ -294,7 +294,7 @@
                         <div class="card-footer bg-white border-0 p-3">
                             <div class="row g-2">
                                 <div class="col-auto">
-                                    <a href="{{ route('admin.doctors.show', $doctor->id) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View Profile" style="border-radius: 8px;">
+                                    <a href="{{ route('profile.show', $doctor->id) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View Profile" style="border-radius: 8px;">
                                         <i class="fas fa-eye me-1"></i>View
                                     </a>
                                 </div>
