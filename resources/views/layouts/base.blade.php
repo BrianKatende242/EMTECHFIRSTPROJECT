@@ -88,7 +88,7 @@
         <ul class="navbar-nav navbar-nav-right">
           <li class="nav-item nav-date dropdown">
             <a class="nav-link d-flex justify-content-center align-items-center" href="javascript:;">
-              <h6 class="date mb-0">0 UGX</h6>
+              <h6 class="date mb-0">{{ isset($walletBalance) ? number_format($walletBalance) : '0' }} UGX</h6>
               <i class="mdi mdi-wallet"></i>
             </a>
           </li>

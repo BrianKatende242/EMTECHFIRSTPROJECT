@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\School;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Services\MarzPayService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -88,7 +89,22 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // Register helper function to get authenticated school
-        // Note: This function is now defined in app/Helpers/SchoolHelper.php and autoloaded
+        // Share wallet balance with admin views
+        View::composer(['layouts.base', 'admin.*'], function ($view) {
+            // Only fetch wallet balance for admin users
+            if (Auth::check() && Auth::user()->is_admin) {
+                $walletBalance = 0;
+                try {
+                    $marzPayService = new MarzPayService();
+                    $balanceData = $marzPayService->getBalance();
+                    // Assuming the balance is in the response as 'balance' or 'available_balance'
+                    $walletBalance = $balanceData['balance'] ?? $balanceData['available_balance'] ?? 0;
+                } catch (\Exception $e) {
+                    // Log error but don't break the page - just show 0
+                    \Log::error('Failed to fetch MarzPay wallet balance: ' . $e->getMessage());
+                }
+                $view->with('walletBalance', $walletBalance);
+            }
+        });
     }
 }
