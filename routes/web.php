@@ -263,6 +263,9 @@ Route::post('/patients/create', function (Request $request) {
             'medical_history' => 'nullable|string'
         ]);
 
+        // Generate unique patient ID
+        $validated['patient_id'] = App\Models\Patient::generatePatientId();
+
         $patient = App\Models\Patient::create($validated);
 
         // After adding a patient, redirect to the patients list for this health facility
