@@ -6,7 +6,12 @@
 
 @section('content')
 <div class="container-fluid px-3 py-2">
-    <!-- Header Section -->
+    <!-- Hea                            <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View/Edit" style="border-radius: 8px;">
+                                <i class="fa fa-eye me-1"></i>View
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">ction -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm bg-primary">
@@ -192,12 +197,12 @@
                 <div class="card-footer bg-white border-0 p-3">
                     <div class="row g-2">
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View/Edit" style="border-radius: 8px;">
+                            <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="btn btn-outline-info btn-sm fw-semibold px-3" title="View/Edit" style="border-radius: 8px;">
                                 <i class="mdi mdi-eye me-1"></i>View
                             </a>
                         </div>
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['appointments', $appointment->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">
+                            <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">
                                 <i class="mdi mdi-pencil me-1"></i>Edit
                             </a>
                         </div>
@@ -208,7 +213,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
                                     <li>
-                                        <form action="{{ route('admin.model.destroy', ['appointments', $appointment->id]) }}" method="POST" style="display:inline-block">
+                                        <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" style="display:inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this appointment?')" style="padding: 0.5rem 1rem;">

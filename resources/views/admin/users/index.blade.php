@@ -101,7 +101,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.model.edit', ['users', $admin->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                    <a href="{{ route('admin.users.edit', $admin->id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
                                         <i class="mdi mdi-pencil"></i>
                                     </a>
                                     <div class="dropdown">
@@ -110,7 +110,7 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
                                             <li>
-                                                <form action="{{ route('admin.model.destroy', ['users', $admin->id]) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('admin.users.destroy', $admin->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this admin?')">

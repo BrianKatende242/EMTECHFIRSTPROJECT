@@ -1,5 +1,9 @@
 @extends('layouts.base')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @section('content')
 <div class="container-fluid">
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -26,8 +30,10 @@
                             <th>Doctor</th>
                             <th>Appointment Date</th>
                             <th>Duration</th>
-                            <th>Status</th>
+                            <th>Appointment Status</th>
+                            <th>Payment Status</th>
                             <th>Amount</th>
+                            <th>Payment Reference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,13 +43,29 @@
                             <td>{{ $appointment->patient->name ?? 'N/A' }}</td>
                             <td>{{ $appointment->doctor->name ?? 'N/A' }}</td>
                             <td>{{ $appointment->appointment_time ? $appointment->appointment_time->format('M d, Y H:i') : 'N/A' }}</td>
-                            <td>{{ $appointment->duration->name ?? 'N/A' }}</td>
+                            <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins ' . ucfirst($appointment->duration->type) : 'N/A' }}</td>
                             <td>
-                                <span class="badge bg-{{ $appointment->status === 'completed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : 'warning') }}">
-                                    {{ ucfirst($appointment->status ?? 'pending') }}
+                                <span class="badge bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : 'warning') }}">
+                                    {{ ucfirst(str_replace('_', ' ', $appointment->status ?? 'pending')) }}
                                 </span>
                             </td>
-                            <td>UGX {{ number_format($appointment->duration->price ?? 0, 0) }}</td>
+                            <td>
+                                @if($appointment->payment_status)
+                                    <span class="badge bg-{{ $appointment->payment_status === 'completed' ? 'success' : ($appointment->payment_status === 'failed' ? 'danger' : 'info') }}">
+                                        {{ ucfirst($appointment->payment_status) }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary">Not Started</span>
+                                @endif
+                            </td>
+                            <td>UGX {{ number_format($appointment->duration ? $appointment->duration->getPrice() : 0, 0) }}</td>
+                            <td>
+                                @if($appointment->payment_reference)
+                                    <small class="text-muted">{{ Str::limit($appointment->payment_reference, 20) }}</small>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

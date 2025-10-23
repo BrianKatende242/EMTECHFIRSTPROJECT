@@ -165,7 +165,7 @@
                                     <a href="{{ route('admin.doctors.show', $doctor->id) }}" class="btn btn-sm btn-outline-info" title="View Profile">
                                         <i class="mdi mdi-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.model.edit', ['doctors', $doctor->id]) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                    <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
                                         <i class="mdi mdi-flag"></i>
                                     </a>
                                     <div class="dropdown">
@@ -183,7 +183,7 @@
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form action="{{ route('admin.model.destroy', ['doctors', $doctor->id]) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this doctor?')">

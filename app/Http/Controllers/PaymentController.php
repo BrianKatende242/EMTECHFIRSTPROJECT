@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Services\MarzPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -22,7 +23,15 @@ class PaymentController extends Controller
     public function showAppointmentPayForm(Appointment $appointment)
     {
         if ($appointment->status !== 'awaiting_payment') {
-            return back()->with('error', 'This appointment is not awaiting payment.');
+            // Redirect to appropriate dashboard instead of back() to avoid redirect loops
+            if ($appointment->healthFacility) {
+                return redirect()->route('health-facility.dashboard', ['id' => $appointment->healthFacility->id])
+                    ->with('error', 'This appointment is not awaiting payment.');
+            } elseif ($appointment->school) {
+                return redirect()->route('school.dashboard')
+                    ->with('error', 'This appointment is not awaiting payment.');
+            }
+            return redirect('/')->with('error', 'This appointment is not awaiting payment.');
         }
         // Load relations and pass sidebar context so menu renders
         $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
@@ -256,7 +265,8 @@ class PaymentController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
-            return back()->with('error', $message);
+            // Redirect to pay page instead of back() to avoid loops
+            return redirect()->route('payment.appointment.pay', $appointment->id)->with('error', $message);
         }
 
         // Normalize phone to international format (+256xxxxxxxxx)
@@ -296,9 +306,40 @@ class PaymentController extends Controller
             $result = $this->marzPayService->collectMoney($data);
 
             if (($result['status'] ?? null) === 'success') {
+                // Create Payment record
+                $payment = \App\Models\Payment::create([
+                    'appointment_id' => $appointment->id,
+                    'amount' => $amount,
+                    'phone_number' => $phone,
+                    'reference_id' => $result['data']['transaction']['uuid'] ?? (string) Str::uuid(),
+                    'status' => 'pending',
+                    'metadata' => [
+                        'marzpay_response' => $result,
+                        'requested_at' => now(),
+                    ]
+                ]);
+
                 // Store payment reference on appointment for tracking
-                $appointment->payment_reference = $result['data']['transaction']['uuid'] ?? null;
+                $appointment->payment_reference = $payment->reference_id;
+                $appointment->payment_status = 'pending';
                 $appointment->save();
+
+                // Create initial Transaction record
+                \App\Models\Transaction::create([
+                    'payment_id' => $payment->id,
+                    'reference_id' => $payment->reference_id,
+                    'amount' => $amount,
+                    'status' => 'pending',
+                    'transaction_id' => $result['data']['transaction']['uuid'] ?? null,
+                    'provider' => 'marzpay',
+                    'provider_reference' => $result['data']['transaction']['uuid'] ?? null,
+                    'marzpay_uuid' => $result['data']['transaction']['uuid'] ?? null,
+                    'country' => 'UG',
+                    'description' => 'Appointment payment - ' . $appointment->id,
+                    'transaction_type' => 'collection',
+                    'webhook_event_type' => 'collection.pending',
+                    'collection_data' => $result,
+                ]);
 
                 $message = 'Payment request sent. Please approve on your phone.';
                 if ($request->expectsJson()) {
@@ -309,14 +350,14 @@ class PaymentController extends Controller
                         'reference_id' => $appointment->payment_reference
                     ]);
                 }
-                return back()->with('success', $message);
+                return redirect()->route('payment.appointment.pay', $appointment->id)->with('success', $message);
             }
 
             $message = $result['message'] ?? 'Failed to initiate payment';
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
-            return back()->with('error', $message);
+            return redirect()->route('payment.appointment.pay', $appointment->id)->with('error', $message);
 
         } catch (\Exception $e) {
             Log::error('Appointment Checkout Error: ' . $e->getMessage());
@@ -324,23 +365,38 @@ class PaymentController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
-            return back()->with('error', $message);
+            return redirect()->route('payment.appointment.pay', $appointment->id)->with('error', $message);
         }
     }
 
     // Mark appointment as paid (manual success landing)
     public function appointmentSuccess(Appointment $appointment)
     {
-        $appointment->status = 'confirmed';
-        $appointment->save();
-        return redirect()->back()->with('success', 'Payment confirmed and appointment marked as confirmed.');
+        // Load relations
+        $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
+
+        // Only confirm if payment was actually completed via webhook
+        if ($appointment->payment_status === 'completed') {
+            $appointment->status = 'confirmed';
+            $appointment->save();
+
+            // Show success page
+            return view('payments/appointment-success', compact('appointment'));
+        }
+
+        // If payment not completed yet, show waiting page
+        return view('payments/appointment-waiting', compact('appointment'));
     }
 
     // Cancel payment flow for appointment
     public function appointmentCancel(Appointment $appointment)
     {
         // Optionally set a specific status; keep awaiting_payment so user can retry
-        return redirect()->back()->with('error', 'Payment was canceled. You can try again.');
+        if ($appointment->healthFacility) {
+            return redirect()->route('health-facility.dashboard', ['id' => $appointment->healthFacility->id])->with('error', 'Payment was canceled. You can try again.');
+        }
+
+        return redirect('/')->with('error', 'Payment was canceled. You can try again.');
     }
 
     /**
@@ -352,26 +408,93 @@ class PaymentController extends Controller
             $reference = $transaction['reference'] ?? null;
             $uuid = $transaction['uuid'] ?? null;
 
-            if ($reference && str_starts_with($reference, 'appointment-')) {
-                // This is an appointment payment
-                $appointmentId = explode('-', $reference)[1] ?? null;
-                if ($appointmentId) {
-                    $appointment = Appointment::find($appointmentId);
-                    if ($appointment) {
-                        $appointment->status = 'confirmed';
-                        $appointment->payment_status = 'completed';
-                        $appointment->save();
+            // Find appointment by payment_reference (could be uuid or reference)
+            $appointment = null;
+            if ($uuid) {
+                $appointment = Appointment::where('payment_reference', $uuid)->first();
+            }
+            if (!$appointment && $reference) {
+                $appointment = Appointment::where('payment_reference', $reference)->first();
+            }
 
-                        Log::info('Appointment payment completed', [
-                            'appointment_id' => $appointmentId,
-                            'transaction_uuid' => $uuid
+            // Also check Payment table for matching reference_id
+            $payment = null;
+            if ($uuid) {
+                $payment = \App\Models\Payment::where('reference_id', $uuid)->first();
+            }
+            if (!$payment && $reference) {
+                $payment = \App\Models\Payment::where('reference_id', $reference)->first();
+            }
+
+            // If we found a payment but no appointment, get appointment from payment
+            if (!$appointment && $payment) {
+                $appointment = $payment->appointment;
+            }
+
+            if ($appointment) {
+                $appointment->status = 'confirmed';
+                $appointment->payment_status = 'completed';
+                $appointment->save();
+
+                // Update Payment record
+                if ($payment) {
+                    $payment->update(['status' => 'completed']);
+                }
+
+                // Send confirmation email to doctor
+                if ($appointment->doctor && $appointment->doctor->email) {
+                    try {
+                        Mail::to($appointment->doctor->email)->send(new \App\Mail\DoctorAppointmentConfirmationMail($appointment));
+                        Log::info('Doctor confirmation email sent', [
+                            'appointment_id' => $appointment->id,
+                            'doctor_email' => $appointment->doctor->email
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send doctor confirmation email: ' . $e->getMessage(), [
+                            'appointment_id' => $appointment->id,
+                            'doctor_email' => $appointment->doctor->email
                         ]);
                     }
                 }
-            }
 
-            // TODO: Store transaction record in database
-            // TODO: Send payment confirmation notifications
+                // Update existing transaction or create new one for successful collection
+                $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Update existing pending transaction
+                    $existingTransaction->update([
+                        'status' => 'successful',
+                        'webhook_event_type' => 'collection.completed',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
+                } else {
+                    // Create new transaction if no pending one exists
+                    \App\Models\Transaction::create([
+                        'payment_id' => $payment?->id,
+                        'reference_id' => $uuid ?? $reference,
+                        'amount' => $transaction['amount'] ?? 0,
+                        'status' => 'successful',
+                        'transaction_id' => $uuid,
+                        'provider' => 'marzpay',
+                        'provider_reference' => $uuid,
+                        'marzpay_uuid' => $uuid,
+                        'country' => 'UG',
+                        'description' => 'Appointment payment completed - ' . $appointment->id,
+                        'transaction_type' => 'collection',
+                        'webhook_event_type' => 'collection.completed',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
+                }
+
+                Log::info('Appointment payment completed', [
+                    'appointment_id' => $appointment->id,
+                    'transaction_uuid' => $uuid
+                ]);
+            }
 
         } catch (\Exception $e) {
             Log::error('Handle Successful Collection Error: ' . $e->getMessage());
@@ -385,24 +508,78 @@ class PaymentController extends Controller
     {
         try {
             $reference = $transaction['reference'] ?? null;
+            $uuid = $transaction['uuid'] ?? null;
 
-            if ($reference && str_starts_with($reference, 'appointment-')) {
-                $appointmentId = explode('-', $reference)[1] ?? null;
-                if ($appointmentId) {
-                    $appointment = Appointment::find($appointmentId);
-                    if ($appointment) {
-                        $appointment->payment_status = 'failed';
-                        $appointment->save();
-
-                        Log::warning('Appointment payment failed', [
-                            'appointment_id' => $appointmentId,
-                            'transaction_uuid' => $transaction['uuid'] ?? null
-                        ]);
-                    }
-                }
+            // Find appointment by payment_reference (could be uuid or reference)
+            $appointment = null;
+            if ($uuid) {
+                $appointment = Appointment::where('payment_reference', $uuid)->first();
+            }
+            if (!$appointment && $reference) {
+                $appointment = Appointment::where('payment_reference', $reference)->first();
             }
 
-            // TODO: Send payment failure notifications
+            // Also check Payment table for matching reference_id
+            $payment = null;
+            if ($uuid) {
+                $payment = \App\Models\Payment::where('reference_id', $uuid)->first();
+            }
+            if (!$payment && $reference) {
+                $payment = \App\Models\Payment::where('reference_id', $reference)->first();
+            }
+
+            // If we found a payment but no appointment, get appointment from payment
+            if (!$appointment && $payment) {
+                $appointment = $payment->appointment;
+            }
+
+            if ($appointment) {
+                $appointment->payment_status = 'failed';
+                $appointment->save();
+
+                // Update Payment record
+                if ($payment) {
+                    $payment->update(['status' => 'failed']);
+                }
+
+                // Update existing transaction or create new one for failed collection
+                $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Update existing pending transaction
+                    $existingTransaction->update([
+                        'status' => 'failed',
+                        'webhook_event_type' => 'collection.failed',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
+                } else {
+                    // Create new transaction if no pending one exists
+                    \App\Models\Transaction::create([
+                        'payment_id' => $payment?->id,
+                        'reference_id' => $uuid ?? $reference,
+                        'amount' => $transaction['amount'] ?? 0,
+                        'status' => 'failed',
+                        'transaction_id' => $uuid,
+                        'provider' => 'marzpay',
+                        'provider_reference' => $uuid,
+                        'marzpay_uuid' => $uuid,
+                        'country' => 'UG',
+                        'description' => 'Appointment payment failed - ' . $appointment->id,
+                        'transaction_type' => 'collection',
+                        'webhook_event_type' => 'collection.failed',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
+                }
+
+                Log::warning('Appointment payment failed', [
+                    'appointment_id' => $appointment->id,
+                    'transaction_uuid' => $uuid
+                ]);
+            }
 
         } catch (\Exception $e) {
             Log::error('Handle Failed Collection Error: ' . $e->getMessage());
@@ -416,16 +593,34 @@ class PaymentController extends Controller
     {
         try {
             $reference = $transaction['reference'] ?? null;
+            $uuid = $transaction['uuid'] ?? null;
 
-            if ($reference && str_starts_with($reference, 'appointment-')) {
-                $appointmentId = explode('-', $reference)[1] ?? null;
-                if ($appointmentId) {
-                    $appointment = Appointment::find($appointmentId);
-                    if ($appointment) {
-                        $appointment->payment_status = 'pending';
-                        $appointment->save();
-                    }
-                }
+            // Find appointment by payment_reference (could be uuid or reference)
+            $appointment = null;
+            if ($uuid) {
+                $appointment = Appointment::where('payment_reference', $uuid)->first();
+            }
+            if (!$appointment && $reference) {
+                $appointment = Appointment::where('payment_reference', $reference)->first();
+            }
+
+            // Also check Payment table for matching reference_id
+            $payment = null;
+            if ($uuid) {
+                $payment = \App\Models\Payment::where('reference_id', $uuid)->first();
+            }
+            if (!$payment && $reference) {
+                $payment = \App\Models\Payment::where('reference_id', $reference)->first();
+            }
+
+            // If we found a payment but no appointment, get appointment from payment
+            if (!$appointment && $payment) {
+                $appointment = $payment->appointment;
+            }
+
+            if ($appointment) {
+                $appointment->payment_status = 'pending';
+                $appointment->save();
             }
 
         } catch (\Exception $e) {
@@ -440,15 +635,71 @@ class PaymentController extends Controller
     {
         try {
             $reference = $transaction['reference'] ?? null;
+            $uuid = $transaction['uuid'] ?? null;
 
-            if ($reference && str_starts_with($reference, 'appointment-')) {
-                $appointmentId = explode('-', $reference)[1] ?? null;
-                if ($appointmentId) {
-                    $appointment = Appointment::find($appointmentId);
-                    if ($appointment) {
-                        $appointment->payment_status = 'cancelled';
-                        $appointment->save();
-                    }
+            // Find appointment by payment_reference (could be uuid or reference)
+            $appointment = null;
+            if ($uuid) {
+                $appointment = Appointment::where('payment_reference', $uuid)->first();
+            }
+            if (!$appointment && $reference) {
+                $appointment = Appointment::where('payment_reference', $reference)->first();
+            }
+
+            // Also check Payment table for matching reference_id
+            $payment = null;
+            if ($uuid) {
+                $payment = \App\Models\Payment::where('reference_id', $uuid)->first();
+            }
+            if (!$payment && $reference) {
+                $payment = \App\Models\Payment::where('reference_id', $reference)->first();
+            }
+
+            // If we found a payment but no appointment, get appointment from payment
+            if (!$appointment && $payment) {
+                $appointment = $payment->appointment;
+            }
+
+            if ($appointment) {
+                $appointment->payment_status = 'cancelled';
+                $appointment->save();
+
+                // Update Payment record
+                if ($payment) {
+                    $payment->update(['status' => 'cancelled']);
+                }
+
+                // Update existing transaction or create new one for cancelled collection
+                $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Update existing pending transaction
+                    $existingTransaction->update([
+                        'status' => 'cancelled',
+                        'webhook_event_type' => 'collection.cancelled',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
+                } else {
+                    // Create new transaction if no pending one exists
+                    \App\Models\Transaction::create([
+                        'payment_id' => $payment?->id,
+                        'reference_id' => $uuid ?? $reference,
+                        'amount' => $transaction['amount'] ?? 0,
+                        'status' => 'cancelled',
+                        'transaction_id' => $uuid,
+                        'provider' => 'marzpay',
+                        'provider_reference' => $uuid,
+                        'marzpay_uuid' => $uuid,
+                        'country' => 'UG',
+                        'description' => 'Appointment payment cancelled - ' . $appointment->id,
+                        'transaction_type' => 'collection',
+                        'webhook_event_type' => 'collection.cancelled',
+                        'collection_data' => $transaction,
+                        'processed_at' => now(),
+                    ]);
                 }
             }
 

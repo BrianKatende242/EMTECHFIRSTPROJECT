@@ -26,6 +26,12 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link {{ request()->is('admin/transactions*') ? 'active' : '' }}" href="{{ route('admin.transactions.index') }}">
+            <i class="mdi mdi-receipt menu-icon"></i>
+            <span class="menu-title">Transactions</span>
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link {{ request()->is('admin/patients*') ? 'active' : '' }}" href="{{ route('admin.patients.index') }}">
             <i class="typcn typcn-user menu-icon"></i>
             <span class="menu-title">Patients</span>

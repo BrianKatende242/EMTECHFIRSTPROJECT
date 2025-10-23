@@ -92,7 +92,7 @@
                             <td>{{ $item->student->name ?? $item->patient->name ?? '-' }}</td>
                             <td>{{ ucfirst($item->status ?? 'unknown') }}</td>
                             <td class="text-nowrap">
-                                <a href="{{ route('admin.model.edit', ['appointments', $item->id]) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <a href="{{ route('admin.appointments.edit', $item->id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 @if($item->status !== 'completed')
                                         <button type="button" class="btn btn-sm btn-success ajax-complete" data-id="{{ $item->id }}">Complete</button>
                                 @endif
@@ -299,7 +299,7 @@
                                     </a>
                                 </div>
                                 <div class="col-auto">
-                                    <a href="{{ route('admin.model.edit', ['doctors', $doctor->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">
+                                    <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3" title="Edit" style="border-radius: 8px;">
                                         <i class="fas fa-edit me-1"></i>Edit
                                     </a>
                                 </div>
@@ -319,7 +319,7 @@
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form action="{{ route('admin.model.destroy', ['doctors', $doctor->id]) }}" method="POST" style="display:inline-block">
+                                                <form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" style="display:inline-block">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this doctor?')" style="padding: 0.5rem 1rem;">

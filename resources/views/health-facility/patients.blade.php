@@ -69,7 +69,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addPatientModalLabel">Add Patient</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" style="display: block !important;"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <form method="POST" action="{{ route('patients.create') }}" id="patientForm">
                 @csrf

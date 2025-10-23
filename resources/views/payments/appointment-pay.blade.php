@@ -76,12 +76,25 @@
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-body text-center py-5">
-        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-          <span class="visually-hidden"></span>
+      <div class="modal-body text-center py-5" id="modalContent">
+        <!-- Processing State -->
+        <div id="processingState">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden"></span>
+          </div>
+          <h5 class="modal-title" id="paymentModalLabel">Processing Payment Request</h5>
+          <p class="text-muted mt-2">Please wait while we initiate your payment...</p>
         </div>
-        <h5 class="modal-title" id="paymentModalLabel">Processing Payment Request</h5>
-        <p class="text-muted mt-2">Please wait while we initiate your payment...</p>
+
+        <!-- Success State -->
+        <div id="successState" style="display: none;">
+          <div class="text-success mb-3">
+            <i class="mdi mdi-check-circle" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="modal-title text-success">Payment Request Sent!</h5>
+          <p class="text-muted mt-2">Please check your phone and approve the payment request.</p>
+          <p class="text-primary mt-3" id="countdownText">Redirecting in 10 seconds...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -138,25 +151,25 @@
     const form = document.getElementById('paymentForm');
     const btn = document.getElementById('requestPaymentBtn');
     const modal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: 'static', keyboard: false });
-    
+
     if(!form || !btn) return;
-    
+
     btn.addEventListener('click', function(e){
       e.preventDefault();
-      
+
       // Basic validation
       const phoneInput = document.getElementById('phone_number');
       if(!phoneInput.checkValidity()){
         phoneInput.reportValidity();
         return;
       }
-      
+
       // Show modal
       modal.show();
-      
+
       // Prepare form data
       const formData = new FormData(form);
-      
+
       // Send AJAX request
       fetch(form.action, {
         method: 'POST',
@@ -168,12 +181,12 @@
       })
       .then(response => response.json())
       .then(data => {
-        modal.hide();
         if(data.success){
-          // Redirect to success page or show success message
-          window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
+          // Show success state
+          showSuccessState();
         } else {
-          // Show error
+          // Hide modal and show error
+          modal.hide();
           alert(data.message || 'Payment request failed. Please try again.');
         }
       })
@@ -183,6 +196,32 @@
         alert('An error occurred. Please try again.');
       });
     });
+
+    function showSuccessState() {
+      // Hide processing state
+      document.getElementById('processingState').style.display = 'none';
+      // Show success state
+      document.getElementById('successState').style.display = 'block';
+
+      // Start countdown
+      let countdown = 10;
+      const countdownText = document.getElementById('countdownText');
+
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownText.textContent = `Redirecting in ${countdown} seconds...`;
+
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          // Redirect to appointments page
+          @if($appointment->healthFacility)
+            window.location.href = '{{ route("health-facility.book-doctor", $appointment->healthFacility->id) }}';
+          @else
+            window.location.href = '{{ route("book-doctor") }}';
+          @endif
+        }
+      }, 1000);
+    }
   })();
 </script>
 @endpush

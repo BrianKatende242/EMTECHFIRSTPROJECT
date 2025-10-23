@@ -17,7 +17,7 @@ class MarzPayService
         $this->baseUrl = config('services.marzpay.base_url');
         $this->apiKey = config('services.marzpay.api_key');
         $this->apiSecret = config('services.marzpay.api_secret');
-        $this->authHeader = config('services.marzpay.auth_header');
+        $this->authHeader = 'Basic ' . config('services.marzpay.auth_header');
     }
 
     /**

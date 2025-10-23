@@ -164,12 +164,12 @@
                 <div class="card-footer bg-white border-0 p-3">
                     <div class="row g-2">
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['payments', $payment->id]) }}" class="btn btn-outline-info btn-sm fw-semibold px-3 payment-card-btn" title="View/Edit" style="border-radius: 8px;">
+                            <a href="{{ route('admin.payments.edit', $payment->id) }}" class="btn btn-outline-info btn-sm fw-semibold px-3 payment-card-btn" title="View/Edit" style="border-radius: 8px;">
                                 <i class="fa fa-eye me-1"></i>View
                             </a>
                         </div>
                         <div class="col-auto">
-                            <a href="{{ route('admin.model.edit', ['payments', $payment->id]) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3 payment-card-btn" title="Edit" style="border-radius: 8px;">
+                            <a href="{{ route('admin.payments.edit', $payment->id) }}" class="btn btn-outline-secondary btn-sm fw-semibold px-3 payment-card-btn" title="Edit" style="border-radius: 8px;">
                                 <i class="fa fa-edit me-1"></i>Edit
                             </a>
                         </div>
@@ -205,7 +205,7 @@
                                     @endif
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <form action="{{ route('admin.model.destroy', ['payments', $payment->id]) }}" method="POST" style="display:inline-block">
+                                        <form action="{{ route('admin.payments.destroy', $payment->id) }}" method="POST" style="display:inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Delete this payment?')" style="padding: 0.5rem 1rem;">

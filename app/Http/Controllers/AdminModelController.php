@@ -11,6 +11,7 @@ class AdminModelController extends Controller
         'doctors' => \App\Models\Doctor::class,
         'appointments' => \App\Models\Appointment::class,
         'payments' => \App\Models\Payment::class,
+        'transactions' => \App\Models\Transaction::class,
         'patients' => \App\Models\Patient::class,
         'schools' => \App\Models\School::class,
         'health-facilities' => \App\Models\HealthFacility::class,
@@ -306,10 +307,42 @@ class AdminModelController extends Controller
             elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
             elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
 
-            $items = $q->paginate(20)->appends(request()->query());
+        } elseif ($modelKey === 'transactions') {
+            $q = $modelClass::with(['payment.appointment.patient', 'payment.appointment.doctor']);
 
-        } else {
-            $items = $modelClass::latest()->paginate(20);
+            if (request()->filled('status')) {
+                $q->where('status', request('status'));
+            }
+
+            if (request()->filled('payment_id')) {
+                $q->where('payment_id', request('payment_id'));
+            }
+
+            if (request()->filled('q')) {
+                $term = '%' . request('q') . '%';
+                $q->where(function($r) use ($term) {
+                    $r->where('reference_id', 'like', $term)
+                      ->orWhere('transaction_id', 'like', $term)
+                      ->orWhere('provider_reference', 'like', $term);
+                });
+            }
+
+            // Date range filter
+            if (request()->filled('date_from')) {
+                $q->whereDate('created_at', '>=', request('date_from'));
+            }
+            if (request()->filled('date_to')) {
+                $q->whereDate('created_at', '<=', request('date_to'));
+            }
+
+            // Sorting
+            $sort = request('sort', 'created_at_desc');
+            if ($sort === 'amount_asc') $q->orderBy('amount', 'asc');
+            elseif ($sort === 'amount_desc') $q->orderBy('amount', 'desc');
+            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
+            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
         }
 
         $generatedSlug = null;
@@ -344,6 +377,13 @@ class AdminModelController extends Controller
             $statuses = ['pending', 'completed', 'failed', 'cancelled'];
             $appointments = \App\Models\Appointment::with('patient')->get()->pluck('patient.name', 'id');
             return view('admin.payments.index', compact('modelKey', 'items', 'statuses', 'appointments'));
+        }
+
+        // Use dedicated view for transactions
+        if ($modelKey === 'transactions') {
+            $statuses = ['pending', 'completed', 'failed', 'cancelled'];
+            $payments = \App\Models\Payment::with('appointment.patient')->get()->pluck('appointment.patient.name', 'id');
+            return view('admin.transactions.index', compact('modelKey', 'items', 'statuses', 'payments'));
         }
 
         // Use dedicated view for patients

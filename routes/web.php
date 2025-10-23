@@ -341,6 +341,13 @@ Route::prefix('admin')->middleware('admin')->group(function(){
 
     Route::post('/users/send-invite', [AdminModelController::class, 'sendAdminInvite'])->name('admin.users.send-invite');
 
+    Route::get('/users', [AdminModelController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/create', [AdminModelController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [AdminModelController::class, 'store'])->name('admin.users.store');
+    Route::get('/users/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{id}', [AdminModelController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{id}', [AdminModelController::class, 'destroy'])->name('admin.users.destroy');
+
     Route::get('/appointments', [AdminModelController::class, 'index'])->name('admin.appointments.index');
     Route::get('/appointments/create', [AdminModelController::class, 'create'])->name('admin.appointments.create');
     Route::post('/appointments', [AdminModelController::class, 'store'])->name('admin.appointments.store');
@@ -354,6 +361,13 @@ Route::prefix('admin')->middleware('admin')->group(function(){
     Route::get('/payments/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.payments.edit');
     Route::put('/payments/{id}', [AdminModelController::class, 'update'])->name('admin.payments.update');
     Route::delete('/payments/{id}', [AdminModelController::class, 'destroy'])->name('admin.payments.destroy');
+
+    Route::get('/transactions', [AdminModelController::class, 'index'])->name('admin.transactions.index');
+    Route::get('/transactions/create', [AdminModelController::class, 'create'])->name('admin.transactions.create');
+    Route::post('/transactions', [AdminModelController::class, 'store'])->name('admin.transactions.store');
+    Route::get('/transactions/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.transactions.edit');
+    Route::put('/transactions/{id}', [AdminModelController::class, 'update'])->name('admin.transactions.update');
+    Route::delete('/transactions/{id}', [AdminModelController::class, 'destroy'])->name('admin.transactions.destroy');
 
     Route::get('/patients', [AdminModelController::class, 'index'])->name('admin.patients.index');
     Route::get('/patients/create', [AdminModelController::class, 'create'])->name('admin.patients.create');
@@ -387,7 +401,7 @@ Route::prefix('admin')->middleware('admin')->group(function(){
     Route::get('/appointments/export', [AdminModelController::class, 'exportAppointmentsCsv'])->name('admin.appointments.export');
     // Payments extras
     Route::post('/payments/bulk', [AdminModelController::class, 'bulkUpdatePayments'])->name('admin.payments.bulk');
-    // Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
+    Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
     Route::get('/doctors/{id}', [AdminModelController::class, 'showDoctor'])->name('admin.doctors.show');
     Route::post('/doctors/{id}/send-login-link', [AdminModelController::class, 'sendLoginLinkToDoctor'])->name('admin.doctors.send-login');
     Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
