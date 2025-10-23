@@ -126,6 +126,16 @@ class AdminController extends Controller
             ];
         }
 
+        // Simple list of models we support in the admin panel
+        $models = [
+            'doctors' => 'Doctors',
+            'appointments' => 'Appointments',
+            'students' => 'Students',
+            'schools' => 'Schools',
+            'health-facilities' => 'Health Facilities',
+            'patients' => 'Patients',
+        ];
+
         return view('admin.index', compact('models', 'stats', 'monthlyData', 'locations'));
     }
 }
