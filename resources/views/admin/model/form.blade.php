@@ -15,7 +15,19 @@
     @endif
 
     @php
-        $modelClass = '\\App\\Models\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $modelKey)));
+        // Map model keys to actual class names
+        $modelMap = [
+            'schools' => 'School',
+            'doctors' => 'Doctor',
+            'patients' => 'Patient',
+            'appointments' => 'Appointment',
+            'payments' => 'Payment',
+            'health-facilities' => 'HealthFacility',
+            'users' => 'User',
+        ];
+        
+        $className = $modelMap[$modelKey] ?? str_replace(' ', '', ucwords(str_replace('-', ' ', $modelKey)));
+        $modelClass = '\\App\\Models\\' . $className;
         $fields = (new $modelClass)->getFillable() ?: array_keys((new $modelClass)->getAttributes());
     @endphp
 
@@ -32,7 +44,7 @@
         }
     @endphp
 
-    <form method="POST" action="{{ $item ? route($updateRoute, [$modelKey, $item->id]) : route($storeRoute, $modelKey) }}" @if(in_array($modelKey, ['doctors', 'schools'])) enctype="multipart/form-data" @endif>
+    <form method="POST" action="{{ $item ? route($updateRoute, $item->id) : route($storeRoute, $modelKey) }}" @if(in_array($modelKey, ['doctors', 'schools'])) enctype="multipart/form-data" @endif>
         @csrf
         @if($item)
             @method('PUT')

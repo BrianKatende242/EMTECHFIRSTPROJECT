@@ -466,6 +466,12 @@ class AdminModelController extends Controller
 
     public function edit($modelKey = null, $id = null)
     {
+        // Handle parameter passing - sometimes Laravel passes id as first param
+        if (is_numeric($modelKey) && !$id) {
+            $id = $modelKey;
+            $modelKey = null;
+        }
+
         // If no modelKey provided, determine it from the route name
         if (!$modelKey) {
             $routeName = request()->route()->getName();

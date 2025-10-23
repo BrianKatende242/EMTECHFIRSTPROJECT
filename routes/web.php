@@ -46,12 +46,6 @@ Route::get('/api-dashboard', [ApiDashboardController::class, 'index'])->name('ap
 // Finance Dashboard Route
 Route::get('/finance-dashboard', [FinanceDashboardController::class, 'index'])->name('finance-dashboard');
 
-
-// Test route for debugging
-Route::get('/admin/schools/{id}/edit', function($id) {
-    return "Test route works with ID: " . $id;
-});
-
 // If you need a web view for admin purposes
 //Route::get('/admin/contact-submissions', function () {
   //  return view('contact-submissions');
@@ -334,11 +328,8 @@ Route::get('password/reset/{token}', 'App\Http\Controllers\Auth\ResetPasswordCon
 Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController@reset')->name('password.update');
 
 // Simple admin area (protected)
-// Route::prefix('admin')->middleware(['auth', 'can:admin'])->group(function(){
-Route::prefix('admin')->group(function(){
-    Route::get('/', function() {
-        return 'Admin index works';
-    })->name('admin.index');
+Route::prefix('admin')->middleware('admin')->group(function(){
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
 
     // Individual model routes
     Route::get('/doctors', [AdminModelController::class, 'index'])->name('admin.doctors.index');
@@ -371,9 +362,7 @@ Route::prefix('admin')->group(function(){
     Route::put('/patients/{id}', [AdminModelController::class, 'update'])->name('admin.patients.update');
     Route::delete('/patients/{id}', [AdminModelController::class, 'destroy'])->name('admin.patients.destroy');
 
-    Route::get('/schools', function() {
-        return 'Schools index works';
-    })->name('admin.schools.index');
+    Route::get('/schools', [AdminModelController::class, 'index'])->name('admin.schools.index');
     Route::get('/schools/create', [AdminModelController::class, 'create'])->name('admin.schools.create');
     Route::post('/schools', [AdminModelController::class, 'store'])->name('admin.schools.store');
     Route::get('/schools/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.schools.edit');
