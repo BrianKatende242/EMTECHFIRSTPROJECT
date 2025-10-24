@@ -132,6 +132,7 @@ Route::post('/students/create', function (Request $request) {
             // Update patient with school association
             $patient->update([
                 'school_id' => $validated['school_id'],
+                'health_facility_id' => null, // Clear health facility association
                 'grade' => $request->input('grade'), // Optional grade for existing patients
             ]);
 
@@ -322,6 +323,7 @@ Route::post('/patients/create', function (Request $request) {
             // Update patient with health facility association
             $patient->update([
                 'health_facility_id' => $validated['health_facility_id'],
+                'school_id' => null, // Clear school association
             ]);
 
             return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])

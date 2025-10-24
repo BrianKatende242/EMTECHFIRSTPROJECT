@@ -106,10 +106,12 @@ class Patient extends Model
 
         if (!empty($attributes['school_id']) && !$this->school_id) {
             $updates['school_id'] = $attributes['school_id'];
+            $updates['health_facility_id'] = null; // Clear health facility association
         }
 
         if (!empty($attributes['health_facility_id']) && !$this->health_facility_id) {
             $updates['health_facility_id'] = $attributes['health_facility_id'];
+            $updates['school_id'] = null; // Clear school association
         }
 
         // Update other fields if they're empty

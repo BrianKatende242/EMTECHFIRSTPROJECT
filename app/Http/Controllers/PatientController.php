@@ -96,6 +96,7 @@ class PatientController extends Controller
                             ->withInput();
                     }
                     $updateData['school_id'] = $existingValidation['school_id'];
+                    $updateData['health_facility_id'] = null; // Clear health facility association
                     $updateData['grade'] = $existingValidation['grade'] ?? $patient->grade;
                 }
 
@@ -107,6 +108,7 @@ class PatientController extends Controller
                             ->withInput();
                     }
                     $updateData['health_facility_id'] = $existingValidation['health_facility_id'];
+                    $updateData['school_id'] = null; // Clear school association
                     $updateData['medical_history'] = $existingValidation['medical_history'] ?? $patient->medical_history;
                 }
 
