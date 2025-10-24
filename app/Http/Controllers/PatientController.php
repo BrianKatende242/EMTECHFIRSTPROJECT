@@ -17,7 +17,7 @@ class PatientController extends Controller
     public function getPatientsByHealthFacility($id)
     {
         // Fetch patients based on health facility ID
-        $patients = Patient::where('health_facility_id', $id)->get();
+        $patients = Patient::forHealthFacility($id)->get();
 
         // Return the data to the view or as JSON
         return view('Health-Facility-Instance', compact('patients'));
@@ -96,20 +96,21 @@ class PatientController extends Controller
                             ->withInput();
                     }
                     $updateData['school_id'] = $existingValidation['school_id'];
-                    $updateData['health_facility_id'] = null; // Clear health facility association
                     $updateData['grade'] = $existingValidation['grade'] ?? $patient->grade;
                 }
 
                 if (!empty($existingValidation['health_facility_id'] ?? null)) {
                     // Check if already associated with this health facility
-                    if ($patient->health_facility_id == $existingValidation['health_facility_id']) {
+                    if ($patient->health_facility_id == $existingValidation['health_facility_id'] || $patient->healthFacilities()->where('health_facility_id', $existingValidation['health_facility_id'])->exists()) {
                         return redirect()->back()
                             ->with('error', 'Patient is already associated with this health facility.')
                             ->withInput();
                     }
-                    $updateData['health_facility_id'] = $existingValidation['health_facility_id'];
-                    $updateData['school_id'] = null; // Clear school association
-                    $updateData['medical_history'] = $existingValidation['medical_history'] ?? $patient->medical_history;
+                    // Use update method to properly handle many-to-many association
+                    $patient->update([
+                        'health_facility_id' => $existingValidation['health_facility_id'],
+                        'medical_history' => $existingValidation['medical_history'] ?? $patient->medical_history
+                    ]);
                 }
 
                 if (!empty($updateData)) {
@@ -141,10 +142,14 @@ class PatientController extends Controller
                     'contact_number' => $newValidation['contact_number'],
                     'medical_history' => $newValidation['medical_history'] ?? null,
                     'school_id' => $newValidation['school_id'] ?? null,
-                    'health_facility_id' => $newValidation['health_facility_id'] ?? null,
                     'grade' => $newValidation['grade'] ?? null,
                     'parent_contact' => $newValidation['parent_contact'] ?? null,
                 ]);
+
+                // Handle health facility association after creation
+                if (!empty($newValidation['health_facility_id'])) {
+                    $patient->update(['health_facility_id' => $newValidation['health_facility_id']]);
+                }
 
                 return redirect()->route('home')
                     ->with('success', 'Patient created successfully.');

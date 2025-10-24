@@ -15,104 +15,107 @@ use Illuminate\Support\Facades\Validator;
 class AppointmentController extends Controller
 {
     public function store(Request $request)
-{
-    \Log::info('Appointment request data:', $request->all());
+    {
+        \Log::info('Appointment request data:', $request->all());
 
-    // Validate request
-    $validator = Validator::make($request->all(), [
-        'doctor_id' => 'required|exists:doctors,id',
-        'duration_id' => 'required|exists:durations,id',
-        'appointment_time' => 'required|date',
-        'reason' => 'required|string|max:500',
-        'patient_id' => 'required|exists:patients,id',
-        'school_id' => 'nullable|exists:schools,id',
-        'health_facility_id' => 'nullable|exists:health_facilities,id'
-    ]);
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'doctor_id' => 'required|exists:doctors,id',
+            'duration_id' => 'required|exists:durations,id',
+            'appointment_time' => 'required|date',
+            'reason' => 'required|string|max:500',
+            'patient_id' => 'required|exists:patients,id',
+            'school_id' => 'nullable|exists:schools,id',
+            'health_facility_id' => 'nullable|exists:health_facilities,id'
+        ]);
 
-    // Additional validation
-    $validator->after(function ($validator) use ($request) {
-        // Parse the appointment time
+        // Additional validation
+        $validator->after(function ($validator) use ($request) {
+            // Parse the appointment time
+            try {
+                $appointmentDateTime = Carbon::parse($request->appointment_time);
+
+                // Check if appointment is in the past
+                if ($appointmentDateTime->isPast()) {
+                    $validator->errors()->add('appointment_time', 'Cannot schedule appointments in the past.');
+                }
+            } catch (\Exception $e) {
+                $validator->errors()->add('appointment_time', 'Invalid date or time format.');
+                return;
+            }
+
+            // Validate patient belongs to the institution
+            $patient = Patient::find($request->patient_id);
+            if ($patient) {
+                if ($request->filled('health_facility_id') && $patient->health_facility_id != $request->health_facility_id) {
+                    $validator->errors()->add('patient_id', 'Patient does not belong to this health facility');
+                }
+                if ($request->filled('school_id') && $patient->school_id != $request->school_id) {
+                    $validator->errors()->add('patient_id', 'Patient does not belong to this school');
+                }
+            }
+        });
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Create appointment
         try {
             $appointmentDateTime = Carbon::parse($request->appointment_time);
 
-            // Check if appointment is in the past
-            if ($appointmentDateTime->isPast()) {
-                $validator->errors()->add('appointment_time', 'Cannot schedule appointments in the past.');
-            }
-        } catch (\Exception $e) {
-            $validator->errors()->add('appointment_time', 'Invalid date or time format.');
-            return;
-        }
-
-        // Validate patient belongs to the institution
-        $patient = Patient::find($request->patient_id);
-        if ($patient) {
-            if ($request->filled('health_facility_id') && $patient->health_facility_id != $request->health_facility_id) {
-                $validator->errors()->add('patient_id', 'Patient does not belong to this health facility');
-            }
-            if ($request->filled('school_id') && $patient->school_id != $request->school_id) {
-                $validator->errors()->add('patient_id', 'Patient does not belong to this school');
-            }
-        }
-    });
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-        // Create appointment
-    try {
-    $appointmentDateTime = Carbon::parse($request->appointment_time);
-
-    $appointment = Appointment::create([
-            'doctor_id' => $request->doctor_id,
-            'appointment_time' => $appointmentDateTime,
-            'duration_id' => $request->duration_id,
-            'reason' => $request->reason,
-            'status' => 'awaiting_payment',
-            'health_facility_id' => $request->health_facility_id,
-            'patient_id' => $request->patient_id,
-            'school_id' => $request->school_id
-        ]);
-
-        // Send confirmation if needed
-        // $this->sendAppointmentConfirmation($appointment); // Removed - confirmation now requires payment        // Check if this is an AJAX request
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Appointment scheduled successfully',
-                'appointment' => $appointment->load(['patient', 'doctor'])
+            $appointment = Appointment::create([
+                'doctor_id' => $request->doctor_id,
+                'appointment_time' => $appointmentDateTime,
+                'duration_id' => $request->duration_id,
+                'reason' => $request->reason,
+                'status' => 'awaiting_payment',
+                'health_facility_id' => $request->health_facility_id,
+                'patient_id' => $request->patient_id,
+                'school_id' => $request->school_id
             ]);
-        }
 
-        // Redirect based on context
-        if ($appointment->health_facility_id) {
-            return redirect()->route('health-facility.book-doctor', ['id' => $appointment->health_facility_id])
-                ->with('success', 'Appointment booked successfully');
-        }
-        if ($appointment->school_id) {
-            return redirect()->route('book-doctor', ['school' => $appointment->school_id])
-                ->with('success', 'Appointment booked successfully');
-        }
-        return redirect()->back()->with('success', 'Appointment booked successfully');
+            // Send confirmation if needed
+            // $this->sendAppointmentConfirmation($appointment); // Removed - confirmation now requires payment
 
-    } catch (\Exception $e) {
-        \Log::error('Appointment creation failed: '.$e->getMessage());
+            // Check if this is an AJAX request
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Appointment scheduled successfully',
+                    'appointment' => $appointment->load(['patient', 'doctor'])
+                ]);
+            }
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Appointment creation failed',
-                'error' => $e->getMessage()
-            ], 500);
+            // Redirect based on context
+            if ($appointment->health_facility_id) {
+                return redirect()->route('health-facility.book-doctor', ['id' => $appointment->health_facility_id])
+                    ->with('success', 'Appointment booked successfully');
+            }
+            if ($appointment->school_id) {
+                return redirect()->route('book-doctor', ['school' => $appointment->school_id])
+                    ->with('success', 'Appointment booked successfully');
+            }
+            return redirect()->back()->with('success', 'Appointment booked successfully');
+
+        } catch (\Exception $e) {
+            \Log::error('Appointment creation failed: '.$e->getMessage());
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment creation failed',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Appointment creation failed');
         }
-
-        return redirect()->back()->with('error', 'Appointment creation failed');
     }
-}
+
     public function index(Request $request)
     {
         $query = Appointment::query();

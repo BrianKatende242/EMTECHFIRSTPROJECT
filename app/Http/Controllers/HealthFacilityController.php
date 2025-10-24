@@ -135,7 +135,7 @@ class HealthFacilityController extends Controller
                            ->orderBy('created_at', 'desc')
                            ->get();
     
-        $patients = Patient::where('health_facility_id', $id)->get();
+        $patients = Patient::forHealthFacility($id)->get();
 
         // Metrics
         $patientsCount = $patients->count();
@@ -161,10 +161,10 @@ class HealthFacilityController extends Controller
         }
 
         // Doughnut: Patients by gender
-        $maleCount = Patient::where('health_facility_id', $id)->where('gender', 'male')->count();
-        $femaleCount = Patient::where('health_facility_id', $id)->where('gender', 'female')->count();
-        $otherCount = Patient::where('health_facility_id', $id)->where('gender', 'other')->count();
-        $unknownCount = Patient::where('health_facility_id', $id)->whereNull('gender')->orWhere('gender','')->count();
+        $maleCount = Patient::forHealthFacility($id)->where('gender', 'male')->count();
+        $femaleCount = Patient::forHealthFacility($id)->where('gender', 'female')->count();
+        $otherCount = Patient::forHealthFacility($id)->where('gender', 'other')->count();
+        $unknownCount = Patient::forHealthFacility($id)->whereNull('gender')->orWhere('gender','')->count();
         $genderLabels = ['Male', 'Female', 'Other', 'Unspecified'];
         $genderData = [$maleCount, $femaleCount, $otherCount, $unknownCount];
     
@@ -192,7 +192,7 @@ class HealthFacilityController extends Controller
     public function patients($id)
     {
         $healthFacility = HealthFacility::findOrFail($id);
-        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        $patients = Patient::forHealthFacility($id)->latest()->get();
         return view('health-facility/patients', compact('healthFacility', 'patients'));
     }
 
@@ -205,7 +205,7 @@ class HealthFacilityController extends Controller
     public function bookDoctor($id)
     {
         $healthFacility = HealthFacility::findOrFail($id);
-        $patients = Patient::where('health_facility_id', $id)->latest()->get();
+        $patients = Patient::forHealthFacility($id)->latest()->get();
         $doctors = Doctor::latest()->get();
         $appointments = Appointment::where('health_facility_id', $id)
             ->with(['patient', 'doctor', 'duration'])

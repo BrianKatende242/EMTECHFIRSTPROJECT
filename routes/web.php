@@ -123,16 +123,9 @@ Route::post('/students/create', function (Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this school
-            if ($patient->school_id == $validated['school_id']) {
-                return redirect()->route('students', ['school' => $validated['school_id']])
-                    ->with('error', 'Patient is already associated with this school.');
-            }
-
             // Update patient with school association
             $patient->update([
                 'school_id' => $validated['school_id'],
-                'health_facility_id' => null, // Clear health facility association
                 'grade' => $request->input('grade'), // Optional grade for existing patients
             ]);
 
@@ -314,16 +307,9 @@ Route::post('/patients/create', function (Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this health facility
-            if ($patient->health_facility_id == $validated['health_facility_id']) {
-                return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
-                    ->with('error', 'Patient is already associated with this health facility.');
-            }
-
             // Update patient with health facility association
             $patient->update([
                 'health_facility_id' => $validated['health_facility_id'],
-                'school_id' => null, // Clear school association
             ]);
 
             return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])

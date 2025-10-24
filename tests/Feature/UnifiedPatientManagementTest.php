@@ -165,9 +165,9 @@ class UnifiedPatientManagementTest extends TestCase
             'gender' => 'male',
         ], ['health_facility_id' => $healthFacility->id]);
 
-        // Should be the same patient but now moved to health facility (old association cleared)
+        // Should be the same patient but now associated with both school and health facility
         $this->assertEquals($patient->id, $samePatient->id);
-        $this->assertNull($samePatient->school_id);
+        $this->assertEquals($school->id, $samePatient->school_id); // Original association preserved
         $this->assertEquals($healthFacility->id, $samePatient->health_facility_id);
     }
 
