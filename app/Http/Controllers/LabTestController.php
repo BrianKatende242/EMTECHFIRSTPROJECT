@@ -29,7 +29,7 @@ class LabTestController extends Controller
     public function index(School $school)
     {
         return $school->labTests()
-            ->with('student')
+            ->with('patient')
             ->latest()
             ->get();
     }

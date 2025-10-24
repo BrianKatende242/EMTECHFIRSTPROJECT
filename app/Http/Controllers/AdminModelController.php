@@ -250,39 +250,6 @@ class AdminModelController extends Controller
             elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
             elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
 
-                        $items = $q->paginate(20)->appends(request()->query());
-
-        } elseif ($modelKey === 'doctors') {
-            $q = $modelClass::with(['school', 'healthFacility']);
-
-            if (request()->filled('specialization')) {
-                $q->where('specialization', request('specialization'));
-            }
-
-            if (request()->filled('school_id')) {
-                $q->where('school_id', request('school_id'));
-            }
-
-            if (request()->filled('health_facility_id')) {
-                $q->where('health_facility_id', request('health_facility_id'));
-            }
-
-            if (request()->filled('q')) {
-                $term = '%' . request('q') . '%';
-                $q->where(function($r) use ($term) {
-                    $r->where('name', 'like', $term)
-                      ->orWhere('email', 'like', $term)
-                      ->orWhere('specialization', 'like', $term);
-                });
-            }
-
-            // Sorting
-            $sort = request('sort', 'created_at_desc');
-            if ($sort === 'name_asc') $q->orderBy('name', 'asc');
-            elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
-            elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
-            elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
-
             $items = $q->paginate(20)->appends(request()->query());
 
             // Export functionality
@@ -307,6 +274,8 @@ class AdminModelController extends Controller
             elseif ($sort === 'name_desc') $q->orderBy('name', 'desc');
             elseif ($sort === 'created_at_desc') $q->orderBy('created_at', 'desc');
             elseif ($sort === 'created_at_asc') $q->orderBy('created_at', 'asc');
+
+            $items = $q->paginate(20)->appends(request()->query());
 
         } elseif ($modelKey === 'transactions') {
             $q = $modelClass::with(['payment.appointment.patient', 'payment.appointment.doctor']);

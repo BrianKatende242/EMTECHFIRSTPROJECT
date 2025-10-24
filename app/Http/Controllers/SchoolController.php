@@ -103,7 +103,7 @@ public function showDashboard($id)
     $school = School::findOrFail($id);
 
     $students = $school->students()->latest()->get();
-    $labTests = $school->labTests()->with('student')->latest()->get();
+    $labTests = $school->labTests()->with('patient')->latest()->get();
     $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
     $doctors = $school->doctors()->latest()->get();
 
