@@ -734,11 +734,15 @@ class AdminModelController extends Controller
             'expires_at' => now()->addDays(7), // expires in 7 days
         ]);
 
-        $inviteUrl = url('/admin/register/' . $token);
+        $inviteUrl = route('admin.register', ['token' => $token]);
+
+        \Illuminate\Support\Facades\Log::info('Sending admin invite email to: ' . $validated['email'] . ' with URL: ' . $inviteUrl);
 
         try {
             \Illuminate\Support\Facades\Mail::to($validated['email'])->send(new \App\Mail\AdminInviteMail($inviteUrl));
+            \Illuminate\Support\Facades\Log::info('Admin invite email sent successfully to: ' . $validated['email']);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send admin invite email to: ' . $validated['email'] . ' - Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to send invite: ' . $e->getMessage());
         }
 
