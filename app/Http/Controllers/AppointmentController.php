@@ -35,10 +35,8 @@ class AppointmentController extends Controller
         try {
             $appointmentDateTime = Carbon::parse($request->appointment_time);
 
-            // Check if appointment is at least 1 hour in advance
-            if (now()->diffInHours($appointmentDateTime, false) < 1) {
-                $validator->errors()->add('appointment_time', 'Appointments must be scheduled at least 1 hour in advance.');
-            }
+            // Flexible scheduling - allow same-day appointments
+            // Removed 1-hour advance booking requirement
         } catch (\Exception $e) {
             $validator->errors()->add('appointment_time', 'Invalid date or time format.');
             return;

@@ -129,9 +129,9 @@
     <div class="mb-3">
         <label for="doctor_id" class="form-label">Doctor</label>
         <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
-            <option value="">Select Date First</option>
+            <option value="">Select Doctor</option>
             @foreach($doctors ?? [] as $doc)
-                <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+                <option value="{{ $doc->id }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
             @endforeach
         </select>
         @error('doctor_id')
@@ -162,8 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const appointmentTimeInput = document.getElementById('appointment_time');
     const doctorSelect = document.getElementById('doctor_id');
     const durationSelect = document.getElementById('duration_id');
-    const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
-    const durationOptions = durationSelect.querySelectorAll('option[data-duration-id]');
 
     // Function to filter duration options based on selected doctor
     function filterDurationOptions() {
@@ -195,49 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Filter duration options when doctor is selected
     doctorSelect.addEventListener('change', filterDurationOptions);
-
-    appointmentTimeInput.addEventListener('change', function() {
-        const selectedDate = new Date(this.value);
-        if (!selectedDate || isNaN(selectedDate.getTime())) {
-            // Reset doctor options
-            doctorOptions.forEach(option => {
-                option.style.display = 'none';
-            });
-            doctorSelect.value = '';
-            filterDurationOptions(); // Also reset duration options
-            return;
-        }
-
-        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-
-        // Fetch available doctors for this day
-        fetch(`/api/doctors/available?day=${dayOfWeek}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const availableDoctorIds = data.doctors.map(doctor => doctor.id.toString());
-
-                    doctorOptions.forEach(option => {
-                        if (availableDoctorIds.includes(option.value)) {
-                            option.style.display = 'block';
-                        } else {
-                            option.style.display = 'none';
-                        }
-                    });
-
-                    // Reset selection if current selection is not available
-                    if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
-                        doctorSelect.value = '';
-                    }
-
-                    // Filter duration options after doctor availability is loaded
-                    filterDurationOptions();
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching available doctors:', error);
-            });
-    });
 
     // Handle form submission to extract duration_id and type
     const appointmentForm = document.querySelector('form[action*="appointments.store"]');

@@ -172,7 +172,7 @@ class AppointmentSchedulingTest extends TestCase
     }
 
     /** @test */
-    public function it_prevents_scheduling_appointments_too_soon()
+    public function it_allows_scheduling_appointments_flexibly()
     {
         $school = School::create([
             'name' => 'Test School',
@@ -204,7 +204,7 @@ class AppointmentSchedulingTest extends TestCase
         $appointmentData = [
             'doctor_id' => $doctor->id,
             'duration_id' => $duration->id,
-            'appointment_time' => now()->addMinutes(30)->format('Y-m-d\TH:i'), // Less than 1 hour from now
+            'appointment_time' => now()->addMinutes(30)->format('Y-m-d\TH:i'), // Less than 1 hour from now - now allowed
             'reason' => 'Urgent checkup',
             'patient_id' => $patient->id,
             'school_id' => $school->id
@@ -212,10 +212,10 @@ class AppointmentSchedulingTest extends TestCase
 
         $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $appointmentData);
 
-        $response->assertStatus(422)
+        $response->assertStatus(200)
                 ->assertJson([
-                    'success' => false
+                    'success' => true
                 ])
-                ->assertJsonStructure(['errors']);
+                ->assertJsonStructure(['appointment']);
     }
 }
