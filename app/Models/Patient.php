@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -104,12 +105,17 @@ class Patient extends Model
     {
         $updates = [];
 
-        if (!empty($attributes['school_id']) && !$this->school_id) {
+        if (!empty($attributes['school_id'])) {
             $updates['school_id'] = $attributes['school_id'];
         }
 
-        if (!empty($attributes['health_facility_id']) && !$this->health_facility_id) {
-            $updates['health_facility_id'] = $attributes['health_facility_id'];
+        if (!empty($attributes['health_facility_id'])) {
+            // If patient doesn't have a primary health facility, set it
+            if (!$this->health_facility_id) {
+                $updates['health_facility_id'] = $attributes['health_facility_id'];
+            }
+            // Always attach to the many-to-many relationship (will be ignored if already attached)
+            $this->healthFacilities()->syncWithoutDetaching([$attributes['health_facility_id']]);
         }
 
         // Update other fields if they're empty
@@ -121,8 +127,22 @@ class Patient extends Model
         }
 
         if (!empty($updates)) {
-            $this->update($updates);
+            parent::update($updates);
         }
+    }
+
+    /**
+     * Override update method to handle health facility associations
+     */
+    public function update(array $attributes = [], array $options = [])
+    {
+        // Handle health facility associations
+        if (!empty($attributes['health_facility_id'])) {
+            // Always attach to the many-to-many relationship
+            $this->healthFacilities()->syncWithoutDetaching([$attributes['health_facility_id']]);
+        }
+
+        return parent::update($attributes, $options);
     }
 
     /**
@@ -136,6 +156,11 @@ class Patient extends Model
     public function healthFacility(): BelongsTo
     {
         return $this->belongsTo(HealthFacility::class);
+    }
+
+    public function healthFacilities(): BelongsToMany
+    {
+        return $this->belongsToMany(HealthFacility::class)->withTimestamps();
     }
 
     public function appointments(): HasMany
@@ -168,7 +193,12 @@ class Patient extends Model
 
     public function scopeForHealthFacility($query, $facilityId)
     {
-        return $query->where('health_facility_id', $facilityId);
+        return $query->where(function ($q) use ($facilityId) {
+            $q->where('health_facility_id', $facilityId)
+              ->orWhereHas('healthFacilities', function ($q) use ($facilityId) {
+                  $q->where('health_facility_id', $facilityId);
+              });
+        });
     }
 
     public function scopeStudents($query)
@@ -178,7 +208,8 @@ class Patient extends Model
 
     public function scopePatients($query)
     {
-        return $query->whereNotNull('health_facility_id');
+        return $query->whereNotNull('health_facility_id')
+                    ->orWhereHas('healthFacilities');
     }
 
     /**
@@ -196,7 +227,7 @@ class Patient extends Model
 
     public function getIsHealthFacilityPatientAttribute()
     {
-        return !is_null($this->health_facility_id);
+        return !is_null($this->health_facility_id) || $this->healthFacilities()->exists();
     }
 
     public function getInstitutionAttribute()

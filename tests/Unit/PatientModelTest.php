@@ -144,7 +144,7 @@ class PatientModelTest extends TestCase
         ]);
 
         $this->assertEquals($existingPatient->id, $foundPatient->id);
-        $this->assertEquals($school->id, $foundPatient->school_id); // Original preserved
+        $this->assertEquals($school->id, $foundPatient->school_id); // Original association preserved
         $this->assertEquals($healthFacility->id, $foundPatient->health_facility_id); // Added
         $this->assertEquals('+256700000002', $foundPatient->contact_number); // Added
         $this->assertEquals('Grade 10', $foundPatient->grade); // Added
