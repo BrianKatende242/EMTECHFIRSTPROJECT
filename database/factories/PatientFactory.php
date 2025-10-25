@@ -33,6 +33,8 @@ class PatientFactory extends Factory
             'parent_contact' => $this->faker->phoneNumber,
             'grade' => $this->faker->randomElement(['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7']),
             'medical_history' => $this->faker->optional()->sentence,
+            'school_id' => null,
+            'health_facility_id' => null,
         ];
     }
 }

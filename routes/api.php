@@ -103,14 +103,6 @@ Route::post('/students', function(Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this school
-            if ($patient->school_id == $validated['school_id']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Patient is already associated with this school.'
-                ], 400);
-            }
-
             // Update patient with school association
             $patient->update([
                 'school_id' => $validated['school_id'],
@@ -182,14 +174,6 @@ Route::post('/patients', function(Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this health facility
-            if ($patient->health_facility_id == $existingValidation['health_facility_id']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Patient is already associated with this health facility.'
-                ], 400);
-            }
-
             // Update patient with health facility association
             $patient->update([
                 'health_facility_id' => $existingValidation['health_facility_id'],
@@ -236,7 +220,7 @@ Route::post('/patients', function(Request $request) {
 
 Route::get('/patients/{healthFacility}', function($healthFacilityId) {
     try {
-        $patients = App\Models\Patient::where('health_facility_id', $healthFacilityId)->get();
+        $patients = App\Models\Patient::forHealthFacility($healthFacilityId)->get();
 
         return response()->json([
             'success' => true,

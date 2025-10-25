@@ -63,7 +63,10 @@
             
       <div class="d-flex justify-content-between mb-1">
                 <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
-        <button type="button" class="btn btn-brand" id="requestPaymentBtn">Request Payment</button>
+        <div>
+          <button type="button" class="btn btn-warning me-2" id="dummyPaymentBtn">Confirm Payment (Dummy)</button>
+          <button type="button" class="btn btn-brand" id="requestPaymentBtn">Request Real Payment</button>
+        </div>
             </div>
           </form>
         </div>
@@ -151,7 +154,9 @@
     const form = document.getElementById('paymentForm');
     const btn = document.getElementById('requestPaymentBtn');
     const modal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: 'static', keyboard: false });
-
+    const modalTitle = document.getElementById('paymentModalLabel');
+    const modalBody = document.querySelector('#paymentModal .modal-body');
+    
     if(!form || !btn) return;
 
     btn.addEventListener('click', function(e){
@@ -163,7 +168,17 @@
         phoneInput.reportValidity();
         return;
       }
-
+      
+      // Update modal for payment request
+      modalTitle.textContent = 'Processing Payment Request';
+      modalBody.innerHTML = `
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden"></span>
+        </div>
+        <h5>Processing Payment Request</h5>
+        <p class="text-muted mt-2">Please wait while we initiate your payment...</p>
+      `;
+      
       // Show modal
       modal.show();
 
@@ -182,18 +197,50 @@
       .then(response => response.json())
       .then(data => {
         if(data.success){
-          // Show success state
-          showSuccessState();
+          // Show success message briefly before redirect
+          modalTitle.textContent = 'Payment Request Sent!';
+          modalBody.innerHTML = `
+            <div class="text-success mb-3">
+              <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+            </div>
+            <h5>Success!</h5>
+            <p class="text-muted mt-2">${data.message || 'Payment request sent successfully.'}</p>
+          `;
+          modal.show();
+          
+          // Redirect after a short delay
+          setTimeout(() => {
+            modal.hide();
+            window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
+          }, 2000);
         } else {
-          // Hide modal and show error
-          modal.hide();
-          alert(data.message || 'Payment request failed. Please try again.');
+          // Show error
+          modalTitle.textContent = 'Payment Request Failed';
+          modalBody.innerHTML = `
+            <div class="text-danger mb-3">
+              <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+            </div>
+            <h5>Error</h5>
+            <p class="text-muted mt-2">${data.message || 'Payment request failed. Please try again.'}</p>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          `;
+          modal.show();
         }
       })
       .catch(error => {
         modal.hide();
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        // Show error modal
+        modalTitle.textContent = 'Payment Request Failed';
+        modalBody.innerHTML = `
+          <div class="text-danger mb-3">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+          </div>
+          <h5>Error</h5>
+          <p class="text-muted mt-2">An error occurred. Please try again.</p>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        `;
+        modal.show();
       });
     });
 
@@ -223,5 +270,108 @@
       }, 1000);
     }
   })();
+</script>
+@endpush
+
+@push('scripts')
+<script>
+function confirmPaymentDummy(appointmentId) {
+    // Show confirmation dialog first
+    if (!confirm('Are you sure you want to confirm payment for this appointment? This will notify the doctor.')) {
+        return;
+    }
+
+    // Get modal elements
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: 'static', keyboard: false });
+    const modalTitle = document.getElementById('paymentModalLabel');
+    const modalBody = document.querySelector('#paymentModal .modal-body');
+
+    // Update modal content for dummy payment
+    modalTitle.textContent = 'Confirming Payment';
+    modalBody.innerHTML = `
+        <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden"></span>
+        </div>
+        <h5>Processing Payment Confirmation</h5>
+        <p class="text-muted mt-2">Please wait while we confirm your payment...</p>
+    `;
+
+    // Show modal
+    modal.show();
+
+    // Make the API call
+    fetch(`/appointment/${appointmentId}/confirm-payment-dummy`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        modal.hide();
+        if (data.success) {
+            // Show success message briefly before redirect
+            modalTitle.textContent = 'Payment Confirmed!';
+            modalBody.innerHTML = `
+                <div class="text-success mb-3">
+                    <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Success!</h5>
+                <p class="text-muted mt-2">Payment confirmed successfully. Doctor has been notified.</p>
+            `;
+            modal.show();
+
+            // Redirect after a short delay
+            setTimeout(() => {
+                modal.hide();
+                // Redirect to appropriate booking page based on appointment type
+                @if($appointment->school_id)
+                    window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
+                @elseif($appointment->health_facility_id)
+                    window.location.href = '{{ route("health-facility.book-doctor", ["id" => $appointment->health_facility_id]) }}';
+                @else
+                    window.location.href = '/'; // fallback to home
+                @endif
+            }, 2000);
+        } else {
+            // Show error
+            modalTitle.textContent = 'Confirmation Failed';
+            modalBody.innerHTML = `
+                <div class="text-danger mb-3">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Error</h5>
+                <p class="text-muted mt-2">${data.message || 'An error occurred while confirming payment.'}</p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            `;
+            modal.show();
+        }
+    })
+    .catch(error => {
+        modal.hide();
+        console.error('Error:', error);
+        // Show error modal
+        modalTitle.textContent = 'Confirmation Failed';
+        modalBody.innerHTML = `
+            <div class="text-danger mb-3">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+            </div>
+            <h5>Error</h5>
+            <p class="text-muted mt-2">An error occurred while confirming payment. Please try again.</p>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        `;
+        modal.show();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dummyBtn = document.getElementById('dummyPaymentBtn');
+    if (dummyBtn) {
+        dummyBtn.addEventListener('click', function() {
+            confirmPaymentDummy({{ $appointment->id }});
+        });
+    }
+});
 </script>
 @endpush

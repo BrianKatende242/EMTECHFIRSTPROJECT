@@ -18,7 +18,7 @@ class SchoolController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:schools',
                 'contact' => 'required|string|max:20',
-                'file_url' => 'nullable|string'
+                'file_url' => 'nullable'
             ]);
         } catch (\Throwable $th) {
             Log::error($th);

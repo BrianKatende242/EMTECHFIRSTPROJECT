@@ -44,7 +44,7 @@
                     </td>
                                         <td>
                                             <div class="d-flex gap-2">
-                                                <form action="{{ route('lab-tests.destroy', ['labTest' => $labTest->id]) }}" method="POST" onsubmit="return confirm('Delete this lab test request?');">
+                                                <form action="{{ route('lab-tests.destroy', ['school' => $school->id, 'labTest' => $labTest->id]) }}" method="POST" onsubmit="return confirm('Delete this lab test request?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>

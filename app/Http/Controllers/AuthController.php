@@ -57,7 +57,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Redirect to external site after logout
-        return redirect()->away('https://ketiai.com');
+        // Redirect to login page after logout
+        return redirect()->route('login');
     }
 }

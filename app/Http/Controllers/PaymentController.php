@@ -23,15 +23,16 @@ class PaymentController extends Controller
     public function showAppointmentPayForm(Appointment $appointment)
     {
         if ($appointment->status !== 'awaiting_payment') {
-            // Redirect to appropriate dashboard instead of back() to avoid redirect loops
-            if ($appointment->healthFacility) {
-                return redirect()->route('health-facility.dashboard', ['id' => $appointment->healthFacility->id])
-                    ->with('error', 'This appointment is not awaiting payment.');
-            } elseif ($appointment->school) {
-                return redirect()->route('school.dashboard')
-                    ->with('error', 'This appointment is not awaiting payment.');
+            // Redirect to appropriate booking page with success message
+            if ($appointment->school_id) {
+                return redirect()->route('book-doctor', ['school' => $appointment->school_id])
+                    ->with('success', 'This appointment has already been confirmed and paid for.');
+            } elseif ($appointment->health_facility_id) {
+                return redirect()->route('health-facility.book-doctor', ['id' => $appointment->health_facility_id])
+                    ->with('success', 'This appointment has already been confirmed and paid for.');
+            } else {
+                return redirect('/')->with('success', 'This appointment has already been confirmed and paid for.');
             }
-            return redirect('/')->with('error', 'This appointment is not awaiting payment.');
         }
         // Load relations and pass sidebar context so menu renders
         $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
@@ -372,20 +373,56 @@ class PaymentController extends Controller
     // Mark appointment as paid (manual success landing)
     public function appointmentSuccess(Appointment $appointment)
     {
-        // Load relations
-        $appointment->load(['school', 'doctor', 'patient', 'healthFacility', 'duration']);
+        // Change status to confirmed and send email to doctor
+        $appointment->status = 'confirmed';
+        $appointment->save();
 
-        // Only confirm if payment was actually completed via webhook
-        if ($appointment->payment_status === 'completed') {
-            $appointment->status = 'confirmed';
-            $appointment->save();
+        // Send email notification to doctor
+        $this->sendAppointmentConfirmationEmail($appointment);
 
-            // Show success page
-            return view('payments/appointment-success', compact('appointment'));
+        return redirect()->back()->with('success', 'Payment confirmed and appointment marked as confirmed.');
+    }
+
+    // Dummy payment confirmation for testing (bypasses actual payment)
+    public function confirmPaymentDummy(Request $request, Appointment $appointment)
+    {
+        // Only allow confirmation if appointment is awaiting payment
+        if ($appointment->status !== 'awaiting_payment') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Appointment is not awaiting payment confirmation.'
+            ], 400);
         }
 
-        // If payment not completed yet, show waiting page
-        return view('payments/appointment-waiting', compact('appointment'));
+        // Change status to confirmed
+        $appointment->status = 'confirmed';
+        $appointment->save();
+
+        // Send email notification to doctor
+        $this->sendAppointmentConfirmationEmail($appointment);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment confirmed successfully. Doctor has been notified.'
+        ]);
+    }
+
+    // Send appointment confirmation email to doctor
+    protected function sendAppointmentConfirmationEmail(Appointment $appointment)
+    {
+        $doctor = $appointment->doctor;
+        $patient = $appointment->patient;
+        $institution = $appointment->school ?? $appointment->healthFacility;
+
+        if ($doctor && $doctor->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($doctor->email)->send(
+                    new \App\Mail\AppointmentConfirmationMail($appointment, $doctor, $patient, $institution)
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
+            }
+        }
     }
 
     // Cancel payment flow for appointment

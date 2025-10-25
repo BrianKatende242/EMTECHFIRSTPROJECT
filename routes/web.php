@@ -16,7 +16,7 @@ use App\Http\Controllers\ApiDashboardController;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\OtpController;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Http\Controllers\PaymentController;
 
@@ -74,12 +74,7 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 
 use App\Http\Controllers\SchoolController;
 
-Route::get('/school-dashboard', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
     return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
@@ -94,12 +89,7 @@ Route::get('/school-dashboard', function () {
 })->name('school.dashboard');
 
 
-Route::get('/students', function (Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/students/{school}', function (Request $request, App\Models\School $school) {
     $query = $school->students();
 
     // Apply filters
@@ -134,31 +124,30 @@ Route::get('/students', function (Request $request) {
 })->name('students');
 
 
-Route::delete('/students/{student}/delete', function ($studentId) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::delete('/students/{school}/{student}/delete', function ($schoolId, $studentId) {
+    $school = App\Models\School::findOrFail($schoolId);
     $student = App\Models\Patient::findOrFail($studentId);
+
+    // Verify the student belongs to the school
+    if ($student->school_id !== $school->id) {
+        abort(403);
+    }
 
     // Check if student has any appointments
     if ($student->appointments()->count() > 0) {
-        return redirect()->route('students')
+        return redirect()->route('students', ['school' => $school->id])
             ->with('error', 'Cannot delete student with existing appointments.');
     }
 
     // Deleting the student will cascade and remove related appointments (handled in Student model)
     $student->delete();
 
-    return redirect()->route('students')->with('success', 'Student deleted successfully.');
+    return redirect()->route('students', ['school' => $school->id])->with('success', 'Student deleted successfully.');
 })->name('students.delete');
 
 Route::post('/students/create', function (Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
 
     try {
         $validated = $request->validate([
@@ -175,7 +164,7 @@ Route::post('/students/create', function (Request $request) {
 
             // Check if patient is already associated with this school
             if ($patient->school_id == $school->id) {
-                return redirect()->route('students')
+                return redirect()->route('students', ['school' => $school->id])
                     ->with('error', 'Patient is already associated with this school.');
             }
 
@@ -185,7 +174,7 @@ Route::post('/students/create', function (Request $request) {
                 'grade' => $request->input('grade'), // Optional grade for existing patients
             ]);
 
-            return redirect()->route('students')
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Existing patient associated with school successfully.');
         } else {
             // Handle new patient
@@ -208,7 +197,7 @@ Route::post('/students/create', function (Request $request) {
                 'grade' => $newValidation['grade'],
             ]);
 
-            return redirect()->route('students')
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Student created successfully.');
         }
     } catch (\Illuminate\Validation\ValidationException $e) {
@@ -219,12 +208,7 @@ Route::post('/students/create', function (Request $request) {
 })->name('students.create');
 
 
-Route::get('/lab-tests', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/lab-tests/{school}', function (App\Models\School $school) {
     // Paginate lab tests for the school (15 per page)
     $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
 
@@ -237,10 +221,8 @@ Route::get('/lab-tests', function () {
 
 // Handle lab test form submissions from web forms (redirect back to lab-tests page)
 Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
 
     $validated = $request->validate([
         'student_id' => 'required|exists:students,id',
@@ -253,48 +235,33 @@ Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
         'status' => 'pending'
     ]));
 
-    return redirect()->route('lab-tests')->with('success', 'Lab test requested successfully.');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test requested successfully.');
 })->name('lab-tests.store');
 
 // Delete a lab test (web)
-Route::delete('/lab-tests/{labTest}', function (App\Models\LabTest $labTest) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::delete('/lab-tests/{school}/{labTest}', function (App\Models\School $school, App\Models\LabTest $labTest) {
     // Verify the lab test belongs to the authenticated school
     if ($labTest->school_id !== $school->id) {
         abort(403);
     }
 
     $labTest->delete();
-    return redirect()->route('lab-tests')->with('success', 'Lab test deleted');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test deleted');
 })->name('lab-tests.destroy');
 
 // Mark a lab test as completed (web)
-Route::post('/lab-tests/{labTest}/complete', function (App\Models\LabTest $labTest) {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::post('/lab-tests/{school}/{labTest}/complete', function (App\Models\School $school, App\Models\LabTest $labTest) {
     // Verify the lab test belongs to the authenticated school
     if ($labTest->school_id !== $school->id) {
         abort(403);
     }
 
     $labTest->update(['status' => 'completed']);
-    return redirect()->route('lab-tests')->with('success', 'Lab test marked completed');
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test marked completed');
 })->name('lab-tests.complete');
 
 
-Route::get('/book-doctor', function () {
-    $school = getAuthenticatedSchool();
-    if (!$school) {
-        return redirect()->route('login');
-    }
-
+Route::get('/book-doctor/{school}', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
@@ -303,8 +270,15 @@ Route::get('/book-doctor', function () {
     ]);
 })->name('book-doctor');
 
+Route::get('/transactions/{school}', function (App\Models\School $school) {
+    // Get transactions/payments related to this school
+    // For now, we'll show appointments with payment status
+    $appointments = $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->paginate(15);
+    return view('school-transactions', compact('school', 'appointments'));
+})->name('school.transactions');
 
-Route::get('/doctor/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+
+Route::get('/doctor/{id}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
 // Appointment actions
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
@@ -415,29 +389,29 @@ Route::prefix('admin')->middleware('admin')->group(function(){
     Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
     Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
 });
-Route::get('doctor/meeting-link/', function () {
-    $doctor = Auth::guard('doctor')->user();
-    if (!$doctor) {
-        return redirect()->route('login');
-    }
+Route::get('doctor/{id}/meeting-link/', function (Request $request) {
+    $doctorId = $request->route('id');
+
+    $doctor = \App\Models\Doctor::findOrFail($doctorId);
+
     return view('meeting-link', [
         'doctor' => $doctor
     ]);
-})->name('doctor.meeting-link')->middleware(['auth:doctor']);
+})->name('doctor.meeting-link');
 
 // Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
 Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
-    ->name('doctor.update-meeting-link')->middleware(['auth:doctor']);
+    ->name('doctor.update-meeting-link');
 
 // Web route to send meeting link to an email (school/health facility)
 Route::post('/doctor/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
-    ->name('doctor.send-link')->middleware(['auth:doctor']);
+    ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)
 Route::post('/doctor/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
-    ->name('doctor.update-availability')->middleware(['auth:doctor']);
+    ->name('doctor.update-availability');
 
-Route::get('/doctor-dashboard/availability', [DoctorController::class, 'availability'])->name('doctor.availability')->middleware(['auth:doctor']);
+Route::get('/doctor-dashboard/availability/{id}', [DoctorController::class, 'availability'])->name('doctor.availability');
 
 Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilities'])->middleware('admin')->name('doctor.all-availabilities');
 
@@ -446,18 +420,11 @@ Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilitie
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
 
-Route::middleware(['auth:doctor'])->group(function () {
-    Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
-    // Add routes for other methods if not already defined
-});
+Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
+// Add routes for other methods if not already defined
 
 
-Route::get('/doctor-dashboard', function () {
-    return view('doctor-dashboard'); // points to resources/views/doctor-dashboard.blade.php
-});
-
-
-Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard')->middleware(['auth:doctor']);
+Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
 
 // One-time login link consume route (public)
 Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
@@ -548,12 +515,6 @@ Route::post('/patients/create', function (Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this health facility
-            if ($patient->health_facility_id == $validated['health_facility_id']) {
-                return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
-                    ->with('error', 'Patient is already associated with this health facility.');
-            }
-
             // Update patient with health facility association
             $patient->update([
                 'health_facility_id' => $validated['health_facility_id'],
@@ -600,6 +561,7 @@ Route::get('/success', function () {
 // New appointment payment routes
 Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showAppointmentPayForm'])->name('payment.appointment.pay');
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
+Route::post('/appointment/{appointment}/confirm-payment-dummy', [PaymentController::class, 'confirmPaymentDummy'])->name('payment.appointment.confirm-dummy');
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
 

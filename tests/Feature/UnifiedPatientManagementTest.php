@@ -165,9 +165,9 @@ class UnifiedPatientManagementTest extends TestCase
             'gender' => 'male',
         ], ['health_facility_id' => $healthFacility->id]);
 
-        // Should be the same patient with both associations
+        // Should be the same patient but now associated with both school and health facility
         $this->assertEquals($patient->id, $samePatient->id);
-        $this->assertEquals($school->id, $samePatient->school_id);
+        $this->assertEquals($school->id, $samePatient->school_id); // Original association preserved
         $this->assertEquals($healthFacility->id, $samePatient->health_facility_id);
     }
 
@@ -480,7 +480,7 @@ class UnifiedPatientManagementTest extends TestCase
             'gender' => 'male',
         ], ['school_id' => $school->id]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$patient->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$patient->id}/delete");
 
         $response->assertRedirect(route('students', ['school' => $school->id]))
                 ->assertSessionHas('success', 'Student deleted successfully.');
@@ -521,7 +521,7 @@ class UnifiedPatientManagementTest extends TestCase
             'duration_id' => $this->getGeneralDurationId(),
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$patient->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$patient->id}/delete");
 
         $response->assertRedirect(route('students', ['school' => $school->id]))
                 ->assertSessionHas('error', 'Cannot delete student with existing appointments.');

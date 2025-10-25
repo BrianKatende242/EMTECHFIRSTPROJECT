@@ -10,10 +10,14 @@ class DoctorAvailabilityController extends Controller
 {
     public function update(Request $request)
     {
-        $doctor = Auth::guard('doctor')->user();
-        if (!$doctor) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        // For insecure access, require doctor ID parameter
+        $doctorId = $request->input('doctor_id') ?? $request->query('doctorId');
+
+        if (!$doctorId) {
+            return response()->json(['success' => false, 'message' => 'Doctor ID is required'], 400);
         }
+
+        $doctor = Doctor::findOrFail($doctorId);
 
         foreach ($request->input('days', []) as $day => $data) {
             $doctor->availabilities()->updateOrCreate(
