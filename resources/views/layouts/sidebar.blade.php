@@ -77,7 +77,13 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('book-doctor*') ? 'active' : '' }}" href="{{ route('book-doctor', ['school' => $school->id]) }}">
+        <a class="nav-link {{ request()->is('lab-tests*') ? 'active' : '' }}" href="{{ route('lab-tests', ['school' => $school->id]) }}">
+            <i class="mdi mdi-flask menu-icon"></i>
+            <span class="menu-title">Lab Tests</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('transactions*') ? 'active' : '' }}" href="{{ route('school.transactions', ['school' => $school->id]) }}">
             <i class="mdi mdi-square-inc-cash menu-icon"></i>
             <span class="menu-title">Transactions</span>
         </a>
@@ -119,25 +125,25 @@
 @elseif(isset($doctor))
 <ul class="nav">
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('doctor/dashboard*') ? 'active' : '' }}" href="{{ route('doctor.dashboard') }}">
+        <a class="nav-link {{ request()->is('doctor/dashboard*') ? 'active' : '' }}" href="{{ route('doctor.dashboard', $doctor->id) }}">
             <i class="typcn typcn-device-desktop menu-icon"></i>
             <span class="menu-title">Dashboard</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('doctor/appointments*') ? 'active' : '' }}" href="{{ route('doctor.appointments') }}">
+        <a class="nav-link {{ request()->is('doctor/appointments*') ? 'active' : '' }}" href="{{ route('doctor.appointments', $doctor->id) }}">
             <i class="typcn typcn-calendar menu-icon"></i>
             <span class="menu-title">Appointments</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('doctor/meeting-link*') ? 'active' : '' }}" href="{{ route('doctor.meeting-link') }}">
+        <a class="nav-link {{ request()->is('doctor/meeting-link*') ? 'active' : '' }}" href="{{ route('doctor.meeting-link', $doctor->id) }}">
             <i class="typcn typcn-video menu-icon"></i>
             <span class="menu-title">Meeting link</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('doctor-dashboard/availability*') ? 'active' : '' }}" href="{{ route('doctor.availability') }}">
+        <a class="nav-link {{ request()->is('doctor-dashboard/availability*') ? 'active' : '' }}" href="{{ route('doctor.availability', $doctor->id) }}">
             <i class="mdi mdi-calendar-clock menu-icon"></i>
             <span class="menu-title">My Availability</span>
         </a>

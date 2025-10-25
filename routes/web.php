@@ -270,8 +270,15 @@ Route::get('/book-doctor/{school}', function (App\Models\School $school) {
     ]);
 })->name('book-doctor');
 
+Route::get('/transactions/{school}', function (App\Models\School $school) {
+    // Get transactions/payments related to this school
+    // For now, we'll show appointments with payment status
+    $appointments = $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->paginate(15);
+    return view('school-transactions', compact('school', 'appointments'));
+})->name('school.transactions');
 
-Route::get('/doctor/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+
+Route::get('/doctor/{id}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
 // Appointment actions
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
@@ -354,35 +361,35 @@ Route::prefix('admin')->middleware('admin')->group(function(){
     Route::get('/appointments/export', [AdminModelController::class, 'exportAppointmentsCsv'])->name('admin.appointments.export');
     // Payments extras
     Route::post('/payments/bulk', [AdminModelController::class, 'bulkUpdatePayments'])->name('admin.payments.bulk');
-    // Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
+    Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
     Route::get('/doctors/{id}', [AdminModelController::class, 'showDoctor'])->name('admin.doctors.show');
     Route::post('/doctors/{id}/send-login-link', [AdminModelController::class, 'sendLoginLinkToDoctor'])->name('admin.doctors.send-login');
     Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
     Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
 });
-Route::get('doctor/meeting-link/', function () {
-    $doctor = Auth::guard('doctor')->user();
-    if (!$doctor) {
-        return redirect()->route('login');
-    }
+Route::get('doctor/{id}/meeting-link/', function (Request $request) {
+    $doctorId = $request->route('id');
+
+    $doctor = \App\Models\Doctor::findOrFail($doctorId);
+
     return view('meeting-link', [
         'doctor' => $doctor
     ]);
-})->name('doctor.meeting-link')->middleware(['auth:doctor']);
+})->name('doctor.meeting-link');
 
 // Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
 Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
-    ->name('doctor.update-meeting-link')->middleware(['auth:doctor']);
+    ->name('doctor.update-meeting-link');
 
 // Web route to send meeting link to an email (school/health facility)
 Route::post('/doctor/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
-    ->name('doctor.send-link')->middleware(['auth:doctor']);
+    ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)
 Route::post('/doctor/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
-    ->name('doctor.update-availability')->middleware(['auth:doctor']);
+    ->name('doctor.update-availability');
 
-Route::get('/doctor-dashboard/availability', [DoctorController::class, 'availability'])->name('doctor.availability')->middleware(['auth:doctor']);
+Route::get('/doctor-dashboard/availability/{id}', [DoctorController::class, 'availability'])->name('doctor.availability');
 
 Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilities'])->middleware('admin')->name('doctor.all-availabilities');
 
@@ -391,18 +398,11 @@ Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilitie
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
 
-Route::middleware(['auth:doctor'])->group(function () {
-    Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
-    // Add routes for other methods if not already defined
-});
+Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
+// Add routes for other methods if not already defined
 
 
-Route::get('/doctor-dashboard', function () {
-    return view('doctor-dashboard'); // points to resources/views/doctor-dashboard.blade.php
-});
-
-
-Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard')->middleware(['auth:doctor']);
+Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
 
 // One-time login link consume route (public)
 Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
