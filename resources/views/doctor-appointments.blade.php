@@ -77,7 +77,7 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ route('doctor.meeting-link') }}" class="btn btn-sm btn-info" title="Start Meeting" target="_blank">
+                                <a href="{{ route('doctor.meeting-link', ['id' => $doctor->id]) }}" class="btn btn-sm btn-info" title="Start Meeting" target="_blank">
                                     <i class="mdi mdi-video"></i>
                                 </a>
                                 @if($appointment->status !== 'cancelled')
