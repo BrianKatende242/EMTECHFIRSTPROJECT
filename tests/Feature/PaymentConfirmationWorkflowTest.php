@@ -176,11 +176,14 @@ class PaymentConfirmationWorkflowTest extends TestCase
     /** @test */
     public function doctor_getDoctorAppointments_only_returns_confirmed_appointments()
     {
+        // Authenticate as the doctor
+        $this->actingAs($this->doctor, 'doctor');
+
         // Initially no confirmed appointments
         $response = $this->get(route('doctor.appointments', ['doctorId' => $this->doctor->id]));
 
         // Should show empty or no confirmed appointments
-        // (Check the actual response structure)
+        $response->assertStatus(200);
 
         // Confirm one appointment
         $this->postJson(route('payment.appointment.confirm-dummy', $this->schoolAppointment));

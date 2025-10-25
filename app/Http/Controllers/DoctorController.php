@@ -104,7 +104,7 @@ class DoctorController extends Controller
 
         // Paginate appointments 10 per page for the doctor's appointments list
         $appointments = Appointment::where('doctor_id', $doctor->id)
-            ->with(['student', 'patient', 'school', 'healthFacility', 'duration'])
+            ->with(['patient', 'school', 'healthFacility', 'duration'])
             ->latest()
             ->paginate(10);
 
