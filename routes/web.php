@@ -16,7 +16,7 @@ use App\Http\Controllers\ApiDashboardController;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\OtpController;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Http\Controllers\PaymentController;
 
@@ -490,12 +490,6 @@ Route::post('/patients/create', function (Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
-            // Check if patient is already associated with this health facility
-            if ($patient->health_facility_id == $validated['health_facility_id']) {
-                return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
-                    ->with('error', 'Patient is already associated with this health facility.');
-            }
-
             // Update patient with health facility association
             $patient->update([
                 'health_facility_id' => $validated['health_facility_id'],
@@ -542,5 +536,6 @@ Route::get('/success', function () {
 // New appointment payment routes
 Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showAppointmentPayForm'])->name('payment.appointment.pay');
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
+Route::post('/appointment/{appointment}/confirm-payment-dummy', [PaymentController::class, 'confirmPaymentDummy'])->name('payment.appointment.confirm-dummy');
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');

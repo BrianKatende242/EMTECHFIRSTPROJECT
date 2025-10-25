@@ -236,7 +236,6 @@ public function showDoctorDashboard()
     }
 
     $doctor = Doctor::with([
-        'appointments.student',
         'appointments.patient',
         'appointments.school',
         'appointments.duration',
@@ -246,7 +245,7 @@ public function showDoctorDashboard()
     // All appointments
     $appointments = $doctor->appointments()->with('duration', 'patient')->latest()->get();
 
-    // Upcoming appointments
+    // Upcoming appointments (only confirmed ones)
     $upcomingAppointments = $doctor->appointments()
         ->with('duration', 'patient')
         ->where('appointment_time', '>', now())
