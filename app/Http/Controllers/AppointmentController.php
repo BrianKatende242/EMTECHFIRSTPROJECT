@@ -44,6 +44,37 @@ class AppointmentController extends Controller
                 return;
             }
 
+            // Check for time conflicts with existing appointments
+            if ($request->filled('doctor_id') && $request->filled('appointment_time') && $request->filled('duration_id')) {
+                $appointmentDateTime = Carbon::parse($request->appointment_time);
+                $duration = Duration::find($request->duration_id);
+
+                if ($duration) {
+                    $proposedStart = $appointmentDateTime;
+                    $proposedEnd = $appointmentDateTime->copy()->addMinutes($duration->minutes);
+
+                    // Get existing appointments for this doctor on the same date
+                    $existingAppointments = Appointment::where('doctor_id', $request->doctor_id)
+                        ->whereDate('appointment_time', $appointmentDateTime->toDateString())
+                        ->where('status', '!=', 'cancelled')
+                        ->get();
+
+                    foreach ($existingAppointments as $existing) {
+                        $existingStart = Carbon::parse($existing->appointment_time);
+                        $existingDuration = $existing->duration ?? Duration::find($existing->duration_id);
+                        $existingEnd = $existingStart->copy()->addMinutes($existingDuration ? $existingDuration->minutes : 30); // Default 30 mins if duration not found
+
+                        // Check for overlap
+                        if (($proposedStart->between($existingStart, $existingEnd) && !$proposedStart->equalTo($existingEnd)) ||
+                            ($proposedEnd->between($existingStart, $existingEnd) && !$proposedEnd->equalTo($existingStart)) ||
+                            ($proposedStart->lessThanOrEqualTo($existingStart) && $proposedEnd->greaterThan($existingStart))) {
+                            $validator->errors()->add('appointment_time', 'This time slot conflicts with an existing appointment for this doctor.');
+                            break;
+                        }
+                    }
+                }
+            }
+
             // Validate patient belongs to the institution
             $patient = Patient::find($request->patient_id);
             if ($patient) {
@@ -57,10 +88,14 @@ class AppointmentController extends Controller
         });
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         // Create appointment
@@ -110,9 +145,9 @@ class AppointmentController extends Controller
                     'message' => 'Appointment creation failed',
                     'error' => $e->getMessage()
                 ], 500);
+            } else {
+                return redirect()->back()->with('error', 'Appointment creation failed');
             }
-
-            return redirect()->back()->with('error', 'Appointment creation failed');
         }
     }
 
@@ -160,6 +195,20 @@ class AppointmentController extends Controller
      */
     public function cancel(Request $request, Appointment $appointment)
     {
+        // Check if appointment has been paid
+        if ($appointment->payment_status === 'completed') {
+            $message = 'Cannot cancel appointment that has already been paid.';
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 422);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
         $appointment->status = 'cancelled';
         $appointment->save();
 
@@ -183,6 +232,34 @@ class AppointmentController extends Controller
         }
 
         return redirect()->back()->with('success', 'Appointment marked completed');
+    }
+
+    /**
+     * Delete a cancelled appointment
+     */
+    public function destroy(Request $request, Appointment $appointment)
+    {
+        // Only allow deletion of cancelled appointments
+        if ($appointment->status !== 'cancelled') {
+            $message = 'Only cancelled appointments can be deleted.';
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 422);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
+        $appointment->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Appointment deleted successfully']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment deleted successfully');
     }
 
     protected function sendAppointmentConfirmation(Appointment $appointment)

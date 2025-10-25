@@ -20,7 +20,6 @@
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -80,7 +79,7 @@
                                 <a href="{{ route('doctor.meeting-link', ['id' => $doctor->id]) }}" class="btn btn-sm btn-info" title="Start Meeting" target="_blank">
                                     <i class="mdi mdi-video"></i>
                                 </a>
-                                @if($appointment->status !== 'cancelled')
+                                @if($appointment->status !== 'completed')
                                     <button class="btn btn-sm btn-danger btn-cancel" data-id="{{ $appointment->id }}" title="Cancel">
                                         <i class="mdi mdi-close"></i>
                                     </button>

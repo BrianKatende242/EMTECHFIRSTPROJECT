@@ -333,6 +333,14 @@
                                         <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-success">
                                             <i class="typcn typcn-credit-card mr-1"></i>Pay Now
                                         </a>
+                                    @elseif($appointment->payment_status !== 'completed' && $appointment->status !== 'cancelled')
+                                        <button class="btn btn-sm btn-danger btn-cancel-appointment" data-id="{{ $appointment->id }}" title="Cancel Appointment">
+                                            <i class="typcn typcn-times mr-1"></i>Cancel
+                                        </button>
+                                    @elseif($appointment->status === 'cancelled')
+                                        <button class="btn btn-sm btn-outline-danger btn-delete-appointment" data-id="{{ $appointment->id }}" title="Delete Appointment">
+                                            <i class="typcn typcn-trash mr-1"></i>Delete
+                                        </button>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -864,6 +872,128 @@ dl.row dd {
         $('#scheduleAppointmentModal').on('hidden.bs.modal', function() {
             $('#appointmentForm')[0].reset();
             $('.alert').not('.alert-info').remove();
+        });
+    });
+
+    // Appointment cancellation functionality
+    $(document).on('click', '.btn-cancel-appointment', function() {
+        const appointmentId = $(this).data('id');
+        const button = $(this);
+        const originalHtml = button.html();
+
+        if (!confirm('Are you sure you want to cancel this appointment?')) {
+            return;
+        }
+
+        // Disable button and show loading
+        button.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i>Cancelling...');
+
+        $.ajax({
+            url: `/appointments/${appointmentId}/cancel`,
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="typcn typcn-tick mr-1"></i>
+                            <strong>Success!</strong> Appointment cancelled successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    $('.container-fluid').prepend(successAlert);
+
+                    // Update the appointment row status
+                    const row = button.closest('tr');
+                    row.find('.badge').removeClass('badge-warning badge-success badge-secondary').addClass('badge-danger');
+                    row.find('.badge i').removeClass('typcn-credit-card typcn-tick typcn-time').addClass('typcn-times');
+                    row.find('.badge').html('<i class="typcn typcn-times mr-1"></i>Cancelled');
+
+                    // Replace cancel button with delete button
+                    button.replaceWith(`
+                        <button class="btn btn-sm btn-outline-danger btn-delete-appointment" data-id="${appointmentId}" title="Delete Appointment">
+                            <i class="typcn typcn-trash mr-1"></i>Delete
+                        </button>
+                    `);
+
+                    // Auto-hide alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut();
+                    }, 3000);
+                } else {
+                    alert('Failed to cancel appointment: ' + (response.message || 'Unknown error'));
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to cancel appointment.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                alert(errorMessage);
+                button.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
+
+    // Appointment deletion functionality
+    $(document).on('click', '.btn-delete-appointment', function() {
+        const appointmentId = $(this).data('id');
+        const button = $(this);
+        const originalHtml = button.html();
+
+        if (!confirm('Are you sure you want to permanently delete this cancelled appointment? This action cannot be undone.')) {
+            return;
+        }
+
+        // Disable button and show loading
+        button.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i>Deleting...');
+
+        $.ajax({
+            url: `/appointments/${appointmentId}`,
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="typcn typcn-tick mr-1"></i>
+                            <strong>Success!</strong> Appointment deleted successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    $('.container-fluid').prepend(successAlert);
+
+                    // Remove the appointment row
+                    button.closest('tr').remove();
+
+                    // Auto-hide alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut();
+                    }, 3000);
+                } else {
+                    alert('Failed to delete appointment: ' + (response.message || 'Unknown error'));
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to delete appointment.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                alert(errorMessage);
+                button.prop('disabled', false).html(originalHtml);
+            }
         });
     });
 </script>

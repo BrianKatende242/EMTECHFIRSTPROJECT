@@ -100,6 +100,7 @@ class DoctorController extends Controller
         // For insecure access, allow viewing appointments by doctor ID
         $doctor = Doctor::findOrFail($id);
         $appointments = Appointment::where('doctor_id', $id)
+            ->where('status', '!=', 'cancelled') // Exclude cancelled appointments
             ->with(['patient', 'school', 'healthFacility', 'duration'])
             ->latest()
             ->paginate(10);
@@ -230,13 +231,15 @@ class DoctorController extends Controller
             // For insecure access, allow viewing dashboard by doctor ID
             $doctor = Doctor::findOrFail($id);
 
-            // Fetch appointments with related data
+            // Fetch appointments with related data (exclude cancelled)
             $appointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('status', '!=', 'cancelled')
                 ->with(['patient', 'duration'])
                 ->get();
 
-            // Get upcoming appointments (next 7 days)
+            // Get upcoming appointments (next 7 days, exclude cancelled)
             $upcomingAppointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('status', '!=', 'cancelled')
                 ->with(['patient'])
                 ->where('appointment_time', '>', now())
                 ->where('appointment_time', '<=', now()->addDays(7))

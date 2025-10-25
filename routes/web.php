@@ -282,6 +282,7 @@ Route::get('/doctor/{id}/appointments', [DoctorController::class, 'getDoctorAppo
 // Appointment actions
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
+Route::delete('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
