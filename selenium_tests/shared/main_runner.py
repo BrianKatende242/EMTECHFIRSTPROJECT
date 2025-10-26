@@ -19,6 +19,8 @@ from health_facilities.test_conflict_validation import run_conflict_validation_t
 from health_facilities.test_cancelled_no_conflict import run_cancelled_no_conflict_test
 from admin.test_admin_login import run_admin_login_test
 from schools.book_appointment import run_school_book_appointment_test
+from schools.pay_appointment import run_school_pay_appointment_test
+from schools.cleanup_appointments import run_school_cleanup_test
 
 def run_all_tests():
     """Run all tests in sequence"""
@@ -26,9 +28,11 @@ def run_all_tests():
 
     tests = [
         ("Cleanup Appointments", run_cleanup_test),
+        ("School Cleanup Appointments", run_school_cleanup_test),
         ("Dashboard Check", run_dashboard_check),
         ("Book Appointment", run_book_appointment_test),
         ("School Book Appointment", run_school_book_appointment_test),
+        ("School Pay Appointment", run_school_pay_appointment_test),
         ("Cancellation Test", run_cancellation_test),
         ("Conflict Validation", run_conflict_validation_test),
         ("Cancelled No Conflict", run_cancelled_no_conflict_test),
@@ -74,9 +78,11 @@ def run_single_test(test_name):
     """Run a single test by name"""
     test_map = {
         "cleanup": ("Cleanup Appointments", run_cleanup_test),
+        "school-cleanup": ("School Cleanup Appointments", run_school_cleanup_test),
         "dashboard": ("Dashboard Check", run_dashboard_check),
         "book": ("Book Appointment", run_book_appointment_test),
         "school-book": ("School Book Appointment", run_school_book_appointment_test),
+        "school-pay": ("School Pay Appointment", run_school_pay_appointment_test),
         "cancel": ("Cancellation Test", run_cancellation_test),
         "conflict": ("Conflict Validation", run_conflict_validation_test),
         "no-conflict": ("Cancelled No Conflict", run_cancelled_no_conflict_test),
@@ -109,7 +115,7 @@ def main():
     parser.add_argument(
         "test",
         nargs="?",
-        choices=["all", "cleanup", "dashboard", "book", "school-book", "cancel", "conflict", "no-conflict", "admin-login"],
+        choices=["all", "cleanup", "school-cleanup", "dashboard", "book", "school-book", "school-pay", "cancel", "conflict", "no-conflict", "admin-login"],
         help="Test to run (default: all)"
     )
     parser.add_argument(
@@ -123,10 +129,12 @@ def main():
     if args.list:
         print("Available tests:")
         print("  all: Run all tests")
-        print("  cleanup: Cleanup existing appointments")
+        print("  cleanup: Cleanup existing appointments (health facility)")
+        print("  school-cleanup: Cleanup existing appointments (school)")
         print("  dashboard: Check dashboard loading")
         print("  book: Book a new appointment")
         print("  school-book: Book appointment from school context")
+        print("  school-pay: Test requesting payment for school appointments")
         print("  cancel: Test appointment cancellation")
         print("  conflict: Test time conflict validation")
         print("  no-conflict: Test cancelled appointments don't create conflicts")

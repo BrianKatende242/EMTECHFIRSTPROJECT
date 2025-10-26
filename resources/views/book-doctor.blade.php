@@ -53,9 +53,24 @@
                                         </td>
                                         <td class="text-end">
                                             @if($appointment->status === 'awaiting_payment')
-                                                <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-credit-card me-1"></i> Pay
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fa fa-credit-card me-1"></i> Pay
+                                                    </a>
+                                                    <button class="btn btn-sm btn-warning cancel-appointment" 
+                                                            data-appointment-id="{{ $appointment->id }}"
+                                                            data-toggle="modal" 
+                                                            data-target="#cancelAppointmentModal">
+                                                        <i class="fa fa-times me-1"></i> Cancel
+                                                    </button>
+                                                </div>
+                                            @elseif($appointment->status === 'cancelled')
+                                                <button class="btn btn-sm btn-danger delete-appointment" 
+                                                        data-appointment-id="{{ $appointment->id }}"
+                                                        data-toggle="modal" 
+                                                        data-target="#deleteAppointmentModal">
+                                                    <i class="fa fa-trash me-1"></i> Delete
+                                                </button>
                                             @else
                                                 —
                                             @endif
@@ -151,6 +166,70 @@
                     </div>
                 </div>
         </div>
+
+        {{-- Cancel Appointment Modal --}}
+        <div class="modal fade" id="cancelAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="cancelAppointmentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelAppointmentModalLabel">Cancel Appointment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to cancel this appointment? This action cannot be undone.</p>
+                        <div class="appointment-details">
+                            <strong>Student:</strong> <span id="cancel-patient-name"></span><br>
+                            <strong>Doctor:</strong> <span id="cancel-doctor-name"></span><br>
+                            <strong>Time:</strong> <span id="cancel-appointment-time"></span><br>
+                            <strong>Status:</strong> <span class="badge badge-warning">Awaiting Payment</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="cancelForm" method="POST" style="display: inline;">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="appointment_id" id="cancelAppointmentId">
+                            <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Keep Appointment</button>
+                            <button type="submit" class="btn btn-warning btn-sm">Cancel Appointment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Delete Appointment Modal --}}
+        <div class="modal fade" id="deleteAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="deleteAppointmentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteAppointmentModalLabel">Delete Appointment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this cancelled appointment? This action cannot be undone.</p>
+                        <div class="appointment-details">
+                            <strong>Student:</strong> <span id="delete-patient-name"></span><br>
+                            <strong>Doctor:</strong> <span id="delete-doctor-name"></span><br>
+                            <strong>Time:</strong> <span id="delete-appointment-time"></span><br>
+                            <strong>Status:</strong> <span class="badge badge-danger">Cancelled</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="deleteForm" method="POST" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="appointment_id" id="deleteAppointmentId">
+                            <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Delete Appointment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 
 @push('scripts')
@@ -163,6 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submit-btn');
     const submitBtnText = submitBtn.querySelector('span:last-child');
     const spinner = submitBtn.querySelector('.spinner-border');
+
+    // Get duration options for filtering
+    const durationOptions = durationSelect ? durationSelect.querySelectorAll('option') : [];
 
     // Function to filter duration options based on selected doctor
     function filterDurationOptions() {
@@ -331,6 +413,203 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial filter of duration options
     filterDurationOptions();
+
+    // Handle cancel appointment button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('cancel-appointment') || e.target.closest('.cancel-appointment')) {
+            e.preventDefault();
+            const button = e.target.classList.contains('cancel-appointment') ? e.target : e.target.closest('.cancel-appointment');
+            const appointmentId = button.getAttribute('data-appointment-id');
+            
+            // Find the appointment row to get details
+            const row = button.closest('tr');
+            const patientName = row.cells[1].textContent;
+            const doctorName = row.cells[2].textContent;
+            const appointmentTime = row.cells[0].textContent;
+            
+            // Populate cancel modal
+            document.getElementById('cancel-patient-name').textContent = patientName;
+            document.getElementById('cancel-doctor-name').textContent = doctorName;
+            document.getElementById('cancel-appointment-time').textContent = appointmentTime;
+            
+            // Set the cancel URL and appointment ID
+            const cancelUrl = '{{ url("/appointments") }}/' + appointmentId + '/cancel';
+            document.getElementById('cancelForm').action = cancelUrl;
+            document.getElementById('cancelAppointmentId').value = appointmentId;
+        }
+    });
+
+    // Handle cancel form submission
+    document.getElementById('cancelForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const appointmentId = document.getElementById('cancelAppointmentId').value;
+
+        // Submit the form
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
+
+            // Try to parse as JSON, but handle non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                // If not JSON, treat as success (appointment was cancelled)
+                return { success: true, message: 'Appointment cancelled successfully' };
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                // Force close modal first
+                $('#cancelAppointmentModal').modal('hide');
+                // Small delay to ensure modal is closed
+                setTimeout(() => {
+                    showAlert('Appointment cancelled successfully!', 'warning');
+                    // Refresh the page to show updated data
+                    location.reload();
+                }, 300);
+            } else {
+                showAlert(data.message || 'Failed to cancel appointment.', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // If we get here, check if the appointment status was actually updated
+            const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`);
+            if (row && row.closest('tr').cells[6].textContent.includes('Cancelled')) {
+                // Status was updated, cancellation worked
+                $('#cancelAppointmentModal').modal('hide');
+                setTimeout(() => {
+                    showAlert('Appointment cancelled successfully!', 'warning');
+                }, 300);
+            } else {
+                // There was a real error
+                showAlert('An error occurred while cancelling the appointment.', 'danger');
+            }
+        });
+    });
+
+    // Handle delete appointment button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-appointment') || e.target.closest('.delete-appointment')) {
+            e.preventDefault();
+            const button = e.target.classList.contains('delete-appointment') ? e.target : e.target.closest('.delete-appointment');
+            const appointmentId = button.getAttribute('data-appointment-id');
+            
+            // Find the appointment row to get details
+            const row = button.closest('tr');
+            const patientName = row.cells[1].textContent;
+            const doctorName = row.cells[2].textContent;
+            const appointmentTime = row.cells[0].textContent;
+            
+            // Populate delete modal
+            document.getElementById('delete-patient-name').textContent = patientName;
+            document.getElementById('delete-doctor-name').textContent = doctorName;
+            document.getElementById('delete-appointment-time').textContent = appointmentTime;
+            
+            // Set the delete URL and appointment ID
+            const deleteUrl = '{{ url("/appointments") }}/' + appointmentId;
+            document.getElementById('deleteForm').action = deleteUrl;
+            document.getElementById('deleteAppointmentId').value = appointmentId;
+            
+            console.log('Delete button clicked for appointment:', appointmentId);
+            console.log('Delete URL set to:', deleteUrl);
+        }
+    });
+
+    // Handle delete form submission
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const appointmentId = document.getElementById('deleteAppointmentId').value;
+
+        console.log('Delete form submitted for appointment:', appointmentId);
+        console.log('Form action:', form.action);
+
+        // Submit the form
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
+
+            // Try to parse as JSON, but handle non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                // If not JSON, treat as success (appointment was deleted)
+                return { success: true, message: 'Appointment deleted successfully' };
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                // Force close modal first
+                $('#deleteAppointmentModal').modal('hide');
+                // Small delay to ensure modal is closed
+                setTimeout(() => {
+                    showAlert('Appointment deleted successfully!', 'success');
+                    // Remove the deleted appointment row from the table
+                    const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`).closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
+                }, 300);
+            } else {
+                showAlert(data.message || 'Failed to delete appointment.', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // If we get here, check if the appointment was actually deleted
+            // by trying to find it in the DOM
+            const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`);
+            if (!row) {
+                // Row is gone, appointment was deleted
+                $('#deleteAppointmentModal').modal('hide');
+                setTimeout(() => {
+                    showAlert('Appointment deleted successfully!', 'success');
+                }, 300);
+            } else {
+                // Row still exists, there was a real error
+                showAlert('An error occurred while deleting the appointment.', 'danger');
+            }
+        });
+    });
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        `;
+        document.querySelector('.content-wrapper .row .col-12').prepend(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000); // Auto remove after 5 seconds
+    }
 });
 </script>
 @endpush

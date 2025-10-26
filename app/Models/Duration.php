@@ -56,7 +56,9 @@ class Duration extends Model
     {
         if ($doctor && is_object($doctor)) {
             // If doctor is provided, use specialization to determine price
-            $isSpecialist = !str_contains(strtolower($doctor->specialization ?? ''), 'general practitioner');
+            $specialization = strtolower($doctor->specialization ?? '');
+            $isSpecialist = str_contains($specialization, 'specialist') ||
+                           (str_contains($specialization, 'surgeon') && !str_contains($specialization, 'general'));
             return $isSpecialist ? $this->specialist_price : $this->general_price;
         }
 

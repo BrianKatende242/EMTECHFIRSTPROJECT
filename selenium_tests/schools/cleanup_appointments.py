@@ -1,25 +1,60 @@
 #!/usr/bin/env python3
 """
-Cleanup existing appointments test module.
-This module cleans up existing appointments by cancelling unpaid ones and deleting cancelled ones from the appointments page.
+Cleanup existing appointments test module for schools.
+This module cleans up existing appointments by cancelling unpaid ones and deleting cancelled ones from the school appointments page.
 """
 
-from selenium.webdriver.common.by import By
-from shared.base_test import BaseTest
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
 
-class CleanupAppointmentsTest(BaseTest):
-    """Test class for cleaning up existing appointments"""
+from selenium.webdriver.common.by import By
+from base_test import BaseTest
+
+class SchoolCleanupAppointmentsTest(BaseTest):
+    """Test class for cleaning up existing appointments from school dashboard"""
+
+    def navigate_to_school_dashboard(self, school_id=1):
+        """Navigate to school dashboard"""
+        url = f"http://localhost:8000/school-dashboard/{school_id}"
+        self.driver.get(url)
+        self.wait(2)
+        print(f"Navigated to school dashboard: {url}")
+
+    def check_school_dashboard_loaded(self):
+        """Check if school dashboard loaded successfully"""
+        try:
+            # Look for school dashboard elements
+            students_card = self.driver.find_element(By.XPATH, "//div[contains(text(), 'Students')]")
+            appointments_card = self.driver.find_element(By.XPATH, "//div[contains(text(), 'Appointments')]")
+            print("✓ School dashboard loaded successfully")
+            return True
+        except Exception as e:
+            print(f"✗ School dashboard elements not found: {str(e)}")
+            return False
+
+    def navigate_to_school_appointments(self):
+        """Navigate to school appointments page"""
+        appointments_link = self.driver.find_element(By.LINK_TEXT, "Appointments")
+        appointments_link.click()
+        self.wait(5)
+        print("Navigated to school appointments page")
 
     def run_test(self):
-        """Run the cleanup test"""
-        print("Starting cleanup of existing appointments...")
+        """Run the school cleanup test"""
+        print("Starting cleanup of existing school appointments...")
 
         try:
-            # Navigate to health facility dashboard first
-            self.navigate_to_health_facility_dashboard()
-            
+            # Navigate to school dashboard first
+            self.navigate_to_school_dashboard()
+
+            # Check if dashboard loaded
+            if not self.check_school_dashboard_loaded():
+                print("✗ School dashboard did not load properly")
+                return False
+
             # Go to appointments page where cancelled appointments can be deleted
-            self.navigate_to_appointments()
+            self.navigate_to_school_appointments()
 
             # Find all appointment rows
             appointment_rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody tr")
@@ -31,7 +66,7 @@ class CleanupAppointmentsTest(BaseTest):
                 # Re-fetch appointment rows after each operation
                 appointment_rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody tr")
                 found_action = False
-                
+
                 for row in appointment_rows:
                     try:
                         # Check appointment status
@@ -65,7 +100,7 @@ class CleanupAppointmentsTest(BaseTest):
                                     delete_form = self.driver.find_element(By.ID, "deleteForm")
                                     delete_form.submit()
                                     self.wait(2)  # Wait for form submission
-                                    
+
                                     # Force close modal if it's still open
                                     try:
                                         modal = self.driver.find_element(By.ID, "deleteAppointmentModal")
@@ -75,7 +110,7 @@ class CleanupAppointmentsTest(BaseTest):
                                             self.wait(1)
                                     except:
                                         pass
-                                    
+
                                     deleted_count += 1
                                     print(f"Deleted cancelled appointment #{deleted_count}")
                                     found_action = True
@@ -85,20 +120,20 @@ class CleanupAppointmentsTest(BaseTest):
                                 continue
                     except Exception as e:
                         continue
-                
+
                 if not found_action:
                     break  # No more appointments to process
 
-            print(f"Cleaned up {cancelled_count} unpaid appointments and {deleted_count} cancelled appointments")
+            print(f"Cleaned up {cancelled_count} unpaid appointments and {deleted_count} cancelled appointments from school")
             return True
 
         except Exception as e:
-            print(f"Warning: Could not clean up existing appointments: {str(e)}")
+            print(f"Warning: Could not clean up existing school appointments: {str(e)}")
             return False
 
-def run_cleanup_test():
-    """Standalone function to run the cleanup test"""
-    test = CleanupAppointmentsTest()
+def run_school_cleanup_test():
+    """Standalone function to run the school cleanup test"""
+    test = SchoolCleanupAppointmentsTest()
     try:
         test.setup_driver()
         return test.run_test()
@@ -106,4 +141,4 @@ def run_cleanup_test():
         test.teardown_driver()
 
 if __name__ == "__main__":
-    run_cleanup_test()
+    run_school_cleanup_test()

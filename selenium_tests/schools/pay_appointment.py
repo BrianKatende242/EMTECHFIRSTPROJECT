@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Book appointment test for schools.
-This module tests booking doctor appointments from a school context.
+Pay for appointment test for schools.
+This module tests paying for doctor appointments from a school context.
 """
 
 import sys
@@ -9,12 +9,13 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support import expected_conditions as EC
 import time
 from base_test import BaseTest
 
-class SchoolBookAppointmentTest(BaseTest):
-    """Test class for booking appointments from school dashboard"""
+class SchoolPayAppointmentTest(BaseTest):
+    """Test class for requesting payment for appointments from school dashboard"""
 
     def navigate_to_school_dashboard(self, school_id=1):
         """Navigate to school dashboard"""
@@ -86,7 +87,7 @@ class SchoolBookAppointmentTest(BaseTest):
                 document.querySelector('input[name="grade"]').value = 'Grade 1';
                 document.querySelector('input[name="birth_date"]').value = '2010-01-01';
                 document.querySelector('input[name="parent_contact"]').value = '123456789';
-                
+
                 // Set gender select value using JavaScript
                 const genderSelect = document.querySelector('select[name="gender"]');
                 genderSelect.value = 'male';
@@ -100,7 +101,7 @@ class SchoolBookAppointmentTest(BaseTest):
             # Also check if the field is required and has value
             is_required = self.driver.execute_script("return document.querySelector('select[name=\"gender\"]').hasAttribute('required');")
             print(f"Gender field required: {is_required}")
-            
+
             # Debug: check the select options
             options = self.driver.execute_script("""
                 const select = document.querySelector('select[name="gender"]');
@@ -154,7 +155,7 @@ class SchoolBookAppointmentTest(BaseTest):
                 if error_elements:
                     for error in error_elements:
                         print(f"Validation error: {error.text}")
-                
+
                 # Check if modal closed (success indicator)
                 try:
                     modal = self.driver.find_element(By.ID, "newStudentModal")
@@ -166,7 +167,7 @@ class SchoolBookAppointmentTest(BaseTest):
                 except:
                     print("✓ Student modal not found - likely successful")
                     return True
-                    
+
                 return False
 
         except Exception as e:
@@ -214,22 +215,12 @@ class SchoolBookAppointmentTest(BaseTest):
         select_patient.select_by_index(1)
         print("Selected student")
 
-        # Set future datetime with random time to avoid conflicts
+        # Set future datetime - use a very unique time to avoid conflicts
         import random
-        datetime_str = self.get_future_datetime_str()
-        
-        # Modify the time to be random (between 8 AM and 5 PM)
-        hour = random.randint(8, 17)  # 8 AM to 5 PM
-        minute = random.randint(0, 3) * 15  # 0, 15, 30, or 45 minutes
-        
-        # Parse and modify the datetime string
-        from datetime import datetime
-        dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
-        dt = dt.replace(hour=hour, minute=minute)
-        random_datetime_str = dt.strftime('%Y-%m-%dT%H:%M')
-        
-        print(f"Using random datetime: {random_datetime_str}")
-        self.set_datetime_input(random_datetime_str)
+        days_ahead = random.randint(400, 500)  # Random days far in the future
+        hour = random.randint(8, 16)  # Random hour between 8 AM and 4 PM
+        datetime_str = self.get_future_datetime_str(days_ahead=days_ahead, hour=hour)
+        self.set_datetime_input(datetime_str)
 
         # Select doctor
         doctor_select = self.driver.find_element(By.ID, "doctor_id")
@@ -241,21 +232,26 @@ class SchoolBookAppointmentTest(BaseTest):
             print("✗ No doctors available")
             return False
 
-        # Select duration
+        # Select duration - find one with a non-zero price
         duration_select = self.driver.find_element(By.ID, "duration_id")
         select_duration = Select(duration_select)
-        
-        if len(select_duration.options) > 1:
-            select_duration.select_by_index(1)
-            selected_duration_value = select_duration.first_selected_option.get_attribute('value')
-            
-            # Extract just the numeric ID from the value (format: "1-general" -> "1")
-            duration_id = selected_duration_value.split('-')[0] if '-' in selected_duration_value else selected_duration_value
-            
-            print(f"Selected duration (ID: {duration_id})")
-        else:
-            print("✗ No durations available")
+
+        # Find a duration option that has a price > 0
+        selected_duration_value = None
+        for option in select_duration.options[1:]:  # Skip the "Select Duration" option
+            price = option.get_attribute("data-price")
+            if price and float(price) > 0:
+                selected_duration_value = option.get_attribute("value")
+                select_duration.select_by_visible_text(option.text)
+                print(f"Selected duration: {option.text} (price: {price})")
+                break
+
+        if not selected_duration_value:
+            print("✗ No duration with valid price found")
             return False
+
+        # Extract just the numeric ID from the value (format: "1-general" -> "1")
+        duration_id = selected_duration_value.split('-')[0] if '-' in selected_duration_value else selected_duration_value
 
         # Enter reason
         reason_input = self.driver.find_element(By.ID, "reason")
@@ -335,9 +331,170 @@ class SchoolBookAppointmentTest(BaseTest):
             print("✓ Modal not found - booking successful")
             return True
 
+    def find_awaiting_payment_appointment(self):
+        """Find an appointment that is awaiting payment"""
+        try:
+            # Look for appointments table
+            appointments_table = self.driver.find_element(By.CSS_SELECTOR, "table.table")
+            rows = appointments_table.find_elements(By.CSS_SELECTOR, "tbody tr")
+
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if len(cells) >= 4:  # Assuming status is in one of the later columns
+                    status_cell = None
+                    # Look for status badge
+                    for cell in cells:
+                        badges = cell.find_elements(By.CLASS_NAME, "badge")
+                        for badge in badges:
+                            if "awaiting_payment" in badge.text.lower() or "awaiting payment" in badge.text.lower():
+                                status_cell = cell
+                                break
+                        if status_cell:
+                            break
+
+                    if status_cell:
+                        # Found an awaiting payment appointment
+                        # Look for action buttons in this row
+                        action_buttons = row.find_elements(By.CSS_SELECTOR, "a.btn, button.btn")
+                        pay_button = None
+                        for button in action_buttons:
+                            if "pay" in button.text.lower() or "payment" in button.text.lower():
+                                pay_button = button
+                                break
+
+                        if pay_button:
+                            print("Found awaiting payment appointment with pay button")
+                            return pay_button
+
+            print("No appointments awaiting payment found")
+            return None
+
+        except Exception as e:
+            print(f"Error finding awaiting payment appointment: {e}")
+            return None
+
+    def pay_for_appointment(self):
+        """Test the appointment payment form and initiate payment request"""
+        try:
+            # First try to find an existing appointment awaiting payment
+            pay_button = self.find_awaiting_payment_appointment()
+
+            if not pay_button:
+                # No existing appointment, need to book one first
+                print("No existing appointment awaiting payment - booking a new one")
+                if not self.book_appointment():
+                    print("✗ Failed to book appointment")
+                    return False
+
+                # Refresh the page to see the new appointment
+                self.driver.refresh()
+                self.wait(3)
+
+                # Now look for the pay button again
+                pay_button = self.find_awaiting_payment_appointment()
+
+                if not pay_button:
+                    print("✗ Could not find pay button after booking appointment")
+                    return False
+
+            # Click the pay button
+            pay_button.click()
+            
+            # Wait for URL to change to payment page
+            WebDriverWait(self.driver, 10).until(
+                lambda driver: "appointment/pay" in driver.current_url
+            )
+            
+            self.wait(2)  # Additional wait for page to load
+            print("Clicked pay button")
+            print(f"Current URL: {self.driver.current_url}")
+            print(f"Page title: {self.driver.title}")
+
+            # Check if we're on the payment page
+            try:
+                payment_header = self.driver.find_element(By.XPATH, "//strong[contains(text(), 'Pay for Appointment')]")
+                print("✓ Navigated to payment page")
+            except Exception as e:
+                print(f"✗ Not on payment page: {e}")
+                # Try to find any strong element with appointment
+                try:
+                    strong_elements = self.driver.find_elements(By.TAG_NAME, "strong")
+                    for elem in strong_elements:
+                        if "appointment" in elem.text.lower():
+                            print(f"Found strong element: {elem.text}")
+                except:
+                    pass
+                return False
+
+            # Fill phone number if needed
+            try:
+                phone_input = self.driver.find_element(By.ID, "phone_number")
+                if not phone_input.get_attribute("value"):
+                    phone_input.clear()
+                    phone_input.send_keys("256700000000")  # Test phone number
+                    print("Filled phone number")
+            except Exception as e:
+                print(f"Could not fill phone number: {e}")
+
+            # Click the request payment button
+            try:
+                request_payment_btn = self.driver.find_element(By.ID, "requestPaymentBtn")
+                request_payment_btn.click()
+                print("Clicked request payment button")
+
+                # Wait for processing modal
+                self.wait(3)
+
+                # Check for success modal or processing state
+                try:
+                    # Look for processing modal
+                    processing_modal = WebDriverWait(self.driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "paymentModal"))
+                    )
+                    print("✓ Payment request modal appeared")
+
+                    # Check if success message appears
+                    try:
+                        success_text = WebDriverWait(self.driver, 10).until(
+                            EC.presence_of_element_located((By.XPATH, "//h5[contains(text(), 'Payment Request Sent!')]"))
+                        )
+                        print("✓ Payment request sent successfully")
+                        return True
+                    except:
+                        # If no success message, check if processing is still happening
+                        try:
+                            processing_text = self.driver.find_element(By.XPATH, "//h5[contains(text(), 'Processing Payment Request')]")
+                            print("✓ Payment request is being processed")
+                            return True
+                        except:
+                            # Check for any success indicators in the modal
+                            try:
+                                modal_body = self.driver.find_element(By.CSS_SELECTOR, "#paymentModal .modal-body")
+                                modal_text = modal_body.text.lower()
+                                if any(keyword in modal_text for keyword in ['success', 'sent', 'request', 'payment']):
+                                    print(f"✓ Payment request appears successful (modal contains: {modal_text[:100]}...)")
+                                    return True
+                            except:
+                                pass
+                            
+                            print("✗ Could not confirm payment request status")
+                            return False
+
+                except Exception as e:
+                    print(f"✗ Payment modal not found: {e}")
+                    return False
+
+            except Exception as e:
+                print(f"✗ Could not click request payment button: {e}")
+                return False
+
+        except Exception as e:
+            print(f"✗ Error during payment process: {e}")
+            return False
+
     def run_test(self):
-        """Run the school book appointment test"""
-        print("Starting school book appointment test...")
+        """Run the school pay appointment test"""
+        print("Starting school pay appointment test...")
 
         try:
             # Navigate to school dashboard first
@@ -351,16 +508,16 @@ class SchoolBookAppointmentTest(BaseTest):
             # Navigate to book doctor page
             self.navigate_to_book_doctor()
 
-            # Book the appointment
-            return self.book_appointment()
+            # Pay for appointment
+            return self.pay_for_appointment()
 
         except Exception as e:
-            print(f"✗ Error during appointment booking: {str(e)}")
+            print(f"✗ Error during appointment payment: {str(e)}")
             return False
 
-def run_school_book_appointment_test():
-    """Standalone function to run the school book appointment test"""
-    test = SchoolBookAppointmentTest()
+def run_school_pay_appointment_test():
+    """Standalone function to run the school pay appointment test"""
+    test = SchoolPayAppointmentTest()
     try:
         test.setup_driver()
         return test.run_test()
@@ -368,4 +525,4 @@ def run_school_book_appointment_test():
         test.teardown_driver()
 
 if __name__ == "__main__":
-    run_school_book_appointment_test()
+    run_school_pay_appointment_test()

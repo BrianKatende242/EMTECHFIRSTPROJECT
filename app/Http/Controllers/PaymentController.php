@@ -383,29 +383,7 @@ class PaymentController extends Controller
         return redirect()->back()->with('success', 'Payment confirmed and appointment marked as confirmed.');
     }
 
-    // Dummy payment confirmation for testing (bypasses actual payment)
-    public function confirmPaymentDummy(Request $request, Appointment $appointment)
-    {
-        // Only allow confirmation if appointment is awaiting payment
-        if ($appointment->status !== 'awaiting_payment') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Appointment is not awaiting payment confirmation.'
-            ], 400);
-        }
 
-        // Change status to confirmed
-        $appointment->status = 'confirmed';
-        $appointment->save();
-
-        // Send email notification to doctor
-        $this->sendAppointmentConfirmationEmail($appointment);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment confirmed successfully. Doctor has been notified.'
-        ]);
-    }
 
     // Send appointment confirmation email to doctor
     protected function sendAppointmentConfirmationEmail(Appointment $appointment)
