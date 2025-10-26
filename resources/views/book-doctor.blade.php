@@ -83,7 +83,11 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <form action="{{ route('appointments.store') }}" method="POST">
+                            <!-- Error messages container -->
+                            <div id="appointment-errors" class="alert alert-danger" style="display: none;"></div>
+                            <div id="appointment-success" class="alert alert-success" style="display: none;"></div>
+                            
+                            <form id="appointment-form" action="{{ route('appointments.store') }}" method="POST">
     @csrf
     <input type="hidden" name="school_id" value="{{ $school->id }}">
 
@@ -95,17 +99,13 @@
             <option value="{{ $patient->id }}">{{ $patient->name }}</option>
             @endforeach
         </select>
-        @error('patient_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
+        <div class="invalid-feedback" id="patient_id-error"></div>
     </div>
 
     <div class="mb-3">
         <label for="appointment_time" class="form-label">Appointment Time</label>
         <input id="appointment_time" type="datetime-local" class="form-control" name="appointment_time" required>
-        @error('appointment_time')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
+        <div class="invalid-feedback" id="appointment_time-error"></div>
     </div>
 
     <div class="mb-3">
@@ -121,9 +121,7 @@
                 </option>
             @endforeach
         </select>
-        @error('duration_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
+        <div class="invalid-feedback" id="duration_id-error"></div>
     </div>
 
     <div class="mb-3">
@@ -134,20 +132,19 @@
                 <option value="{{ $doc->id }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
             @endforeach
         </select>
-        @error('doctor_id')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
+        <div class="invalid-feedback" id="doctor_id-error"></div>
     </div>
 
     <div class="mb-3">
         <label for="reason" class="form-label">Reason</label>
         <textarea id="reason" class="form-control" name="reason" required></textarea>
-        @error('reason')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
+        <div class="invalid-feedback" id="reason-error"></div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Book Appointment</button>
+    <button type="submit" class="btn btn-primary" id="submit-btn">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+        Book Appointment
+    </button>
                         </form>
 
                         </div>
@@ -162,6 +159,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const appointmentTimeInput = document.getElementById('appointment_time');
     const doctorSelect = document.getElementById('doctor_id');
     const durationSelect = document.getElementById('duration_id');
+    const appointmentForm = document.getElementById('appointment-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitBtnText = submitBtn.querySelector('span:last-child');
+    const spinner = submitBtn.querySelector('.spinner-border');
 
     // Function to filter duration options based on selected doctor
     function filterDurationOptions() {
@@ -191,39 +192,142 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Filter duration options when doctor is selected
-    doctorSelect.addEventListener('change', filterDurationOptions);
+    // Function to show errors
+    function showErrors(errors) {
+        // Clear previous errors
+        document.querySelectorAll('.invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.form-control').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
 
-    // Handle form submission to extract duration_id and type
-    const appointmentForm = document.querySelector('form[action*="appointments.store"]');
-    if (appointmentForm) {
-        appointmentForm.addEventListener('submit', function(e) {
-            const durationValue = durationSelect.value;
-            if (durationValue) {
-                const selectedOption = durationSelect.querySelector(`option[value="${durationValue}"]`);
-                if (selectedOption) {
-                    const durationId = selectedOption.getAttribute('data-duration-id');
-                    const type = selectedOption.getAttribute('data-type');
+        // Hide success message
+        document.getElementById('appointment-success').style.display = 'none';
 
-                    // Create hidden inputs for duration_id and consultation_type
-                    const durationIdInput = document.createElement('input');
-                    durationIdInput.type = 'hidden';
-                    durationIdInput.name = 'duration_id';
-                    durationIdInput.value = durationId;
-                    appointmentForm.appendChild(durationIdInput);
+        // Show error message
+        const errorContainer = document.getElementById('appointment-errors');
+        if (typeof errors === 'string') {
+            errorContainer.textContent = errors;
+            errorContainer.style.display = 'block';
+        } else if (typeof errors === 'object') {
+            let errorMessages = [];
+            for (const [field, messages] of Object.entries(errors)) {
+                if (Array.isArray(messages)) {
+                    messages.forEach(message => errorMessages.push(message));
+                } else {
+                    errorMessages.push(messages);
+                }
 
-                    const typeInput = document.createElement('input');
-                    typeInput.type = 'hidden';
-                    typeInput.name = 'consultation_type';
-                    typeInput.value = type;
-                    appointmentForm.appendChild(typeInput);
-
-                    // Update the original select to have the correct value
-                    durationSelect.value = durationId;
+                // Show field-specific errors
+                const errorElement = document.getElementById(field + '-error');
+                if (errorElement) {
+                    errorElement.textContent = Array.isArray(messages) ? messages[0] : messages;
+                    errorElement.style.display = 'block';
+                    const inputElement = document.getElementById(field);
+                    if (inputElement) {
+                        inputElement.classList.add('is-invalid');
+                    }
                 }
             }
-        });
+
+            if (errorMessages.length > 0) {
+                errorContainer.innerHTML = errorMessages.join('<br>');
+                errorContainer.style.display = 'block';
+            }
+        }
     }
+
+    // Function to show success
+    function showSuccess(message) {
+        // Clear errors
+        document.querySelectorAll('.invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.form-control').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+        document.getElementById('appointment-errors').style.display = 'none';
+
+        // Show success message
+        const successContainer = document.getElementById('appointment-success');
+        successContainer.textContent = message;
+        successContainer.style.display = 'block';
+
+        // Reset form after 2 seconds and close modal
+        setTimeout(() => {
+            appointmentForm.reset();
+            $('#newAppointmentModal').modal('hide');
+            successContainer.style.display = 'none';
+            // Reload page to show new appointment
+            location.reload();
+        }, 2000);
+    }
+
+    // Function to set loading state
+    function setLoading(loading) {
+        submitBtn.disabled = loading;
+        spinner.style.display = loading ? 'inline-block' : 'none';
+        submitBtnText.textContent = loading ? 'Booking...' : 'Book Appointment';
+    }
+
+    // Handle form submission via AJAX
+    appointmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Clear previous messages
+        document.getElementById('appointment-errors').style.display = 'none';
+        document.getElementById('appointment-success').style.display = 'none';
+
+        // Prepare form data
+        const formData = new FormData(appointmentForm);
+
+        // Handle duration selection
+        const durationValue = durationSelect.value;
+        if (durationValue) {
+            const selectedOption = durationSelect.querySelector(`option[value="${durationValue}"]`);
+            if (selectedOption) {
+                const durationId = selectedOption.getAttribute('data-duration-id');
+                const type = selectedOption.getAttribute('data-type');
+
+                // Update form data with correct values
+                formData.set('duration_id', durationId);
+                formData.append('consultation_type', type);
+            }
+        }
+
+        setLoading(true);
+
+        // Submit via AJAX
+        fetch(appointmentForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            setLoading(false);
+
+            if (data.success) {
+                showSuccess(data.message || 'Appointment booked successfully!');
+            } else {
+                showErrors(data.errors || data.message || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            setLoading(false);
+            console.error('AJAX Error:', error);
+            showErrors('Network error occurred. Please try again.');
+        });
+    });
+
+    // Filter duration options when doctor is selected
+    doctorSelect.addEventListener('change', filterDurationOptions);
 
     // Initial filter of duration options
     filterDurationOptions();

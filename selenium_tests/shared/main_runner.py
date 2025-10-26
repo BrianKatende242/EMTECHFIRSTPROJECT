@@ -18,6 +18,7 @@ from health_facilities.test_cancellation import run_cancellation_test
 from health_facilities.test_conflict_validation import run_conflict_validation_test
 from health_facilities.test_cancelled_no_conflict import run_cancelled_no_conflict_test
 from admin.test_admin_login import run_admin_login_test
+from schools.book_appointment import run_school_book_appointment_test
 
 def run_all_tests():
     """Run all tests in sequence"""
@@ -27,6 +28,7 @@ def run_all_tests():
         ("Cleanup Appointments", run_cleanup_test),
         ("Dashboard Check", run_dashboard_check),
         ("Book Appointment", run_book_appointment_test),
+        ("School Book Appointment", run_school_book_appointment_test),
         ("Cancellation Test", run_cancellation_test),
         ("Conflict Validation", run_conflict_validation_test),
         ("Cancelled No Conflict", run_cancelled_no_conflict_test),
@@ -74,6 +76,7 @@ def run_single_test(test_name):
         "cleanup": ("Cleanup Appointments", run_cleanup_test),
         "dashboard": ("Dashboard Check", run_dashboard_check),
         "book": ("Book Appointment", run_book_appointment_test),
+        "school-book": ("School Book Appointment", run_school_book_appointment_test),
         "cancel": ("Cancellation Test", run_cancellation_test),
         "conflict": ("Conflict Validation", run_conflict_validation_test),
         "no-conflict": ("Cancelled No Conflict", run_cancelled_no_conflict_test),
@@ -106,7 +109,7 @@ def main():
     parser.add_argument(
         "test",
         nargs="?",
-        choices=["all", "cleanup", "dashboard", "book", "cancel", "conflict", "no-conflict", "admin-login"],
+        choices=["all", "cleanup", "dashboard", "book", "school-book", "cancel", "conflict", "no-conflict", "admin-login"],
         help="Test to run (default: all)"
     )
     parser.add_argument(
@@ -123,6 +126,7 @@ def main():
         print("  cleanup: Cleanup existing appointments")
         print("  dashboard: Check dashboard loading")
         print("  book: Book a new appointment")
+        print("  school-book: Book appointment from school context")
         print("  cancel: Test appointment cancellation")
         print("  conflict: Test time conflict validation")
         print("  no-conflict: Test cancelled appointments don't create conflicts")

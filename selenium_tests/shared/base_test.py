@@ -96,10 +96,30 @@ class BaseTest:
                     return False
             except:
                 try:
+                    # Check for Laravel flash messages
+                    flash_success = self.driver.find_element(By.CSS_SELECTOR, ".alert-success, [class*='success'], [role='alert']")
+                    if flash_success.is_displayed():
+                        print(f"✓ Flash success message: {flash_success.text}")
+                        return True
+                except:
+                    pass
+                
+                try:
                     error_alert = self.driver.find_element(By.CLASS_NAME, "alert-danger")
                     print(f"✗ Error alert: {error_alert.text}")
                     return False
                 except:
+                    try:
+                        # Check for validation errors
+                        validation_errors = self.driver.find_elements(By.CLASS_NAME, "invalid-feedback")
+                        if validation_errors:
+                            for error in validation_errors:
+                                if error.is_displayed() and error.text.strip():
+                                    print(f"✗ Validation error: {error.text}")
+                            return False
+                    except:
+                        pass
+                    
                     print("No alerts found")
                     return None
 
