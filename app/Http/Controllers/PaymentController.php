@@ -415,6 +415,33 @@ class PaymentController extends Controller
     }
 
     /**
+     * Confirm dummy payment for testing purposes
+     * This method simulates payment confirmation for testing the workflow
+     */
+    public function confirmDummyPayment(Appointment $appointment)
+    {
+        // Check if appointment is awaiting payment
+        if ($appointment->status !== 'awaiting_payment') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Appointment is not awaiting payment confirmation.'
+            ], 400);
+        }
+
+        // Change status to confirmed
+        $appointment->status = 'confirmed';
+        $appointment->save();
+
+        // Send confirmation email to doctor
+        $this->sendAppointmentConfirmationEmail($appointment);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment confirmed successfully. Doctor has been notified.'
+        ]);
+    }
+
+    /**
      * Handle successful collection webhook
      */
     private function handleSuccessfulCollection($transaction)

@@ -567,6 +567,9 @@ Route::post('/appointment/checkout', [PaymentController::class, 'createAppointme
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
 
+// Dummy payment confirmation route for testing
+Route::post('/payment/appointment/confirm-dummy/{appointment}', [PaymentController::class, 'confirmDummyPayment'])->name('payment.appointment.confirm-dummy');
+
 // MarzPay API Routes (public webhook endpoint)
 Route::post('/marzpay/webhook', [PaymentController::class, 'handleCallback'])->name('marzpay.webhook');
 
