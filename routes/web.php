@@ -406,7 +406,7 @@ Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeet
     ->name('doctor.update-meeting-link');
 
 // Web route to send meeting link to an email (school/health facility)
-Route::post('/doctor/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
+Route::post('/doctor/send-link/{id}', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
     ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)

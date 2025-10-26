@@ -50,13 +50,14 @@
         <div class="modal fade" id="sendLinkModal" tabindex="-1" aria-labelledby="sendLinkModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="POST" action="{{ route('doctor.send-link', ['doctor' => $doctor->id]) }}">
+                    <form method="POST" action="{{ route('doctor.send-link', ['id' => $doctor->id]) }}" id="sendLinkForm">
                         @csrf
                         <div class="modal-header">
                             <h5 class="modal-title" id="sendLinkModalLabel">Send Meeting Link</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+                            <div id="sendLinkAlert" class="mb-3"></div>
                             <div class="mb-3">
                                 <label for="recipient_email" class="form-label">Recipient email</label>
                                 <input type="email" class="form-control" id="recipient_email" name="recipient_email" required placeholder="example@school.edu">
@@ -68,7 +69,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Send Link</button>
+                            <button type="submit" class="btn btn-primary" id="sendLinkBtn">Send Link</button>
                         </div>
                     </form>
                 </div>
@@ -119,11 +120,21 @@ document.addEventListener('DOMContentLoaded', function(){
   const copyBtn = document.getElementById('copyLinkBtn');
   const input = document.getElementById('meetingLinkInput');
   const alertBox = document.getElementById('ml-alert');
+  const sendLinkForm = document.getElementById('sendLinkForm');
+  const sendLinkAlert = document.getElementById('sendLinkAlert');
+  const sendLinkBtn = document.getElementById('sendLinkBtn');
+  
   function showInlineAlert(msg, type='success'){
     if(!alertBox) return;
     alertBox.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
     setTimeout(()=>{ const a = alertBox.querySelector('.alert'); if(a){ a.classList.remove('show'); a.addEventListener('transitionend', ()=> alertBox.innerHTML = ''); } }, 2500);
   }
+  
+  function showModalAlert(msg, type='success'){
+    if(!sendLinkAlert) return;
+    sendLinkAlert.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+  }
+  
   if(copyBtn && input){
     copyBtn.addEventListener('click', function(){
       const text = input.value;
@@ -133,6 +144,60 @@ document.addEventListener('DOMContentLoaded', function(){
         const el = document.createElement('textarea');
         el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
         showInlineAlert('Meeting link copied');
+      });
+    });
+  }
+  
+  if(sendLinkForm){
+    sendLinkForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      
+      // Clear previous alerts
+      if(sendLinkAlert) sendLinkAlert.innerHTML = '';
+      
+      // Disable submit button
+      if(sendLinkBtn) {
+        sendLinkBtn.disabled = true;
+        sendLinkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+      }
+      
+      // Get form data
+      const formData = new FormData(this);
+      
+      // Send AJAX request
+      fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          showModalAlert(data.message || 'Meeting link sent successfully!', 'success');
+          // Close modal after 2 seconds
+          setTimeout(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('sendLinkModal'));
+            if(modal) modal.hide();
+            // Clear form
+            sendLinkForm.reset();
+          }, 2000);
+        } else {
+          showModalAlert(data.message || 'Failed to send meeting link.', 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showModalAlert('An error occurred while sending the meeting link.', 'danger');
+      })
+      .finally(() => {
+        // Re-enable submit button
+        if(sendLinkBtn) {
+          sendLinkBtn.disabled = false;
+          sendLinkBtn.innerHTML = 'Send Link';
+        }
       });
     });
   }

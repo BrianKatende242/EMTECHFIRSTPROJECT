@@ -18,6 +18,7 @@ from health_facilities.test_cancellation import run_cancellation_test
 from health_facilities.test_conflict_validation import run_conflict_validation_test
 from health_facilities.test_cancelled_no_conflict import run_cancelled_no_conflict_test
 from admin.test_admin_login import run_admin_login_test
+from doctors.test_doctor_meeting_link import run_doctor_meeting_link_test
 from schools.book_appointment import run_school_book_appointment_test
 from schools.pay_appointment import run_school_pay_appointment_test
 from schools.cleanup_appointments import run_school_cleanup_test
@@ -37,6 +38,7 @@ def run_all_tests():
         ("Conflict Validation", run_conflict_validation_test),
         ("Cancelled No Conflict", run_cancelled_no_conflict_test),
         ("Admin Login Test", run_admin_login_test),
+        ("Doctor Meeting Link Test", run_doctor_meeting_link_test),
     ]
 
     results = []
@@ -87,6 +89,7 @@ def run_single_test(test_name):
         "conflict": ("Conflict Validation", run_conflict_validation_test),
         "no-conflict": ("Cancelled No Conflict", run_cancelled_no_conflict_test),
         "admin-login": ("Admin Login Test", run_admin_login_test),
+        "doctor-meeting-link": ("Doctor Meeting Link Test", run_doctor_meeting_link_test),
     }
 
     if test_name not in test_map:
@@ -115,7 +118,7 @@ def main():
     parser.add_argument(
         "test",
         nargs="?",
-        choices=["all", "cleanup", "school-cleanup", "dashboard", "book", "school-book", "school-pay", "cancel", "conflict", "no-conflict", "admin-login"],
+        choices=["all", "cleanup", "school-cleanup", "dashboard", "book", "school-book", "school-pay", "cancel", "conflict", "no-conflict", "admin-login", "doctor-meeting-link"],
         help="Test to run (default: all)"
     )
     parser.add_argument(
@@ -139,6 +142,7 @@ def main():
         print("  conflict: Test time conflict validation")
         print("  no-conflict: Test cancelled appointments don't create conflicts")
         print("  admin-login: Test admin user login")
+        print("  doctor-meeting-link: Test doctor meeting link functionality")
         return
 
     test_to_run = args.test or "all"
