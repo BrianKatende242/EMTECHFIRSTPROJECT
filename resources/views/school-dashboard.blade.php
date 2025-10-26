@@ -1,72 +1,56 @@
 @extends('layouts.base')
 
 @section('content')
-    <div class="row g-3 g-md-4">
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-students">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Students -->
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Students</div>
+                        <h5 class="mb-0">{{ $studentsCount }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Students</div>
-                        <div class="stat-value">{{ $studentsCount }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Students progress" aria-valuenow="{{ $studentsCount }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-85"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-account-group icon-xl text-primary"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-appointments">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+
+        <!-- Appointments -->
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Appointments</div>
+                        <h5 class="mb-0">{{ $appointmentsCount }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Appointments</div>
-                        <div class="stat-value">{{ $appointmentsCount }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Appointments progress" aria-valuenow="{{ $appointmentsCount }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-75"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-calendar-clock icon-xl text-success"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-labtests">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-flask" aria-hidden="true"></i>
+
+        <!-- Lab Tests -->
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Lab Tests</div>
+                        <h5 class="mb-0">{{ $labTestsCount }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Lab Tests</div>
-                        <div class="stat-value">{{ $labTestsCount }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Lab tests progress" aria-valuenow="{{ $labTestsCount }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-50"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-flask icon-xl text-warning"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card stat-card stat-doctors">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon">
-                        <i class="fa fa-user-md" aria-hidden="true"></i>
+
+        <!-- Doctors -->
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Doctors</div>
+                        <h5 class="mb-0">{{ $doctorsCount }}</h5>
                     </div>
-                    <div class="stat-sep" aria-hidden="true"></div>
-                    <div class="flex-grow-1">
-                        <div class="stat-label">Doctors</div>
-                        <div class="stat-value">{{ $doctorsCount }}</div>
-                        <div class="progress mt-2" role="progressbar" aria-label="Doctors progress" aria-valuenow="{{ $doctorsCount }}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar w-65"></div>
-                        </div>
-                    </div>
+                    <i class="mdi mdi-doctor icon-xl text-info"></i>
                 </div>
             </div>
         </div>
@@ -163,3 +147,17 @@
         </div>
     </div>
 @endsection
+
+{{-- ======================= STYLES ======================= --}}
+<style>
+.card {
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+.card-header {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-bottom: none;
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
