@@ -59,7 +59,7 @@
     <div class="row mt-4">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-primary text-white">Weekly Activity</div>
+                <div class="card-header bg-primary text-dark">Weekly Activity</div>
                 <div class="card-body">
                     <canvas id="weeklyActivityChart" height="120"></canvas>
                 </div>
@@ -79,7 +79,7 @@
                                     borderWidth: 2,
                                     hoverBackgroundColor: '#000000',
                                     hoverBorderColor: '#593bdb',
-                                    data: [3, 5, 2, 4, 6, 1, 0] // Replace with dynamic data
+                                    data: @json($weeklyAppointments)
                                 },
                                 {
                                     label: 'Lab Tests',
@@ -88,7 +88,7 @@
                                     borderWidth: 2,
                                     hoverBackgroundColor: 'rgba(89, 59, 219, 0.85)',
                                     hoverBorderColor: '#000000',
-                                    data: [2, 3, 1, 2, 4, 0, 0] // Replace with dynamic data
+                                    data: @json($weeklyLabTests)
                                 }
                             ]
                         },

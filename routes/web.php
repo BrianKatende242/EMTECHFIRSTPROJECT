@@ -75,6 +75,30 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 use App\Http\Controllers\SchoolController;
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
+    // Get current week data (Monday to Sunday)
+    $startOfWeek = now()->startOfWeek(); // Monday
+    $endOfWeek = now()->endOfWeek(); // Sunday
+
+    // Weekly appointments data
+    $weeklyAppointments = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->appointments()
+            ->whereDate('appointment_time', $date)
+            ->count();
+        $weeklyAppointments[] = $count;
+    }
+
+    // Weekly lab tests data
+    $weeklyLabTests = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->labTests()
+            ->whereDate('created_at', $date)
+            ->count();
+        $weeklyLabTests[] = $count;
+    }
+
     return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
@@ -84,7 +108,9 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'students' => $school->students()->latest()->get(),
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'labTests' => $school->labTests()->with('patient')->latest()->get(),
-        'doctors' => Doctor::latest()->get()
+        'doctors' => Doctor::latest()->get(),
+        'weeklyAppointments' => $weeklyAppointments,
+        'weeklyLabTests' => $weeklyLabTests
     ]);
 })->name('school.dashboard');
 
