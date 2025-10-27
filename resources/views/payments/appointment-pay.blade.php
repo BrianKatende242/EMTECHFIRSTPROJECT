@@ -196,22 +196,27 @@
       .then(response => response.json())
       .then(data => {
         if(data.success){
-          // Show success message briefly before redirect
+          // Show success message with pending status
           modalTitle.textContent = 'Payment Request Sent!';
           modalBody.innerHTML = `
             <div class="text-success mb-3">
               <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
             </div>
-            <h5>Success!</h5>
-            <p class="text-muted mt-2">${data.message || 'Payment request sent successfully.'}</p>
+            <h5>Payment Request Sent!</h5>
+            <p class="text-muted mt-2">${data.message || 'Please check your phone and approve the payment request.'}</p>
+            <div class="alert alert-info mt-3">
+              <i class="fas fa-clock me-2"></i>
+              <strong>Payment Status:</strong> Waiting for confirmation...<br>
+              <small>Your appointment will be confirmed once payment is completed.</small>
+            </div>
+            <div class="mt-3 d-flex gap-2 justify-content-center">
+              <button type="button" class="btn btn-primary" id="checkStatusBtn">
+                <i class="fas fa-sync-alt me-2"></i>Check Status
+              </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
           `;
           modal.show();
-          
-          // Redirect after a short delay
-          setTimeout(() => {
-            modal.hide();
-            window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
-          }, 2000);
         } else {
           // Show error
           modalTitle.textContent = 'Payment Request Failed';
@@ -270,6 +275,108 @@
         }
       }, 1000);
     }
+
+    // Function to check payment status
+    function checkPaymentStatus() {
+      const checkBtn = document.getElementById('checkStatusBtn');
+      if (!checkBtn) return;
+
+      // Disable button and show loading
+      checkBtn.disabled = true;
+      checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+
+      fetch('{{ route("payment.appointment.status", $appointment->id) }}', {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.status) {
+          const status = data.status;
+          const modalBody = document.querySelector('#paymentModal .modal-body');
+
+          if (status.appointment_status === 'confirmed') {
+            // Payment confirmed - show success and redirect
+            modalTitle.textContent = 'Payment Confirmed!';
+            modalBody.innerHTML = `
+              <div class="text-success mb-3">
+                <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+              </div>
+              <h5>Payment Successful!</h5>
+              <p class="text-muted mt-2">Your appointment has been confirmed.</p>
+              <p class="text-primary mt-3">Redirecting...</p>
+            `;
+
+            setTimeout(() => {
+              @if($appointment->school_id)
+                window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
+              @elseif($appointment->healthFacility)
+                window.location.href = '{{ route("health-facility.book-doctor", $appointment->healthFacility->id) }}';
+              @else
+                window.location.href = '/';
+              @endif
+            }, 2000);
+          } else if (status.payment_status === 'failed') {
+            // Payment failed
+            modalTitle.textContent = 'Payment Failed';
+            modalBody.innerHTML = `
+              <div class="text-danger mb-3">
+                <i class="fas fa-times-circle" style="font-size: 3rem;"></i>
+              </div>
+              <h5>Payment Failed</h5>
+              <p class="text-muted mt-2">Your payment could not be processed. Please try again.</p>
+              <div class="mt-3">
+                <button type="button" class="btn btn-primary" onclick="window.location.reload()">Try Again</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            `;
+          } else {
+            // Still pending - update status and keep checking
+            modalTitle.textContent = 'Payment Status';
+            modalBody.innerHTML = `
+              <div class="text-info mb-3">
+                <i class="fas fa-clock" style="font-size: 3rem;"></i>
+              </div>
+              <h5>Payment Status: ${status.payment_status || 'Pending'}</h5>
+              <p class="text-muted mt-2">Still waiting for payment confirmation...</p>
+              <div class="alert alert-info mt-3">
+                <small>Please check your phone and approve the payment if you haven't already.</small>
+              </div>
+              <div class="mt-3 d-flex gap-2 justify-content-center">
+                <button type="button" class="btn btn-primary" id="checkStatusBtn">
+                  <i class="fas fa-sync-alt me-2"></i>Check Again
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            `;
+
+            // Re-attach event listener for new button
+            setTimeout(() => {
+              const newCheckBtn = document.getElementById('checkStatusBtn');
+              if (newCheckBtn) {
+                newCheckBtn.addEventListener('click', checkPaymentStatus);
+              }
+            }, 100);
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error checking status:', error);
+        // Re-enable button
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Check Status';
+      });
+    }
+
+    // Attach check status button event listener
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'checkStatusBtn') {
+        checkPaymentStatus();
+      }
+    });
   })();
 </script>
 @endpush

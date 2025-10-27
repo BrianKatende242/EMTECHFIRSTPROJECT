@@ -565,6 +565,7 @@ Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showApp
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
 
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
+Route::get('/appointment/payment-status/{appointment}', [PaymentController::class, 'checkAppointmentPaymentStatus'])->name('payment.appointment.status');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
 
 // Dummy payment confirmation route for testing
