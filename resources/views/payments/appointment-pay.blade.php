@@ -29,12 +29,12 @@
                 <dt class="col-4">Patient</dt><dd class="col-8">{{ optional($appointment->patient)->name ?? '—' }}</dd>
                 <dt class="col-4">Doctor</dt><dd class="col-8">{{ optional($appointment->doctor)->name ? 'Dr. ' . $appointment->doctor->name : '—' }}</dd>
                 <dt class="col-4">Time</dt><dd class="col-8">{{ optional($appointment->appointment_time)->format('D, M j, Y g:i A') }}</dd>
-                <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->duration ? number_format($appointment->duration->getPrice(), 0) . ' UGX' : '—' }}</dd>
+                <dt class="col-4">Amount</dt><dd class="col-8">{{ $appointment->duration ? number_format($appointment->duration->getPriceForDoctor($appointment->doctor), 0) . ' UGX' : '—' }}</dd>
                 <dt class="col-4">Status</dt><dd class="col-8"><span class="badge bg-warning text-dark">{{ $appointment->status }}</span></dd>
               </dl>
               @if($appointment->duration)
               <div class="mt-2">
-                <span class="amount-chip">UGX {{ number_format($appointment->duration->getPrice(), 0) }}</span>
+                <span class="amount-chip">UGX {{ number_format($appointment->duration->getPriceForDoctor($appointment->doctor), 0) }}</span>
               </div>
               @endif
             </div>
@@ -58,14 +58,13 @@
               <div class="invalid-feedback">Enter a valid number like 2567XXXXXXXX</div>
             </div>
 
-            <input type="hidden" name="amount" value="{{ old('amount', $appointment->duration ? $appointment->duration->getPrice() : '') }}">
+            <input type="hidden" name="amount" value="{{ old('amount', $appointment->duration ? $appointment->duration->getPriceForDoctor($appointment->doctor) : '') }}">
 
             
       <div class="d-flex justify-content-between mb-1">
                 <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
         <div>
-          <button type="button" class="btn btn-warning me-2" id="dummyPaymentBtn">Confirm Payment (Dummy)</button>
-          <button type="button" class="btn btn-brand" id="requestPaymentBtn">Request Real Payment</button>
+          <button type="button" class="btn btn-brand" id="requestPaymentBtn">Request Payment</button>
         </div>
             </div>
           </form>
@@ -79,12 +78,25 @@
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-body text-center py-5">
-        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-          <span class="visually-hidden"></span>
+      <div class="modal-body text-center py-5" id="modalContent">
+        <!-- Processing State -->
+        <div id="processingState">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden"></span>
+          </div>
+          <h5 class="modal-title" id="paymentModalLabel">Processing Payment Request</h5>
+          <p class="text-muted mt-2">Please wait while we initiate your payment...</p>
         </div>
-        <h5 class="modal-title" id="paymentModalLabel">Processing Payment</h5>
-        <p class="text-muted mt-2">Please wait while we process your request...</p>
+
+        <!-- Success State -->
+        <div id="successState" style="display: none;">
+          <div class="text-success mb-3">
+            <i class="mdi mdi-check-circle" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="modal-title text-success">Payment Request Sent!</h5>
+          <p class="text-muted mt-2">Please check your phone and approve the payment request.</p>
+          <p class="text-primary mt-3" id="countdownText">Redirecting in 10 seconds...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -145,10 +157,10 @@
     const modalBody = document.querySelector('#paymentModal .modal-body');
     
     if(!form || !btn) return;
-    
+
     btn.addEventListener('click', function(e){
       e.preventDefault();
-      
+
       // Basic validation
       const phoneInput = document.getElementById('phone_number');
       if(!phoneInput.checkValidity()){
@@ -168,10 +180,10 @@
       
       // Show modal
       modal.show();
-      
+
       // Prepare form data
       const formData = new FormData(form);
-      
+
       // Send AJAX request
       fetch(form.action, {
         method: 'POST',
@@ -183,30 +195,53 @@
       })
       .then(response => response.json())
       .then(data => {
-        modal.hide();
         if(data.success){
-          // Show success message briefly before redirect
+          // Show success message with pending status
           modalTitle.textContent = 'Payment Request Sent!';
           modalBody.innerHTML = `
             <div class="text-success mb-3">
-              <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+              <i class="mdi mdi-check-circle" style="font-size: 3rem;"></i>
             </div>
-            <h5>Success!</h5>
-            <p class="text-muted mt-2">${data.message || 'Payment request sent successfully.'}</p>
+            <h5>Payment Request Sent!</h5>
+            <p class="text-muted mt-2">${data.message || 'Please check your phone and approve the payment request.'}</p>
+            <div class="alert alert-info mt-3">
+              <i class="mdi mdi-clock-outline me-2"></i>
+              <strong>Payment Status:</strong> Waiting for confirmation...<br>
+              <small>Your appointment will be confirmed once payment is completed.</small>
+            </div>
+            <p class="text-primary mt-3" id="countdownText">Redirecting in 30 seconds...</p>
+            <div class="mt-3 d-flex gap-2 justify-content-center">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
           `;
           modal.show();
-          
-          // Redirect after a short delay
-          setTimeout(() => {
-            modal.hide();
-            window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
-          }, 2000);
+
+          // Start countdown
+          let countdown = 30;
+          const countdownText = document.getElementById('countdownText');
+
+          const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownText.textContent = `Redirecting in ${countdown} seconds...`;
+
+            if (countdown <= 0) {
+              clearInterval(countdownInterval);
+              // Redirect to appointments page
+              @if($appointment->school_id)
+                window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
+              @elseif($appointment->healthFacility)
+                window.location.href = '{{ route("health-facility.book-doctor", $appointment->healthFacility->id) }}';
+              @else
+                window.location.href = '/'; // fallback to home
+              @endif
+            }
+          }, 1000);
         } else {
           // Show error
           modalTitle.textContent = 'Payment Request Failed';
           modalBody.innerHTML = `
             <div class="text-danger mb-3">
-              <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+              <i class="mdi mdi-alert-circle" style="font-size: 3rem;"></i>
             </div>
             <h5>Error</h5>
             <p class="text-muted mt-2">${data.message || 'Payment request failed. Please try again.'}</p>
@@ -222,7 +257,7 @@
         modalTitle.textContent = 'Payment Request Failed';
         modalBody.innerHTML = `
           <div class="text-danger mb-3">
-            <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+            <i class="mdi mdi-alert-circle" style="font-size: 3rem;"></i>
           </div>
           <h5>Error</h5>
           <p class="text-muted mt-2">An error occurred. Please try again.</p>
@@ -231,109 +266,36 @@
         modal.show();
       });
     });
+
+    function showSuccessState() {
+      // Hide processing state
+      document.getElementById('processingState').style.display = 'none';
+      // Show success state
+      document.getElementById('successState').style.display = 'block';
+
+      // Start countdown
+      let countdown = 30;
+      const countdownText = document.getElementById('countdownText');
+
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownText.textContent = `Redirecting in ${countdown} seconds...`;
+
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          // Redirect to appointments page
+          @if($appointment->school_id)
+            window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
+          @elseif($appointment->healthFacility)
+            window.location.href = '{{ route("health-facility.book-doctor", $appointment->healthFacility->id) }}';
+          @else
+            window.location.href = '/'; // fallback to home
+          @endif
+        }
+      }, 1000);
+    }
   })();
 </script>
 @endpush
 
-@push('scripts')
-<script>
-function confirmPaymentDummy(appointmentId) {
-    // Show confirmation dialog first
-    if (!confirm('Are you sure you want to confirm payment for this appointment? This will notify the doctor.')) {
-        return;
-    }
 
-    // Get modal elements
-    const modal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: 'static', keyboard: false });
-    const modalTitle = document.getElementById('paymentModalLabel');
-    const modalBody = document.querySelector('#paymentModal .modal-body');
-
-    // Update modal content for dummy payment
-    modalTitle.textContent = 'Confirming Payment';
-    modalBody.innerHTML = `
-        <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden"></span>
-        </div>
-        <h5>Processing Payment Confirmation</h5>
-        <p class="text-muted mt-2">Please wait while we confirm your payment...</p>
-    `;
-
-    // Show modal
-    modal.show();
-
-    // Make the API call
-    fetch(`/appointment/${appointmentId}/confirm-payment-dummy`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        modal.hide();
-        if (data.success) {
-            // Show success message briefly before redirect
-            modalTitle.textContent = 'Payment Confirmed!';
-            modalBody.innerHTML = `
-                <div class="text-success mb-3">
-                    <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
-                </div>
-                <h5>Success!</h5>
-                <p class="text-muted mt-2">Payment confirmed successfully. Doctor has been notified.</p>
-            `;
-            modal.show();
-
-            // Redirect after a short delay
-            setTimeout(() => {
-                modal.hide();
-                // Redirect to appropriate booking page based on appointment type
-                @if($appointment->school_id)
-                    window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
-                @elseif($appointment->health_facility_id)
-                    window.location.href = '{{ route("health-facility.book-doctor", ["id" => $appointment->health_facility_id]) }}';
-                @else
-                    window.location.href = '/'; // fallback to home
-                @endif
-            }, 2000);
-        } else {
-            // Show error
-            modalTitle.textContent = 'Confirmation Failed';
-            modalBody.innerHTML = `
-                <div class="text-danger mb-3">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
-                </div>
-                <h5>Error</h5>
-                <p class="text-muted mt-2">${data.message || 'An error occurred while confirming payment.'}</p>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            `;
-            modal.show();
-        }
-    })
-    .catch(error => {
-        modal.hide();
-        console.error('Error:', error);
-        // Show error modal
-        modalTitle.textContent = 'Confirmation Failed';
-        modalBody.innerHTML = `
-            <div class="text-danger mb-3">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
-            </div>
-            <h5>Error</h5>
-            <p class="text-muted mt-2">An error occurred while confirming payment. Please try again.</p>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        `;
-        modal.show();
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const dummyBtn = document.getElementById('dummyPaymentBtn');
-    if (dummyBtn) {
-        dummyBtn.addEventListener('click', function() {
-            confirmPaymentDummy({{ $appointment->id }});
-        });
-    }
-});
-</script>
-@endpush

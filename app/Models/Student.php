@@ -37,6 +37,26 @@ class Student extends Model
     }
 
     /**
+     * Boot the model and add deleting handler to cascade-delete related records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function (Student $student) {
+            // Delete related appointments so model events on Appointment run
+            $student->appointments()->get()->each(function ($appt) {
+                $appt->delete();
+            });
+
+            // Delete related lab tests to prevent foreign key constraint errors
+            $student->labTests()->get()->each(function ($lab) {
+                $lab->delete();
+            });
+        });
+    }
+
+    /**
      * Get the age of the student calculated from birth_date
      */
     public function getAgeAttribute()

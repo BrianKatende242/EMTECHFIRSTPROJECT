@@ -8,6 +8,9 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FinanceDashboardController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminModelController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthFacilityController;
 use App\Http\Controllers\ApiDashboardController;
 use App\Http\Controllers\ContactController;
@@ -43,7 +46,6 @@ Route::get('/api-dashboard', [ApiDashboardController::class, 'index'])->name('ap
 // Finance Dashboard Route
 Route::get('/finance-dashboard', [FinanceDashboardController::class, 'index'])->name('finance-dashboard');
 
-
 // If you need a web view for admin purposes
 //Route::get('/admin/contact-submissions', function () {
   //  return view('contact-submissions');
@@ -70,10 +72,33 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 //     ]);
 // })->name('school.dashboard');
 
-
-
+use App\Http\Controllers\SchoolController;
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
+    // Get current week data (Monday to Sunday)
+    $startOfWeek = now()->startOfWeek(); // Monday
+    $endOfWeek = now()->endOfWeek(); // Sunday
+
+    // Weekly appointments data
+    $weeklyAppointments = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->appointments()
+            ->whereDate('appointment_time', $date)
+            ->count();
+        $weeklyAppointments[] = $count;
+    }
+
+    // Weekly lab tests data
+    $weeklyLabTests = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->labTests()
+            ->whereDate('created_at', $date)
+            ->count();
+        $weeklyLabTests[] = $count;
+    }
+
     return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
@@ -83,36 +108,76 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'students' => $school->students()->latest()->get(),
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'labTests' => $school->labTests()->with('patient')->latest()->get(),
-        'doctors' => Doctor::latest()->get()
+        'doctors' => Doctor::latest()->get(),
+        'weeklyAppointments' => $weeklyAppointments,
+        'weeklyLabTests' => $weeklyLabTests
     ]);
 })->name('school.dashboard');
 
 
-Route::get('/students/{school}', function (App\Models\School $school) {
+Route::get('/students/{school}', function (Request $request, App\Models\School $school) {
+    $query = $school->students();
+
+    // Apply filters
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    if ($request->filled('grade')) {
+        $query->where('grade', $request->grade);
+    }
+
+    if ($request->filled('gender')) {
+        $query->where('gender', $request->gender);
+    }
+
+    if ($request->filled('min_age')) {
+        $minBirthDate = now()->subYears($request->min_age + 1)->addDay();
+        $query->where('birth_date', '<=', $minBirthDate);
+    }
+
+    if ($request->filled('max_age')) {
+        $maxBirthDate = now()->subYears($request->max_age);
+        $query->where('birth_date', '>=', $maxBirthDate);
+    }
+
+    $students = $query->latest()->paginate(15);
+
     return view('students', [
         'school' => $school,
-        'students' => $school->students()->latest()->get()
+        'students' => $students
     ]);
 })->name('students');
 
 
-Route::delete('/students/{student}/delete', function ($studentId) {
+Route::delete('/students/{school}/{student}/delete', function ($schoolId, $studentId) {
+    $school = App\Models\School::findOrFail($schoolId);
     $student = App\Models\Patient::findOrFail($studentId);
-    $schoolId = $student->school_id;
+
+    // Verify the student belongs to the school
+    if ($student->school_id !== $school->id) {
+        abort(403);
+    }
+
+    // Check if student has any appointments
     if ($student->appointments()->count() > 0) {
-        return redirect()->route('students', ['school' => $schoolId])
+        return redirect()->route('students', ['school' => $school->id])
             ->with('error', 'Cannot delete student with existing appointments.');
     }
+
+    // Deleting the student will cascade and remove related appointments (handled in Student model)
     $student->delete();
-    return redirect()->route('students', ['school' => $schoolId])->with('success', 'Student deleted successfully.');
+
+    return redirect()->route('students', ['school' => $school->id])->with('success', 'Student deleted successfully.');
 })->name('students.delete');
 
 Route::post('/students/create', function (Request $request) {
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
+
     try {
         $validated = $request->validate([
             'patient_type' => 'required|in:new,existing',
-            'patient_type' => 'required|in:new,existing',
-            'school_id' => 'required',
         ]);
 
         if ($validated['patient_type'] === 'existing') {
@@ -123,13 +188,19 @@ Route::post('/students/create', function (Request $request) {
 
             $patient = App\Models\Patient::where('patient_id', $existingValidation['patient_id'])->first();
 
+            // Check if patient is already associated with this school
+            if ($patient->school_id == $school->id) {
+                return redirect()->route('students', ['school' => $school->id])
+                    ->with('error', 'Patient is already associated with this school.');
+            }
+
             // Update patient with school association
             $patient->update([
-                'school_id' => $validated['school_id'],
+                'school_id' => $school->id,
                 'grade' => $request->input('grade'), // Optional grade for existing patients
             ]);
 
-            return redirect()->route('students', ['school' => $validated['school_id']])
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Existing patient associated with school successfully.');
         } else {
             // Handle new patient
@@ -148,11 +219,11 @@ Route::post('/students/create', function (Request $request) {
                 'gender' => $newValidation['gender'],
                 'parent_contact' => $newValidation['parent_contact'],
             ], [
-                'school_id' => $validated['school_id'],
+                'school_id' => $school->id,
                 'grade' => $newValidation['grade'],
             ]);
 
-            return redirect()->route('students', ['school' => $patient->school_id])
+            return redirect()->route('students', ['school' => $school->id])
                 ->with('success', 'Student created successfully.');
         }
     } catch (\Illuminate\Validation\ValidationException $e) {
@@ -164,15 +235,59 @@ Route::post('/students/create', function (Request $request) {
 
 
 Route::get('/lab-tests/{school}', function (App\Models\School $school) {
+    // Paginate lab tests for the school (15 per page)
+    $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
+
     return view('lab-tests', [
         'school' => $school,
-        'labTests' => $school->labTests()->with('patient')->latest()->get(),
+        'labTests' => $labTests,
         'students' => $school->students()->latest()->get()
     ]);
 })->name('lab-tests');
 
+// Handle lab test form submissions from web forms (redirect back to lab-tests page)
+Route::post('/lab-tests', function (Illuminate\Http\Request $request) {
+    // Get school from form data instead of session
+    $school = App\Models\School::findOrFail($request->input('school_id'));
 
-Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
+    $validated = $request->validate([
+        'student_id' => 'required|exists:students,id',
+        'test_type' => 'required|string',
+        'notes' => 'nullable|string'
+    ]);
+
+    $labTest = App\Models\LabTest::create(array_merge($validated, [
+        'school_id' => $school->id,
+        'status' => 'pending'
+    ]));
+
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test requested successfully.');
+})->name('lab-tests.store');
+
+// Delete a lab test (web)
+Route::delete('/lab-tests/{school}/{labTest}', function (App\Models\School $school, App\Models\LabTest $labTest) {
+    // Verify the lab test belongs to the authenticated school
+    if ($labTest->school_id !== $school->id) {
+        abort(403);
+    }
+
+    $labTest->delete();
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test deleted');
+})->name('lab-tests.destroy');
+
+// Mark a lab test as completed (web)
+Route::post('/lab-tests/{school}/{labTest}/complete', function (App\Models\School $school, App\Models\LabTest $labTest) {
+    // Verify the lab test belongs to the authenticated school
+    if ($labTest->school_id !== $school->id) {
+        abort(403);
+    }
+
+    $labTest->update(['status' => 'completed']);
+    return redirect()->route('lab-tests', ['school' => $school->id])->with('success', 'Lab test marked completed');
+})->name('lab-tests.complete');
+
+
+Route::get('/book-doctor/{school}', function (App\Models\School $school) {
     return view('book-doctor', [
         'school' => $school,
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
@@ -181,33 +296,150 @@ Route::get('/book-doctor/{school}/', function (App\Models\School $school) {
     ]);
 })->name('book-doctor');
 
+Route::get('/transactions/{school}', function (App\Models\School $school) {
+    // Get transactions/payments related to this school
+    // For now, we'll show appointments with payment status
+    $appointments = $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->paginate(15);
+    return view('school-transactions', compact('school', 'appointments'));
+})->name('school.transactions');
 
-Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+
+Route::get('/doctor/{id}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
 // Appointment actions
+Route::post('/appointments/validate', [\App\Http\Controllers\AppointmentController::class, 'validateAppointment'])->name('appointments.validate');
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 Route::patch('/appointments/{appointment}/complete', [\App\Http\Controllers\AppointmentController::class, 'complete'])->name('appointments.complete');
+Route::delete('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
-Route::get('doctor/{doctorId}/meeting-link/', function ($doctorId) {
-    $doctor = Doctor::findOrFail($doctorId);
+// Authentication routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Registration routes
+Route::get('register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+
+// Admin registration invite route
+Route::get('/admin/register/{token}', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('admin.register');
+
+// Password Reset Routes
+Route::get('password/reset', 'App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'App\Http\Controllers\Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController@reset')->name('password.update');
+
+// Simple admin area (protected)
+Route::prefix('admin')->middleware('admin')->group(function(){
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+
+    // Individual model routes
+    Route::get('/doctors', [AdminModelController::class, 'index'])->name('admin.doctors.index');
+    Route::get('/doctors/create', [AdminModelController::class, 'create'])->name('admin.doctors.create');
+    Route::post('/doctors', [AdminModelController::class, 'store'])->name('admin.doctors.store');
+    Route::get('/doctors/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.doctors.edit');
+    Route::put('/doctors/{id}', [AdminModelController::class, 'update'])->name('admin.doctors.update');
+    Route::delete('/doctors/{id}', [AdminModelController::class, 'destroy'])->name('admin.doctors.destroy');
+
+    Route::post('/users/send-invite', [AdminModelController::class, 'sendAdminInvite'])->name('admin.users.send-invite');
+
+    Route::get('/users', [AdminModelController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/create', [AdminModelController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [AdminModelController::class, 'store'])->name('admin.users.store');
+    Route::get('/users/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{id}', [AdminModelController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{id}', [AdminModelController::class, 'destroy'])->name('admin.users.destroy');
+
+    Route::get('/appointments', [AdminModelController::class, 'index'])->name('admin.appointments.index');
+    Route::get('/appointments/create', [AdminModelController::class, 'create'])->name('admin.appointments.create');
+    Route::post('/appointments', [AdminModelController::class, 'store'])->name('admin.appointments.store');
+    Route::get('/appointments/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.appointments.edit');
+    Route::put('/appointments/{id}', [AdminModelController::class, 'update'])->name('admin.appointments.update');
+    Route::delete('/appointments/{id}', [AdminModelController::class, 'destroy'])->name('admin.appointments.destroy');
+
+    Route::get('/payments', [AdminModelController::class, 'index'])->name('admin.payments.index');
+    Route::get('/payments/create', [AdminModelController::class, 'create'])->name('admin.payments.create');
+    Route::post('/payments', [AdminModelController::class, 'store'])->name('admin.payments.store');
+    Route::get('/payments/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.payments.edit');
+    Route::put('/payments/{id}', [AdminModelController::class, 'update'])->name('admin.payments.update');
+    Route::delete('/payments/{id}', [AdminModelController::class, 'destroy'])->name('admin.payments.destroy');
+
+    Route::get('/transactions', [AdminModelController::class, 'index'])->name('admin.transactions.index');
+    Route::get('/transactions/create', [AdminModelController::class, 'create'])->name('admin.transactions.create');
+    Route::post('/transactions', [AdminModelController::class, 'store'])->name('admin.transactions.store');
+    Route::get('/transactions/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.transactions.edit');
+    Route::put('/transactions/{id}', [AdminModelController::class, 'update'])->name('admin.transactions.update');
+    Route::delete('/transactions/{id}', [AdminModelController::class, 'destroy'])->name('admin.transactions.destroy');
+
+    Route::get('/patients', [AdminModelController::class, 'index'])->name('admin.patients.index');
+    Route::get('/patients/create', [AdminModelController::class, 'create'])->name('admin.patients.create');
+    Route::post('/patients', [AdminModelController::class, 'store'])->name('admin.patients.store');
+    Route::get('/patients/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.patients.edit');
+    Route::put('/patients/{id}', [AdminModelController::class, 'update'])->name('admin.patients.update');
+    Route::delete('/patients/{id}', [AdminModelController::class, 'destroy'])->name('admin.patients.destroy');
+
+    Route::get('/schools', [AdminModelController::class, 'index'])->name('admin.schools.index');
+    Route::get('/schools/create', [AdminModelController::class, 'create'])->name('admin.schools.create');
+    Route::post('/schools', [AdminModelController::class, 'store'])->name('admin.schools.store');
+    Route::get('/schools/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.schools.edit');
+    Route::put('/schools/{id}', [AdminModelController::class, 'update'])->name('admin.schools.update');
+    Route::delete('/schools/{id}', [AdminModelController::class, 'destroy'])->name('admin.schools.destroy');
+
+    Route::get('/health-facilities', [AdminModelController::class, 'index'])->name('admin.health-facilities.index');
+    Route::get('/health-facilities/create', [AdminModelController::class, 'create'])->name('admin.health-facilities.create');
+    Route::post('/health-facilities', [AdminModelController::class, 'store'])->name('admin.health-facilities.store');
+    Route::get('/health-facilities/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.health-facilities.edit');
+    Route::put('/health-facilities/{id}', [AdminModelController::class, 'update'])->name('admin.health-facilities.update');
+    Route::delete('/health-facilities/{id}', [AdminModelController::class, 'destroy'])->name('admin.health-facilities.destroy');
+
+    Route::get('/doctor-availabilities', [AdminModelController::class, 'index'])->name('admin.doctor-availabilities.index');
+
+    Route::get('/durations', [AdminModelController::class, 'index'])->name('admin.durations.index');
+    Route::get('/durations/create', [AdminModelController::class, 'create'])->name('admin.durations.create');
+    Route::post('/durations', [AdminModelController::class, 'store'])->name('admin.durations.store');
+    Route::post('/durations/seed', [AdminModelController::class, 'seedDurations'])->name('admin.durations.seed');
+    Route::get('/durations/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.durations.edit');
+    Route::put('/durations/{id}', [AdminModelController::class, 'update'])->name('admin.durations.update');
+    Route::delete('/durations/{id}', [AdminModelController::class, 'destroy'])->name('admin.durations.destroy');
+
+    // Generic model routes (fallback)
+    Route::get('/{modelKey}', [AdminModelController::class, 'index'])->name('admin.model.index');
+    Route::get('/{modelKey}/create', [AdminModelController::class, 'create'])->name('admin.model.create');
+    Route::post('/{modelKey}', [AdminModelController::class, 'store'])->name('admin.model.store');
+    // Appointments extras
+    Route::post('/appointments/bulk', [AdminModelController::class, 'bulkUpdateAppointments'])->name('admin.appointments.bulk');
+    Route::get('/appointments/export', [AdminModelController::class, 'exportAppointmentsCsv'])->name('admin.appointments.export');
+    // Payments extras
+    Route::post('/payments/bulk', [AdminModelController::class, 'bulkUpdatePayments'])->name('admin.payments.bulk');
+    Route::get('/{modelKey}/{id}/edit', [AdminModelController::class, 'edit'])->name('admin.model.edit');
+    Route::get('/doctors/{id}', [AdminModelController::class, 'showDoctor'])->name('admin.doctors.show');
+    Route::post('/doctors/{id}/send-login-link', [AdminModelController::class, 'sendLoginLinkToDoctor'])->name('admin.doctors.send-login');
+    Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
+    Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
+});
+Route::get('doctor/{id}/meeting-link/', function (Request $request) {
+    $doctorId = $request->route('id');
+
+    $doctor = \App\Models\Doctor::findOrFail($doctorId);
+
     return view('meeting-link', [
-        'appointments' => $doctor->appointments()->with(['patient', 'school', 'healthFacility', 'duration'])->latest()->get(),
         'doctor' => $doctor
     ]);
 })->name('doctor.meeting-link');
 
 // Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
-Route::post('/doctor/{id}/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
+Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
     ->name('doctor.update-meeting-link');
 
 // Web route to send meeting link to an email (school/health facility)
-Route::post('/doctor/{doctor}/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
+Route::post('/doctor/send-link/{id}', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
     ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)
-Route::post('/doctor/{doctor}/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
+Route::post('/doctor/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
     ->name('doctor.update-availability');
 
-Route::get('/doctor-dashboard/{doctorId}/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
+Route::get('/doctor-dashboard/availability/{id}', [DoctorController::class, 'availability'])->name('doctor.availability');
 
 Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilities'])->middleware('admin')->name('doctor.all-availabilities');
 
@@ -216,18 +448,20 @@ Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilitie
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
 
-Route::middleware(['auth:doctor'])->group(function () {
-    Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
-    // Add routes for other methods if not already defined
-});
+Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
+// Add routes for other methods if not already defined
 
 
-Route::get('/doctor-dashboard', function () {
-    return view('doctor-dashboard'); // points to resources/views/doctor-dashboard.blade.php
-});
+Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard.show');
 
+// One-time login link consume route (public)
+Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
 
-Route::get('/doctor-dashboard/{doctorId}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
+// Centralized profile route (optional doctor id to preserve doctor context)
+Route::get('/doctors/{doctor}', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+
+// Current user profile route
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('user.profile');
 
 
 // In your web.php routes file, add this route
@@ -272,9 +506,13 @@ Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 
 
 // Health Facility section routes
 Route::get('/health-facility/{id}/patients', [HealthFacilityController::class, 'patients'])->name('health-facility.patients');
+Route::match(['post', 'delete'], '/health-facility/{id}/patients', [HealthFacilityController::class, 'destroyAllPatients'])->name('health-facility.patients.destroy-all');
 Route::get('/health-facility/{id}/patients/create', [HealthFacilityController::class, 'createPatient'])->name('health-facility.patients.create');
+Route::delete('/health-facility/{id}/patients/{patientId}', [HealthFacilityController::class, 'destroyPatient'])->name('health-facility.patients.destroy');
 Route::get('/health-facility/{id}/book-doctor', [HealthFacilityController::class, 'bookDoctor'])->name('health-facility.book-doctor');
 Route::get('/health-facility/{id}/lab-tests', [HealthFacilityController::class, 'labTests'])->name('health-facility.lab-tests');
+Route::get('/health-facility/{id}/transactions', [HealthFacilityController::class, 'transactions'])->name('health-facility.transactions');
+Route::get('/health-facility/{id}/staff', [HealthFacilityController::class, 'staff'])->name('health-facility.staff');
 
 Route::put('/health-facilities/{id}', [HealthFacilityController::class, 'updateHealthFacility'])->name('health-facilities.update');
 Route::post('/health-facilities/{id}/change-password', [HealthFacilityController::class, 'changePassword'])->name('health-facilities.change-password');
@@ -353,6 +591,29 @@ Route::get('/success', function () {
 // New appointment payment routes
 Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showAppointmentPayForm'])->name('payment.appointment.pay');
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
-Route::post('/appointment/{appointment}/confirm-payment-dummy', [PaymentController::class, 'confirmPaymentDummy'])->name('payment.appointment.confirm-dummy');
+
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
+Route::get('/appointment/payment-status/{appointment}', [PaymentController::class, 'checkAppointmentPaymentStatus'])->name('payment.appointment.status');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
+
+// Dummy payment confirmation route for testing
+Route::post('/payment/appointment/confirm-dummy/{appointment}', [PaymentController::class, 'confirmDummyPayment'])->name('payment.appointment.confirm-dummy');
+
+// MarzPay API Routes (public webhook endpoint)
+Route::post('/marzpay/webhook', [PaymentController::class, 'handleCallback'])->name('marzpay.webhook');
+
+// MarzPay Payment Routes (authenticated)
+Route::prefix('api/payments')->middleware('auth')->group(function () {
+    Route::post('/collect', [PaymentController::class, 'requestPayment'])->name('api.payments.collect');
+    Route::post('/send', [PaymentController::class, 'sendPayment'])->name('api.payments.send');
+    Route::get('/status/{referenceId}', [PaymentController::class, 'paymentStatus'])->name('api.payments.status');
+    Route::get('/balance', [PaymentController::class, 'accountBalance'])->name('api.payments.balance');
+});
+
+// MarzPay Test Routes (no auth for testing)
+Route::prefix('test/payments')->group(function () {
+    Route::post('/collect', [PaymentController::class, 'requestPayment'])->name('test.payments.collect');
+    Route::post('/send', [PaymentController::class, 'sendPayment'])->name('test.payments.send');
+    Route::get('/status/{referenceId}', [PaymentController::class, 'paymentStatus'])->name('test.payments.status');
+    Route::get('/balance', [PaymentController::class, 'accountBalance'])->name('test.payments.balance');
+});

@@ -43,7 +43,87 @@
         @endif
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="mb-0">Student Management</h2>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudentModal"><i class="fa fa-plus"></i> New Student</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#newStudentModal"><i class="fa fa-plus"></i> Register</button>
+                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#newStudentModal"><i class="mdi mdi-cloud-upload"></i> <span>Import</span></button>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fa fa-filter"></i> Filters
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('students', ['school' => $school->id]) }}" id="filterForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="search">Search by Name:</label>
+                                        <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="Enter student name">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="grade">Grade:</label>
+                                        <select class="form-control" id="grade" name="grade">
+                                            <option value="">All Grades</option>
+                                            @php
+                                                $allGrades = $school->students()->pluck('grade')->unique()->filter()->sort();
+                                            @endphp
+                                            @foreach($allGrades as $gradeOption)
+                                                <option value="{{ $gradeOption }}" {{ request('grade') == $gradeOption ? 'selected' : '' }}>{{ $gradeOption }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="gender">Gender:</label>
+                                        <select class="form-control" id="gender" name="gender">
+                                            <option value="">All Genders</option>
+                                            <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                                            <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                                            <option value="other" {{ request('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="min_age">Min Age:</label>
+                                        <input type="number" class="form-control" id="min_age" name="min_age" value="{{ request('min_age') }}" min="1" max="25" placeholder="Min age">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="max_age">Max Age:</label>
+                                        <input type="number" class="form-control" id="max_age" name="max_age" value="{{ request('max_age') }}" min="1" max="25" placeholder="Max age">
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @if(request()->hasAny(['search', 'grade', 'gender', 'min_age', 'max_age']))
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <a href="{{ route('students', ['school' => $school->id]) }}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fa fa-times"></i> Clear Filters
+                                        </a>
+                                        <small class="text-muted ml-2">
+                                            Showing {{ $students->count() }} of {{ $school->students()->count() }} students
+                                        </small>
+                                    </div>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
                 </div>
 
         <!-- New Student Modal -->
@@ -52,7 +132,9 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="newStudentModalLabel">New Student</h5>
-                        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <form action="{{ route('students.create') }}" method="POST">
@@ -61,13 +143,13 @@
                             <!-- Patient Type Selection -->
                             <div class="form-group mb-3">
                                 <label class="form-label fw-bold">Patient Type:</label>
-                                <div class="form-check">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="patient_type" id="new_patient" value="new" checked>
                                     <label class="form-check-label" for="new_patient">
                                         New Student
                                     </label>
                                 </div>
-                                <div class="form-check">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="patient_type" id="existing_patient" value="existing">
                                     <label class="form-check-label" for="existing_patient">
                                         Existing Patient (Enter Patient ID)
@@ -148,14 +230,23 @@
                                 <a href="{{ route('patients.profile', ['patient' => $student->id]) }}" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="fa fa-user"></i> Profile
                                 </a>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStudentModal" data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                                <form method="POST" action="{{ route('students.delete', ['school' => $school->id, 'student' => $student->id]) }}" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete {{ $student->name }}?')">
+                                        <i class="mdi mdi-delete"></i> Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $students->appends(request()->query())->links() }}
+                </div>
             </div>
         @else
             <div class="alert alert-info text-dark">
@@ -164,76 +255,4 @@
         @endif
             </div>
         </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteStudentModalLabel">Delete Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete <span id="studentName"></span>?</p>
-                </div>
-                <div class="modal-footer">
-                    <form id="deleteStudentForm" method="POST" action="">
-                        @csrf
-                        @method('DELETE')
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        var deleteStudentModal = document.getElementById('deleteStudentModal');
-        deleteStudentModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var studentId = button.getAttribute('data-student-id');
-            var studentName = button.getAttribute('data-student-name');
-            var modalStudentName = deleteStudentModal.querySelector('#studentName');
-            var form = deleteStudentModal.querySelector('#deleteStudentForm');
-            modalStudentName.textContent = studentName;
-            form.action = '/students/' + studentId + '/delete'; // Adjust route as needed
-        });
-
-        // Toggle patient type sections
-        document.querySelectorAll('input[name="patient_type"]').forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                var newPatientSection = document.getElementById('newPatientSection');
-                var existingPatientSection = document.getElementById('existingPatientSection');
-                var newPatientFields = newPatientSection.querySelectorAll('input, select');
-                var existingPatientFields = existingPatientSection.querySelectorAll('input');
-
-                if (this.value === 'existing') {
-                    newPatientSection.style.display = 'none';
-                    existingPatientSection.style.display = 'block';
-                    
-                    // Remove required attribute from new patient fields
-                    newPatientFields.forEach(function(field) {
-                        field.removeAttribute('required');
-                    });
-                    
-                    // Add required to patient_id field
-                    document.getElementById('patient_id').setAttribute('required', 'required');
-                } else {
-                    newPatientSection.style.display = 'block';
-                    existingPatientSection.style.display = 'none';
-                    
-                    // Add required attribute to new patient fields
-                    newPatientFields.forEach(function(field) {
-                        if (field.name !== 'school_id') { // Don't make hidden fields required
-                            field.setAttribute('required', 'required');
-                        }
-                    });
-                    
-                    // Remove required from patient_id field
-                    document.getElementById('patient_id').removeAttribute('required');
-                }
-            });
-        });
-    </script>
 @endsection

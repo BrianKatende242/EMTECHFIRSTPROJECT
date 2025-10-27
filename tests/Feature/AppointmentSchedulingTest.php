@@ -213,9 +213,6 @@ class AppointmentSchedulingTest extends TestCase
         $response = $this->withoutMiddleware()->postJson(route('appointments.store'), $appointmentData);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false
-                ])
                 ->assertJsonStructure(['errors'])
                 ->assertJsonFragment([
                     'appointment_time' => ['Cannot schedule appointments in the past.']

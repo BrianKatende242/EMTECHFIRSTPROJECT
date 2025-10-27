@@ -162,6 +162,7 @@ class PaymentConfirmationWorkflowTest extends TestCase
 
         // The appointments should not be visible in the dashboard
         // (This would need to be checked by examining the view data or HTML content)
+        $response->assertStatus(200);
 
         // Confirm one appointment
         $this->postJson(route('payment.appointment.confirm-dummy', $this->schoolAppointment));
@@ -171,22 +172,26 @@ class PaymentConfirmationWorkflowTest extends TestCase
 
         // Check that the confirmed appointment is included in the response
         // (This would depend on how the dashboard renders the data)
+        $response->assertStatus(200);
     }
 
     /** @test */
     public function doctor_getDoctorAppointments_only_returns_confirmed_appointments()
     {
+        // Authenticate as the doctor
+        $this->actingAs($this->doctor, 'doctor');
+
         // Initially no confirmed appointments
-        $response = $this->get(route('doctor.appointments', ['doctorId' => $this->doctor->id]));
+        $response = $this->get(route('doctor.appointments', ['id' => $this->doctor->id]));
 
         // Should show empty or no confirmed appointments
-        // (Check the actual response structure)
+        $response->assertStatus(200);
 
         // Confirm one appointment
         $this->postJson(route('payment.appointment.confirm-dummy', $this->schoolAppointment));
 
         // Now should show one confirmed appointment
-        $response = $this->get(route('doctor.appointments', ['doctorId' => $this->doctor->id]));
+        $response = $this->get(route('doctor.appointments', ['id' => $this->doctor->id]));
 
         // The response should contain the confirmed appointment
         $response->assertStatus(200);

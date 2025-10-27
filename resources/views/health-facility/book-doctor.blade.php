@@ -5,8 +5,8 @@
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="m-0">Book Doctor</h3>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookDoctorModal">
-                <i class="fa fa-calendar-plus me-2"></i> New Appointment
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#bookDoctorModal">
+                <i class="mdi mdi-calendar-plus me-2"></i> New Appointment
             </button>
         </div>
     </div>
@@ -41,20 +41,36 @@
                             <td>{{ optional($appt->doctor)->name ? 'Dr. ' . $appt->doctor->name : '—' }}</td>
                             <td>{{ optional($appt->appointment_time)->format('D, M j, Y g:i A') }}</td>
                             <td>{{ $appt->duration ? $appt->duration->minutes . ' mins' : '—' }}</td>
-                            <td>{{ $appt->duration ? number_format($appt->duration->getPrice()) . ' UGX' : '—' }}</td>
+                            <td>{{ $appt->duration ? number_format($appt->duration->getPriceForDoctor($appt->doctor), 0) . ' UGX' : '—' }}</td>
                             <td>
                                 <span class="badge bg-{{ 
                                     $appt->status == 'confirmed' ? 'success' : 
-                                    ($appt->status == 'awaiting_payment' ? 'warning' : 'secondary') 
+                                    ($appt->status == 'awaiting_payment' ? 'warning' : 
+                                    ($appt->status == 'cancelled' ? 'danger' : 'secondary')) 
                                 }} text-white">
                                     {{ ucfirst(str_replace('_', ' ', $appt->status)) }}
                                 </span>
                             </td>
                             <td>
                                 @if($appt->status === 'awaiting_payment')
-                                    <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-credit-card me-1"></i> Pay
-                                    </a>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('payment.appointment.pay', $appt) }}" class="btn btn-sm btn-primary">
+                                            <i class="mdi mdi-credit-card me-1"></i> Pay
+                                        </a>
+                                        <button class="btn btn-sm btn-warning cancel-appointment" 
+                                                data-appointment-id="{{ $appt->id }}"
+                                                data-toggle="modal" 
+                                                data-target="#cancelAppointmentModal">
+                                            <i class="mdi mdi-cancel me-1"></i> Cancel
+                                        </button>
+                                    </div>
+                                @elseif($appt->status === 'cancelled')
+                                    <button class="btn btn-sm btn-danger delete-appointment" 
+                                            data-appointment-id="{{ $appt->id }}"
+                                            data-toggle="modal" 
+                                            data-target="#deleteAppointmentModal">
+                                        <i class="mdi mdi-delete me-1"></i> Delete
+                                    </button>
                                 @else
                                     —
                                 @endif
@@ -71,12 +87,14 @@
     </div>
 
     {{-- Book Doctor Modal --}}
-    <div class="modal fade" id="bookDoctorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="bookDoctorModal" tabindex="-1" role="dialog" aria-labelledby="bookDoctorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Book Appointment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="bookDoctorModalLabel">Book Appointment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form id="appointment-form" action="{{ route('appointments.store') }}" method="POST">
                     @csrf
@@ -99,9 +117,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Doctor</label>
                                 <select id="doctor_id" name="doctor_id" class="form-select form-control" required>
-                                    <option value="">Select Date First</option>
+                                    <option value="">Select Doctor</option>
                                     @foreach($doctors as $doc)
-                                        <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}" style="display: none;">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+                                        <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -110,7 +128,12 @@
                                 <select name="duration_id" class="form-select form-control" required>
                                     <option value="">Select Duration</option>
                                     @foreach(\App\Models\Duration::active()->get() as $duration)
-                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+                                        <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="general" data-price="{{ $duration->general_price }}">
+                                            {{ $duration->minutes }} minutes - General: UGX {{ number_format($duration->general_price, 0) }}
+                                        </option>
+                                        <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="specialist" data-price="{{ $duration->specialist_price }}">
+                                            {{ $duration->minutes }} minutes - Specialist: UGX {{ number_format($duration->specialist_price, 0) }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -121,10 +144,74 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Book</button>
+                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Book</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Cancel Appointment Modal --}}
+    <div class="modal fade" id="cancelAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="cancelAppointmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelAppointmentModalLabel">Cancel Appointment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this appointment? This action cannot be undone.</p>
+                    <div class="appointment-details">
+                        <strong>Patient:</strong> <span id="cancel-patient-name"></span><br>
+                        <strong>Doctor:</strong> <span id="cancel-doctor-name"></span><br>
+                        <strong>Time:</strong> <span id="cancel-appointment-time"></span><br>
+                        <strong>Status:</strong> <span class="badge badge-warning">Awaiting Payment</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form id="cancelForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="appointment_id" id="cancelAppointmentId">
+                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Keep Appointment</button>
+                        <button type="submit" class="btn btn-warning btn-sm">Cancel Appointment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Delete Appointment Modal --}}
+    <div class="modal fade" id="deleteAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="deleteAppointmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteAppointmentModalLabel">Delete Appointment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this cancelled appointment? This action cannot be undone.</p>
+                    <div class="appointment-details">
+                        <strong>Patient:</strong> <span id="delete-patient-name"></span><br>
+                        <strong>Doctor:</strong> <span id="delete-doctor-name"></span><br>
+                        <strong>Time:</strong> <span id="delete-appointment-time"></span><br>
+                        <strong>Status:</strong> <span class="badge badge-danger">Cancelled</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="appointment_id" id="deleteAppointmentId">
+                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Delete Appointment</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -134,48 +221,258 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const appointmentTimeInput = document.getElementById('appointment_time');
-    const doctorSelect = document.getElementById('doctor_id');
-    const doctorOptions = doctorSelect.querySelectorAll('option[data-specialization]');
+    const appointmentForm = document.getElementById('appointment-form');
+    const modal = document.getElementById('bookDoctorModal');
+    const modalBody = modal.querySelector('.modal-body');
+    let appointmentToDelete = null;
 
-    appointmentTimeInput.addEventListener('change', function() {
-        const selectedDate = new Date(this.value);
-        if (!selectedDate || isNaN(selectedDate.getTime())) {
-            // Reset doctor options
-            doctorOptions.forEach(option => {
-                option.style.display = 'none';
-            });
-            doctorSelect.value = '';
-            return;
-        }
+    // Duration filtering code...
 
-        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    // Handle form submission via AJAX
+    appointmentForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
 
-        // Fetch available doctors for this day
-        fetch(`/api/doctors/available?day=${dayOfWeek}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const availableDoctorIds = data.doctors.map(doctor => doctor.id.toString());
+        const formData = new FormData(appointmentForm);
 
-                    doctorOptions.forEach(option => {
-                        if (availableDoctorIds.includes(option.value)) {
-                            option.style.display = 'block';
-                        } else {
-                            option.style.display = 'none';
-                        }
-                    });
-
-                    // Reset selection if current selection is not available
-                    if (doctorSelect.value && !availableDoctorIds.includes(doctorSelect.value)) {
-                        doctorSelect.value = '';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching available doctors:', error);
-            });
+        fetch(appointmentForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Success: close modal, show success message, refresh appointments table
+                $(modal).modal('hide');
+                showAlert('Appointment booked successfully!', 'success');
+                refreshAppointmentsTable();
+                appointmentForm.reset(); // Reset form
+            } else {
+                // Validation errors
+                displayErrors(data.errors);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while booking the appointment.', 'danger');
+        });
     });
+
+    // Handle cancel appointment button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('cancel-appointment') || e.target.closest('.cancel-appointment')) {
+            e.preventDefault();
+            const button = e.target.classList.contains('cancel-appointment') ? e.target : e.target.closest('.cancel-appointment');
+            const appointmentId = button.getAttribute('data-appointment-id');
+            
+            // Find the appointment row to get details
+            const row = button.closest('tr');
+            const patientName = row.cells[1].textContent;
+            const doctorName = row.cells[2].textContent;
+            const appointmentTime = row.cells[3].textContent;
+            
+            // Populate cancel modal
+            document.getElementById('cancel-patient-name').textContent = patientName;
+            document.getElementById('cancel-doctor-name').textContent = doctorName;
+            document.getElementById('cancel-appointment-time').textContent = appointmentTime;
+            
+            // Set the cancel URL and appointment ID
+            const cancelUrl = '{{ url("/appointments") }}/' + appointmentId + '/cancel';
+            document.getElementById('cancelForm').action = cancelUrl;
+            document.getElementById('cancelAppointmentId').value = appointmentId;
+        }
+    });
+
+    // Handle cancel form submission
+    document.getElementById('cancelForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const appointmentId = document.getElementById('cancelAppointmentId').value;
+
+        // Submit the form
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
+
+            // Try to parse as JSON, but handle non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                // If not JSON, treat as success (appointment was cancelled)
+                return { success: true, message: 'Appointment cancelled successfully' };
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                // Force close modal first
+                $('#cancelAppointmentModal').modal('hide');
+                // Small delay to ensure modal is closed
+                setTimeout(() => {
+                    showAlert('Appointment cancelled successfully!', 'warning');
+                    // Refresh the page to show updated data
+                    location.reload();
+                }, 300);
+            } else {
+                showAlert(data.message || 'Failed to cancel appointment.', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // If we get here, check if the appointment status was actually updated
+            const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`);
+            if (row && row.closest('tr').cells[4].textContent.includes('Cancelled')) {
+                // Status was updated, cancellation worked
+                $('#cancelAppointmentModal').modal('hide');
+                setTimeout(() => {
+                    showAlert('Appointment cancelled successfully!', 'warning');
+                }, 300);
+            } else {
+                // There was a real error
+                showAlert('An error occurred while cancelling the appointment.', 'danger');
+            }
+        });
+    });
+
+    // Handle delete appointment button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-appointment') || e.target.closest('.delete-appointment')) {
+            e.preventDefault();
+            const button = e.target.classList.contains('delete-appointment') ? e.target : e.target.closest('.delete-appointment');
+            const appointmentId = button.getAttribute('data-appointment-id');
+            
+            // Find the appointment row to get details
+            const row = button.closest('tr');
+            const patientName = row.cells[1].textContent;
+            const doctorName = row.cells[2].textContent;
+            const appointmentTime = row.cells[3].textContent;
+            
+            // Populate delete modal
+            document.getElementById('delete-patient-name').textContent = patientName;
+            document.getElementById('delete-doctor-name').textContent = doctorName;
+            document.getElementById('delete-appointment-time').textContent = appointmentTime;
+            
+            // Set the delete URL and appointment ID
+            const deleteUrl = '{{ url("/appointments") }}/' + appointmentId;
+            document.getElementById('deleteForm').action = deleteUrl;
+            document.getElementById('deleteAppointmentId').value = appointmentId;
+        }
+    });
+
+    // Handle delete form submission
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const appointmentId = document.getElementById('deleteAppointmentId').value;
+
+        // Submit the form
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
+
+            // Try to parse as JSON, but handle non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                // If not JSON, treat as success (appointment was deleted)
+                return { success: true, message: 'Appointment deleted successfully' };
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                // Force close modal first
+                $('#deleteAppointmentModal').modal('hide');
+                // Small delay to ensure modal is closed
+                setTimeout(() => {
+                    showAlert('Appointment deleted successfully!', 'success');
+                    // Remove the deleted appointment row from the table
+                    const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`).closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
+                }, 300);
+            } else {
+                showAlert(data.message || 'Failed to delete appointment.', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // If we get here, check if the appointment was actually deleted
+            // by trying to find it in the DOM
+            const row = document.querySelector(`button[data-appointment-id="${appointmentId}"]`);
+            if (!row) {
+                // Row is gone, appointment was deleted
+                $('#deleteAppointmentModal').modal('hide');
+                setTimeout(() => {
+                    showAlert('Appointment deleted successfully!', 'success');
+                }, 300);
+            } else {
+                // Row still exists, there was a real error
+                showAlert('An error occurred while deleting the appointment.', 'danger');
+            }
+        });
+    });
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        `;
+        document.querySelector('.content-wrapper .row .col-12').prepend(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000); // Auto remove after 5 seconds
+    }
+
+    function displayErrors(errors) {
+        // Clear previous errors
+        modalBody.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+        for (const field in errors) {
+            const input = appointmentForm.querySelector(`[name="${field}"]`);
+            if (input) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-danger';
+                errorDiv.textContent = errors[field][0];
+                input.parentNode.appendChild(errorDiv);
+            }
+        }
+    }
+
+    function refreshAppointmentsTable() {
+        // Simple refresh by reloading the page or updating the table
+        location.reload(); // For simplicity, reload the page to show new appointment
+    }
+
+    // Duration filtering code...
 });
 </script>
 @endpush

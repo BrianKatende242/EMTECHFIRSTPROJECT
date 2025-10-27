@@ -1,31 +1,38 @@
 @extends('layouts.base')
 
 @section('content')
-<div class="container py-4 card shadow-sm mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Appointments</h2>
-        <div>
-            <input id="search" class="form-control form-control-sm" placeholder="Search by patient or school" style="width:280px; display:inline-block;">
-        </div>
-    </div>
+<div class="container-fluid p-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Appointments</h2>
+            </div>
 
-    <div class="row mb-3 g-2">
-        <div class="col-md-3">
-            <select id="filter-status" class="form-select form-select-sm">
-                <option value="">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Search</label>
+                    <input id="search" class="form-control form-control-sm" placeholder="Search by patient or school">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Status</label>
+                    <select id="filter-status" class="form-control form-control-sm">
+                        <option value="">All statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Date</label>
+                    <input id="filter-date" type="date" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-2">
+                    <button id="clear-filters" class="btn btn-sm btn-outline-secondary w-100">Clear Filters</button>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-            <input id="filter-date" type="date" class="form-control form-control-sm" placeholder="Date">
-        </div>
-        <div class="col-md-3 text-end">
-            <button id="clear-filters" class="btn btn-sm btn-outline-secondary">Clear</button>
-        </div>
-    </div>
+
+        <div class="card-body">
 
     <div id="appointments-container">
     @if($appointments->count())
@@ -46,7 +53,7 @@
                     @foreach($appointments as $appointment)
                     <tr data-id="{{ $appointment->id }}">
                         <td class="appt-time">{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
-                        <td class="appt-patient">{{ $appointment->student->name ?? $appointment->patient->name ?? '-' }}</td>
+                        <td class="appt-patient">{{ $appointment->patient->name ?? '-' }}</td>
                         <td class="appt-school">
                             @if($appointment->school)
                                 {{ $appointment->school->name }}<br>
@@ -69,17 +76,17 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="" class="btn btn-sm btn-info" title="View">
-                                    <i class="fa fa-video-camera"></i>
+                                <a href="{{ route('doctor.meeting-link', ['id' => $doctor->id]) }}" class="btn btn-sm btn-info" title="Start Meeting" target="_blank">
+                                    <i class="mdi mdi-video"></i>
                                 </a>
-                                @if($appointment->status !== 'cancelled')
+                                @if($appointment->status !== 'completed')
                                     <button class="btn btn-sm btn-danger btn-cancel" data-id="{{ $appointment->id }}" title="Cancel">
-                                        <i class="fa fa-times"></i>
+                                        <i class="mdi mdi-close"></i>
                                     </button>
                                 @endif
                                 @if($appointment->status === 'pending')
                                     <button class="btn btn-sm btn-success btn-complete" data-id="{{ $appointment->id }}" title="Mark Complete">
-                                        <i class="fa fa-check"></i>
+                                        <i class="mdi mdi-check"></i>
                                     </button>
                                 @endif
                             </div>
@@ -89,10 +96,15 @@
                 </tbody>
             </table>
         </div>
+        <div class="mt-3">
+            {{ $appointments->links() }}
+        </div>
     @else
         <div class="alert alert-info mt-4">No appointments found.</div>
     @endif
+        </div>
     </div>
+</div>
 </div>
 
 @push('scripts')

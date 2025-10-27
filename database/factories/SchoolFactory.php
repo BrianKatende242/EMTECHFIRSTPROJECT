@@ -1,14 +1,34 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-use App\Models\School;
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(School::class, function (Faker $faker) {
-    return [
-        'name' => $faker->company(),
-        'email' => $faker->unique()->safeEmail,
-        'contact' => $faker->phoneNumber(),
-        'file_url' => $faker->url(),
-    ];
-});
+use App\Models\School;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\School>
+ */
+class SchoolFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = School::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->company(),
+            'email' => $this->faker->unique()->safeEmail,
+            'contact' => $this->faker->phoneNumber(),
+            'address' => $this->faker->address(),
+        ];
+    }
+}

@@ -13,3 +13,8 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 pollix template/
+
+# MarzPay Documentation
+MARZPAY_DOCUMENTATION.txt
+
+selenium_test.py

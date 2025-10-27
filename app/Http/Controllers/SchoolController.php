@@ -102,13 +102,21 @@ public function showDashboard($id)
 {
     $school = School::findOrFail($id);
 
-    $allDoctors = Doctor::all(); // Fetch all doctors
-
-    // Optional: fetch related data like messages, stats, etc. if needed
+    $students = $school->students()->latest()->get();
+    $labTests = $school->labTests()->with('patient')->latest()->get();
+    $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
+    $doctors = $school->doctors()->latest()->get();
 
     return view('school-dashboard', [
         'school' => $school,
-        'allDoctors' => $allDoctors
+        'students' => $students,
+        'labTests' => $labTests,
+        'appointments' => $appointments,
+        'doctors' => $doctors,
+        'studentsCount' => $students->count(),
+        'appointmentsCount' => $appointments->count(),
+        'labTestsCount' => $labTests->count(),
+        'doctorsCount' => $doctors->count(),
     ]);
 }
 }

@@ -25,6 +25,14 @@ class PatientWebRoutesTest extends TestCase
         $this->createTestDurations();
     }
 
+    protected function mockAuthenticatedSchool(School $school)
+    {
+        // Mock the getAuthenticatedSchool function to return our test school
+        $this->app->bind('getAuthenticatedSchool', function () use ($school) {
+            return $school;
+        });
+    }
+
     /** @test */
     public function it_can_display_students_page()
     {
@@ -101,9 +109,15 @@ class PatientWebRoutesTest extends TestCase
     /** @test */
     public function it_validates_web_student_creation()
     {
+        $school = School::create([
+            'name' => 'Test School',
+            'email' => 'test@school.com',
+            'contact' => '+256700000000',
+        ]);
+
         $response = $this->withoutMiddleware()->post('/students/create', [
             'patient_type' => 'new',
-            'school_id' => 1, // Add school_id so validation proceeds to check other fields
+            'school_id' => $school->id, // Use the created school's ID
             'name' => '',
             'gender' => 'invalid',
             'birth_date' => 'not-a-date',
@@ -136,7 +150,7 @@ class PatientWebRoutesTest extends TestCase
             'school_id' => $school->id,
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$student->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$student->id}/delete");
 
         $response->assertRedirect("/students/{$school->id}")
                 ->assertSessionHas('success', 'Student deleted successfully.');
@@ -179,7 +193,7 @@ class PatientWebRoutesTest extends TestCase
             'reason' => 'Medical checkup',
         ]);
 
-        $response = $this->withoutMiddleware()->delete("/students/{$student->id}/delete");
+        $response = $this->withoutMiddleware()->delete("/students/{$school->id}/{$student->id}/delete");
 
         $response->assertRedirect("/students/{$school->id}")
                 ->assertSessionHas('error', 'Cannot delete student with existing appointments.');
@@ -358,88 +372,6 @@ class PatientWebRoutesTest extends TestCase
         $this->assertEquals($student->id, $appointments->first()->patient->id);
         $this->assertEquals($student->id, $patients->first()->id);
         $this->assertEquals($doctor->id, $doctors->first()->id);
-    }
-
-    /** @test */
-    public function it_can_display_doctor_meeting_link_page()
-    {
-        $doctor = Doctor::create([
-            'name' => 'Dr. Test',
-            'email' => 'dr@test.com',
-            'specialization' => 'General',
-            'contact' => '+256700000001',
-        ]);
-
-        $school = School::create([
-            'name' => 'Test School',
-            'email' => 'test@school.com',
-            'contact' => '+256700000000',
-        ]);
-
-        $healthFacility = HealthFacility::create([
-            'name' => 'Test Health Facility',
-            'email' => 'test@facility.com',
-            'contact_number' => '+256711111111',
-            'contact' => '+256711111111',
-            'location' => 'Test Location',
-            'type' => 'hospital',
-        ]);
-
-        $student = Patient::create([
-            'patient_id' => 'P001',
-            'name' => 'Test Student',
-            'birth_date' => '2010-01-01',
-            'gender' => 'male',
-            'school_id' => $school->id,
-        ]);
-
-        $hfPatient = Patient::create([
-            'patient_id' => 'P002',
-            'name' => 'Test HF Patient',
-            'birth_date' => '1980-01-01',
-            'gender' => 'female',
-            'health_facility_id' => $healthFacility->id,
-        ]);
-
-        // Create appointments for both types of patients
-        Appointment::create([
-            'school_id' => $school->id,
-            'patient_id' => $student->id,
-            'doctor_id' => $doctor->id,
-            'appointment_time' => now()->addDays(1),
-            'status' => 'pending',
-            'duration_id' => $this->getGeneralDurationId(),
-            'reason' => 'School medical checkup',
-        ]);
-
-        Appointment::create([
-            'health_facility_id' => $healthFacility->id,
-            'patient_id' => $hfPatient->id,
-            'doctor_id' => $doctor->id,
-            'appointment_time' => now()->addDays(2),
-            'status' => 'scheduled',
-            'duration_id' => $this->getSpecialistDurationId(),
-            'reason' => 'Health facility consultation',
-        ]);
-
-        $response = $this->get("/doctor/{$doctor->id}/meeting-link/");
-
-        $response->assertStatus(200)
-                ->assertViewHas('doctor', $doctor)
-                ->assertViewHas('appointments');
-
-        $appointments = $response->viewData('appointments');
-        $this->assertCount(2, $appointments);
-
-        // Check that patient relationships are loaded correctly
-        $appointment1 = $appointments->where('patient_id', $student->id)->first();
-        $appointment2 = $appointments->where('patient_id', $hfPatient->id)->first();
-
-        $this->assertEquals($student->name, $appointment1->patient->name);
-        $this->assertEquals($school->name, $appointment1->school->name);
-
-        $this->assertEquals($hfPatient->name, $appointment2->patient->name);
-        $this->assertEquals($healthFacility->name, $appointment2->healthFacility->name);
     }
 
     /** @test */

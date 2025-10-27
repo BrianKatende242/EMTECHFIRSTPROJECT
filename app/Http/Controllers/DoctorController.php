@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MeetingLinkMail;
+use Illuminate\Support\Facades\Auth;
 
 
 class DoctorController extends Controller
@@ -43,6 +44,19 @@ class DoctorController extends Controller
             'doctors' => $doctors,
             'error' => $error
         ]);
+    }
+
+    /**
+     * Authenticated doctor dashboard (uses doctor guard)
+     */
+    public function authDashboard()
+    {
+        $doctor = Auth::guard('doctor')->user();
+        if (!$doctor) {
+            return redirect()->route('login');
+        }
+
+        return $this->showDoctorDashboard($doctor->id);
     }
 
     /**
@@ -81,17 +95,15 @@ class DoctorController extends Controller
     /**
      * Get all appointments for a doctor (API endpoint)
      */
-    public function getDoctorAppointments(Request $request)
+    public function getDoctorAppointments(Request $request, $id)
     {
-        $doctorId = $request->route('doctorId');
-
-        $doctor = Doctor::findOrFail($doctorId);
-
-        $appointments = Appointment::where('doctor_id', $doctorId)
-            ->where('status', 'confirmed') // Only show confirmed appointments
-            ->with(['school', 'patient', 'duration', 'healthFacility'])
+        // For insecure access, allow viewing appointments by doctor ID
+        $doctor = Doctor::findOrFail($id);
+        $appointments = Appointment::where('doctor_id', $id)
+            ->where('status', '!=', 'cancelled') // Exclude cancelled appointments
+            ->with(['patient', 'school', 'healthFacility', 'duration'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('doctor-appointments', [
             'appointments' => $appointments,
@@ -213,66 +225,57 @@ class DoctorController extends Controller
 }
 
 
-public function showDoctorDashboard($doctorId)
-{
-    $doctor = Doctor::with([
-        'appointments.patient',
-        'appointments.school',
-        'appointments.duration',
-        'availabilities' // ✅ Include availabilities here
-    ])->findOrFail($doctorId);
+    public function showDoctorDashboard($id)
+    {
+        try {
+            // For insecure access, allow viewing dashboard by doctor ID
+            $doctor = Doctor::findOrFail($id);
 
-    // All appointments (only confirmed ones)
-    $appointments = $doctor->appointments()
-        ->where('status', 'confirmed')
-        ->latest()->get();
+            // Fetch appointments with related data (exclude cancelled)
+            $appointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('status', '!=', 'cancelled')
+                ->with(['patient', 'duration'])
+                ->get();
 
-    // Upcoming appointments (only confirmed ones)
-    $upcomingAppointments = $doctor->appointments()
-        ->where('status', 'confirmed')
-        ->where('appointment_time', '>', now())
-        ->orderBy('appointment_time')
-        ->get();
+            // Get upcoming appointments (next 7 days, exclude cancelled)
+            $upcomingAppointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('status', '!=', 'cancelled')
+                ->with(['patient'])
+                ->where('appointment_time', '>', now())
+                ->where('appointment_time', '<=', now()->addDays(7))
+                ->orderBy('appointment_time')
+                ->get();
 
-    // Calculate stats
-    $totalAppointments = $appointments->count();
-    $completedAppointments = $appointments->where('status', 'completed')->count();
-    $upcomingAppointmentCount = $upcomingAppointments->count();
+            // Calculate stats
+            $totalAppointments = $appointments->count();
+            $completedAppointments = $appointments->where('status', 'completed')->count();
+            $uniquePatients = $appointments->pluck('patient')->filter()->unique('id')->count();
 
-    $stats = [
-        'total_appointments' => $totalAppointments,
-        'completed_appointments' => $completedAppointments,
-        'upcoming_appointments' => $upcomingAppointmentCount,
-    ];
+            // Calculate revenue
+            $revenue = 0;
+            foreach ($appointments as $appt) {
+                if ($appt->status === 'completed' && $appt->duration) {
+                    $revenue += $appt->duration->getPrice();
+                }
+            }
 
-    // Compute availability for the next 7 days
-    $today = now();
-    $nextSevenDays = [];
+            $stats = [
+                'total_appointments' => $totalAppointments,
+                'completed_appointments' => $completedAppointments,
+                'patients' => $uniquePatients,
+                'revenue' => $revenue
+            ];
 
-    foreach (range(0, 6) as $i) {
-        $date = $today->copy()->addDays($i);
-        $dayName = strtolower($date->format('l')); // e.g., "monday"
-
-        $availability = $doctor->availabilities
-            ->where('day', $dayName)
-            ->first();
-
-        $nextSevenDays[] = [
-            'date' => $date,
-            'available' => $availability ? $availability->available : false,
-        ];
-    }
-
-    return view('doctor-dashboard', [
-        'doctor' => $doctor,
-        'appointments' => $appointments,
-        'upcomingAppointments' => $upcomingAppointments,
-        'stats' => $stats,
-        'nextSevenDays' => $nextSevenDays // ✅ Pass to view
-    ]);
-}
-
-    /**
+            return view('doctor-dashboard', [
+                'doctor' => $doctor,
+                'appointments' => $appointments,
+                'upcomingAppointments' => $upcomingAppointments,
+                'stats' => $stats
+            ]);
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }    /**
      * Show availability management page for all doctors with filtering
      */
     public function allAvailabilities(Request $request)
@@ -320,6 +323,7 @@ public function update(Request $request, Doctor $doctor)
 
 public function updateMeetingLink(Request $request, $id)
 {
+    // For insecure access, require doctor ID parameter
     $doctor = Doctor::findOrFail($id);
 
     $request->validate([
@@ -404,25 +408,34 @@ public function uploadImage(Request $request, Doctor $doctor)
 }
 
 
-    public function sendLink(Request $request, Doctor $doctor)
+    public function sendLink(Request $request, $id)
     {
+        // For insecure access, require doctor ID parameter
+        $doctor = Doctor::findOrFail($id);
+
         $request->validate([
             'recipient_email' => 'required|email',
             'message' => 'nullable|string',
         ]);
 
-    // Use Jitsi Meet as the meeting provider
-    $link = 'https://meet.jit.si/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
-        $messageContent = $request->input('message') ?? "You have a meeting invitation. Click the button below to join.";
+        // Use Jitsi Meet as the meeting provider
+        $link = 'https://meet.jit.si/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
+            $messageContent = $request->input('message') ?? "You have a meeting invitation. Click the button below to join.";
 
-        // Use a Mailable with a nice HTML template
-        Mail::to($request->recipient_email)
-            ->send(new MeetingLinkMail($doctor, $messageContent, $link));
+            // Use a Mailable with a nice HTML template
+            Mail::to($request->recipient_email)
+                ->send(new MeetingLinkMail($doctor, $messageContent, $link));
+
+        // Check if this is an AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Meeting link sent successfully!'
+            ]);
+        }
 
         return back()->with('success', 'Meeting link sent successfully.');
-    }
-
-public function updateOnlineStatus(Request $request, Doctor $doctor)
+    }public function updateOnlineStatus(Request $request, Doctor $doctor)
 {
     // Validate the request data
     $request->validate([
@@ -439,9 +452,9 @@ public function updateOnlineStatus(Request $request, Doctor $doctor)
     /**
      * Show availability management page for a specific doctor
      */
-    public function availability($doctorId)
+    public function availability($id)
     {
-        $doctor = Doctor::with('availabilities')->findOrFail($doctorId);
+        $doctor = Doctor::findOrFail($id);
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         return view('doctor-availability', [

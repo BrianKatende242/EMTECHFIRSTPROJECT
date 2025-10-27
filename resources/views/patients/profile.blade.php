@@ -10,7 +10,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-2 text-center">
                             <div class="patient-avatar">
-                                <i class="fa fa-user-circle fa-4x text-primary"></i>
+                                <i class="mdi mdi-account icon-xl text-primary"></i>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -18,7 +18,7 @@
                             <p class="text-muted mb-2">
                                 <strong>Patient ID:</strong> {{ $patient->patient_id }}
                                 <button class="btn btn-sm btn-outline-secondary ml-2 copy-btn" data-clipboard-text="{{ $patient->patient_id }}" title="Copy Patient ID">
-                                    <i class="fa fa-copy"></i>
+                                    <i class="typcn typcn-copy"></i>
                                 </button>
                             </p>
                             <div class="d-flex flex-wrap">
@@ -36,10 +36,10 @@
                         <div class="col-md-4 text-right">
                             <div class="btn-group" role="group">
                                 <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
-                                    <i class="fa fa-arrow-left"></i> Back
+                                    <i class="typcn typcn-arrow-left"></i> Back
                                 </a>
                                 <button class="btn btn-outline-primary" onclick="window.print()">
-                                    <i class="fa fa-print"></i> Print Profile
+                                    <i class="typcn typcn-printer"></i> Print Profile
                                 </button>
                             </div>
                         </div>
@@ -51,47 +51,47 @@
 
     <!-- Quick Stats -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-info">
-                <div class="inner">
-                    <h3>{{ $patient->appointments->count() }}</h3>
-                    <p>Total Appointments</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-calendar-check"></i>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-success">
-                <div class="inner">
-                    <h3>{{ $patient->labTests->count() }}</h3>
-                    <p>Lab Tests</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-flask"></i>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Total Appointments</div>
+                        <h5 class="mb-0">{{ $patient->appointments->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-calendar icon-xl text-primary"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-warning">
-                <div class="inner">
-                    <h3>{{ $patient->maternalDocuments->count() }}</h3>
-                    <p>Maternal Documents</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-file-medical"></i>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Lab Tests</div>
+                        <h5 class="mb-0">{{ $patient->labTests->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-flask icon-xl text-success"></i>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box bg-danger">
-                <div class="inner">
-                    <h3>{{ $patient->appointments->where('status', 'completed')->count() }}</h3>
-                    <p>Completed Appointments</p>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Maternal Documents</div>
+                        <h5 class="mb-0">{{ $patient->maternalDocuments->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-file-document icon-xl text-warning"></i>
                 </div>
-                <div class="icon">
-                    <i class="fa fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <div class="card">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <div class="stat-label mb-2">Completed Appointments</div>
+                        <h5 class="mb-0">{{ $patient->appointments->where('status', 'completed')->count() }}</h5>
+                    </div>
+                    <i class="mdi mdi-check-circle icon-xl text-info"></i>
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-user mr-2"></i>Patient Information
+                        <i class="typcn typcn-user mr-2"></i>Patient Information
                     </h3>
                 </div>
                 <div class="card-body">
@@ -157,12 +157,12 @@
 
                     @if($patient->medicalHistories->count() > 0)
                     <div class="mt-3">
-                        <h5><i class="fa fa-history mr-2"></i>Medical History</h5>
+                        <h5><i class="typcn typcn-time mr-2"></i>Medical History</h5>
                         <div class="timeline">
                             @foreach($patient->medicalHistories->sortByDesc('recorded_date') as $history)
                             <div class="timeline-item">
                                 <div class="timeline-marker bg-info">
-                                    <i class="fa fa-user-md"></i>
+                                    <i class="typcn typcn-user"></i>
                                 </div>
                                 <div class="timeline-content">
                                     <div class="d-flex justify-content-between align-items-start">
@@ -191,7 +191,7 @@
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-flask mr-2"></i>Lab Test History
+                        <i class="typcn typcn-beaker mr-2"></i>Lab Test History
                     </h3>
                 </div>
                 <div class="card-body table-responsive p-0">
@@ -237,22 +237,22 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-bolt mr-2"></i>Quick Actions
+                        <i class="typcn typcn-flash mr-2"></i>Quick Actions
                     </h3>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#scheduleAppointmentModal">
-                            <i class="fa fa-calendar-plus mr-2"></i>Schedule Appointment
+                            <i class="typcn typcn-calendar mr-2"></i>Schedule Appointment
                         </button>
                         <button class="btn btn-success mb-2" disabled>
-                            <i class="fa fa-flask mr-2"></i>Order Lab Test
+                            <i class="typcn typcn-beaker mr-2"></i>Order Lab Test
                         </button>
                         <button class="btn btn-info mb-2" disabled>
-                            <i class="fa fa-file-medical mr-2"></i>Add Medical Note
+                            <i class="typcn typcn-document mr-2"></i>Add Medical Note
                         </button>
                         <button class="btn btn-warning mb-2" disabled>
-                            <i class="fa fa-edit mr-2"></i>Update Profile
+                            <i class="typcn typcn-edit mr-2"></i>Update Profile
                         </button>
                     </div>
                 </div>
@@ -263,7 +263,7 @@
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-baby mr-2"></i>Maternal Health Documents
+                        <i class="typcn typcn-heart mr-2"></i>Maternal Health Documents
                     </h3>
                 </div>
                 <div class="card-body">
@@ -276,7 +276,7 @@
                         <div>
                             @if($document->file_path)
                             <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="fa fa-eye"></i> View
+                                <i class="typcn typcn-eye"></i> View
                             </a>
                             @endif
                         </div>
@@ -295,18 +295,18 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-calendar-alt mr-2"></i>Appointment History
+                        <i class="typcn typcn-calendar mr-2"></i>Appointment History
                     </h3>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th><i class="fa fa-calendar-day mr-1"></i>Date & Time</th>
-                                <th><i class="fa fa-user-md mr-1"></i>Doctor</th>
-                                <th><i class="fa fa-info-circle mr-1"></i>Status</th>
-                                <th><i class="fa fa-sticky-note mr-1"></i>Notes</th>
-                                <th><i class="fa fa-cogs mr-1"></i>Actions</th>
+                                <th><i class="typcn typcn-calendar mr-1"></i>Date & Time</th>
+                                <th><i class="typcn typcn-user mr-1"></i>Doctor</th>
+                                <th><i class="typcn typcn-info mr-1"></i>Status</th>
+                                <th><i class="typcn typcn-chat mr-1"></i>Notes</th>
+                                <th><i class="typcn typcn-cog mr-1"></i>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -323,7 +323,7 @@
                                 </td>
                                 <td>
                                     <span class="badge badge-{{ $appointment->status === 'completed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : ($appointment->status === 'awaiting_payment' ? 'warning' : 'secondary')) }}">
-                                        <i class="fa fa-{{ $appointment->status === 'completed' ? 'check' : ($appointment->status === 'cancelled' ? 'times' : ($appointment->status === 'awaiting_payment' ? 'credit-card' : 'clock')) }} mr-1"></i>
+                                        <i class="typcn typcn-{{ $appointment->status === 'completed' ? 'tick' : ($appointment->status === 'cancelled' ? 'times' : ($appointment->status === 'awaiting_payment' ? 'credit-card' : 'time')) }} mr-1"></i>
                                         {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                     </span>
                                 </td>
@@ -331,8 +331,16 @@
                                 <td>
                                     @if($appointment->status === 'awaiting_payment')
                                         <a href="{{ route('payment.appointment.pay', $appointment) }}" class="btn btn-sm btn-success">
-                                            <i class="fa fa-credit-card mr-1"></i>Pay Now
+                                            <i class="typcn typcn-credit-card mr-1"></i>Pay Now
                                         </a>
+                                    @elseif($appointment->payment_status !== 'completed' && $appointment->status !== 'cancelled')
+                                        <button class="btn btn-sm btn-danger btn-cancel-appointment" data-id="{{ $appointment->id }}" title="Cancel Appointment">
+                                            <i class="typcn typcn-times mr-1"></i>Cancel
+                                        </button>
+                                    @elseif($appointment->status === 'cancelled')
+                                        <button class="btn btn-sm btn-outline-danger btn-delete-appointment" data-id="{{ $appointment->id }}" title="Delete Appointment">
+                                            <i class="typcn typcn-trash mr-1"></i>Delete
+                                        </button>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -354,7 +362,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fa fa-flask mr-2"></i>Lab Test History
+                        <i class="typcn typcn-beaker mr-2"></i>Lab Test History
                     </h3>
                 </div>
                 <div class="card-body table-responsive p-0">
@@ -402,7 +410,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="scheduleAppointmentModalLabel">
-                    <i class="fa fa-calendar-plus mr-2"></i>Schedule Appointment for {{ $patient->name }}
+                    <i class="typcn typcn-calendar mr-2"></i>Schedule Appointment for {{ $patient->name }}
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -423,7 +431,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="doctor_id" class="form-label">
-                                    <i class="fa fa-user-md mr-1"></i>Doctor <span class="text-danger">*</span>
+                                    <i class="typcn typcn-user mr-1"></i>Doctor <span class="text-danger">*</span>
                                 </label>
                                 <select name="doctor_id" id="doctor_id" class="form-control" required>
                                     <option value="">Select Doctor</option>
@@ -441,7 +449,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="duration_id" class="form-label">
-                                    <i class="fa fa-clock mr-1"></i>Duration <span class="text-danger">*</span>
+                                    <i class="typcn typcn-time mr-1"></i>Duration <span class="text-danger">*</span>
                                 </label>
                                 <select name="duration_id" id="duration_id" class="form-control" required>
                                     <option value="">Select Duration</option>
@@ -457,7 +465,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="appointment_date" class="form-label">
-                                    <i class="fa fa-calendar mr-1"></i>Appointment Date <span class="text-danger">*</span>
+                                    <i class="typcn typcn-calendar mr-1"></i>Appointment Date <span class="text-danger">*</span>
                                 </label>
                                 <input type="date" name="appointment_date" id="appointment_date" class="form-control" required
                                        min="{{ \Carbon\Carbon::tomorrow()->format('Y-m-d') }}">
@@ -466,7 +474,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="appointment_time" class="form-label">
-                                    <i class="fa fa-clock mr-1"></i>Appointment Time <span class="text-danger">*</span>
+                                    <i class="typcn typcn-time mr-1"></i>Appointment Time <span class="text-danger">*</span>
                                 </label>
                                 <input type="time" name="appointment_time" id="appointment_time" class="form-control" required>
                             </div>
@@ -475,7 +483,7 @@
 
                     <div class="form-group">
                         <label for="reason" class="form-label">
-                            <i class="fa fa-comment mr-1"></i>Reason for Visit <span class="text-danger">*</span>
+                            <i class="typcn typcn-chat mr-1"></i>Reason for Visit <span class="text-danger">*</span>
                         </label>
                         <textarea name="reason" id="reason" class="form-control" rows="3" required
                                   placeholder="Please describe the reason for this appointment..."></textarea>
@@ -483,7 +491,7 @@
 
                     <!-- Patient Info Summary -->
                     <div class="alert alert-info text-dark">
-                        <h6><i class="fa fa-info-circle mr-1"></i>Appointment Details</h6>
+                        <h6><i class="typcn typcn-info mr-1"></i>Appointment Details</h6>
                         <p class="mb-1"><strong>Patient:</strong> {{ $patient->name }} (ID: {{ $patient->patient_id }})</p>
                         @if($patient->school)
                             <p class="mb-1"><strong>Institution:</strong> {{ $patient->school->name }} (School)</p>
@@ -495,10 +503,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fa fa-times mr-1"></i>Cancel
+                        <i class="typcn typcn-times mr-1"></i>Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fa fa-calendar-check mr-1"></i>Schedule Appointment
+                        <i class="typcn typcn-calendar mr-1"></i>Schedule Appointment
                     </button>
                 </div>
             </form>
@@ -519,74 +527,19 @@
     padding: 0.375rem 0.5rem;
 }
 
-/* Small Stats Boxes */
-.small-box {
-    border-radius: 0.375rem;
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    margin-bottom: 20px;
-    position: relative;
-    display: block;
-    color: #fff;
-    transition: transform 0.2s ease-in-out;
+/* Stat Label Styling */
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.small-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,.15);
-}
-
-.small-box .inner {
-    padding: 15px;
-}
-
-.small-box .inner h3 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    white-space: nowrap;
-    padding: 0;
-    line-height: 1;
-}
-
-.small-box .inner p {
-    font-size: 0.9rem;
-    margin: 0;
-    opacity: 0.9;
-}
-
-.small-box .icon {
-    color: rgba(0,0,0,0.15);
-    z-index: 0;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    font-size: 70px;
-    transition: all .3s linear;
-}
-
-.small-box:hover .icon {
-    transform: scale(1.1);
-}
-
-.small-box.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-}
-
-.small-box.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
-}
-
-.small-box.bg-warning {
-    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
-    color: #212529 !important;
-}
-
-.small-box.bg-warning .icon {
-    color: rgba(0,0,0,0.2);
-}
-
-.small-box.bg-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%) !important;
+/* Icon XL Styling */
+.icon-xl {
+    font-size: 2.5rem;
+    opacity: 0.8;
 }
 
 /* Print Styles */
@@ -717,21 +670,19 @@ dl.row dd {
     }
 }
 
-/* Copy Button Styling */
-.copy-btn {
-    padding: 0.125rem 0.25rem;
-    font-size: 0.75rem;
-    line-height: 1;
-    border-radius: 0.25rem;
-    transition: all 0.2s ease-in-out;
+/* Stat Label Styling */
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.copy-btn:hover {
-    transform: scale(1.05);
-}
-
-.copy-btn i {
-    font-size: 0.75rem;
+/* Icon XL Styling */
+.icon-xl {
+    font-size: 2.5rem;
+    opacity: 0.8;
 }
 
 .timeline::before {
@@ -831,7 +782,7 @@ dl.row dd {
             const originalClass = originalIcon.className;
 
             // Change icon temporarily
-            originalIcon.className = isError ? 'fa fa-exclamation-triangle' : 'fa fa-check';
+            originalIcon.className = isError ? 'typcn typcn-warning' : 'typcn typcn-tick';
 
             // Change button color temporarily
             button.classList.remove('btn-outline-secondary');
@@ -856,7 +807,7 @@ dl.row dd {
             const originalText = submitBtn.html();
 
             // Disable submit button and show loading
-            submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Scheduling...');
+            submitBtn.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i> Scheduling...');
 
             // Clear any previous alerts
             $('.alert').not('.alert-info').remove();
@@ -869,7 +820,7 @@ dl.row dd {
                     // Show success message
                     const successAlert = `
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fa fa-check-circle mr-1"></i>
+                            <i class="typcn typcn-tick mr-1"></i>
                             <strong>Success!</strong> Appointment scheduled successfully.
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -901,7 +852,7 @@ dl.row dd {
                     // Show error message
                     const errorAlert = `
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                            <i class="typcn typcn-warning mr-1"></i>
                             <strong>Error!</strong> ${errorMessage}
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -921,6 +872,128 @@ dl.row dd {
         $('#scheduleAppointmentModal').on('hidden.bs.modal', function() {
             $('#appointmentForm')[0].reset();
             $('.alert').not('.alert-info').remove();
+        });
+    });
+
+    // Appointment cancellation functionality
+    $(document).on('click', '.btn-cancel-appointment', function() {
+        const appointmentId = $(this).data('id');
+        const button = $(this);
+        const originalHtml = button.html();
+
+        if (!confirm('Are you sure you want to cancel this appointment?')) {
+            return;
+        }
+
+        // Disable button and show loading
+        button.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i>Cancelling...');
+
+        $.ajax({
+            url: `/appointments/${appointmentId}/cancel`,
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="typcn typcn-tick mr-1"></i>
+                            <strong>Success!</strong> Appointment cancelled successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    $('.container-fluid').prepend(successAlert);
+
+                    // Update the appointment row status
+                    const row = button.closest('tr');
+                    row.find('.badge').removeClass('badge-warning badge-success badge-secondary').addClass('badge-danger');
+                    row.find('.badge i').removeClass('typcn-credit-card typcn-tick typcn-time').addClass('typcn-times');
+                    row.find('.badge').html('<i class="typcn typcn-times mr-1"></i>Cancelled');
+
+                    // Replace cancel button with delete button
+                    button.replaceWith(`
+                        <button class="btn btn-sm btn-outline-danger btn-delete-appointment" data-id="${appointmentId}" title="Delete Appointment">
+                            <i class="typcn typcn-trash mr-1"></i>Delete
+                        </button>
+                    `);
+
+                    // Auto-hide alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut();
+                    }, 3000);
+                } else {
+                    alert('Failed to cancel appointment: ' + (response.message || 'Unknown error'));
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to cancel appointment.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                alert(errorMessage);
+                button.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
+
+    // Appointment deletion functionality
+    $(document).on('click', '.btn-delete-appointment', function() {
+        const appointmentId = $(this).data('id');
+        const button = $(this);
+        const originalHtml = button.html();
+
+        if (!confirm('Are you sure you want to permanently delete this cancelled appointment? This action cannot be undone.')) {
+            return;
+        }
+
+        // Disable button and show loading
+        button.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i>Deleting...');
+
+        $.ajax({
+            url: `/appointments/${appointmentId}`,
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="typcn typcn-tick mr-1"></i>
+                            <strong>Success!</strong> Appointment deleted successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    $('.container-fluid').prepend(successAlert);
+
+                    // Remove the appointment row
+                    button.closest('tr').remove();
+
+                    // Auto-hide alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut();
+                    }, 3000);
+                } else {
+                    alert('Failed to delete appointment: ' + (response.message || 'Unknown error'));
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to delete appointment.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                alert(errorMessage);
+                button.prop('disabled', false).html(originalHtml);
+            }
         });
     });
 </script>

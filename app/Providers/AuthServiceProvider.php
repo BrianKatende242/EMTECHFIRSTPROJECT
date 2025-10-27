@@ -25,6 +25,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // Gate for admin area
+        Gate::define('admin', function ($user) {
+            if (! $user) return false;
+            // Eloquent models expose attributes, so check the attribute directly
+            return (bool) ($user->is_admin ?? false);
+        });
     }
 }

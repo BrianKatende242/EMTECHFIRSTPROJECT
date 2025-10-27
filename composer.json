@@ -42,6 +42,9 @@
         "classmap": [
             "database/seeders",
             "database/factories"
+        ],
+        "files": [
+            "app/Helpers/SchoolHelper.php"
         ]
     },
     "autoload-dev": {

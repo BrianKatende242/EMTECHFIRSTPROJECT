@@ -1,0 +1,1 @@
+# Schools selenium tests package

@@ -28,6 +28,8 @@
 
 /* Background / text helpers */
 .bg-primary { background-color: #FF00F8 !important; }
+/* Purple helper used for secondary emphasis (e.g., Upcoming Appointments) */
+.bg-purple { background-color: #593bdb !important; }
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover, button.bg-primary:focus { background-color: #e000dc !important; }
 .text-primary { color: #FF00F8 !important; }

@@ -50,17 +50,23 @@
                 <!-- Patient Type Selection -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Patient Type:</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="patient_type" id="new_patient" value="new" checked>
-                        <label class="form-check-label" for="new_patient">
-                            New Patient
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="patient_type" id="existing_patient" value="existing">
-                        <label class="form-check-label" for="existing_patient">
-                            Existing Patient (Enter Patient ID)
-                        </label>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input type="radio" class="form-check-input" name="patient_type" id="new_patient" value="new" checked>
+                                    New Patient
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input type="radio" class="form-check-input" name="patient_type" id="existing_patient" value="existing">
+                                    Existing Patient (Enter Patient ID)
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SchoolOtpMail;
-use App\Models\Otp;
+use App\Models\OneTimeLoginToken;
 use App\Models\School;
 use App\Models\Doctor;
 use App\Models\HealthFacility;
@@ -59,7 +59,7 @@ class OtpController extends Controller
             
             // Log email configuration details
             \Log::info('Email configuration', [
-                'mail_driver' => config('mail.default'),
+                'mail_driver' => config('mail.driver'),
                 'mail_host' => config('mail.host'),
                 'mail_port' => config('mail.port'),
                 'mail_from_address' => config('mail.from.address'),
@@ -99,7 +99,7 @@ class OtpController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'mail_config' => [
-                    'driver' => config('mail.default'),
+                    'driver' => config('mail.driver'),
                     'host' => config('mail.host'),
                     'port' => config('mail.port'),
                     'from_address' => config('mail.from.address'),
@@ -276,15 +276,28 @@ class OtpController extends Controller
         // Get the school information
         $school = School::where('email', $request->email)->first();
 
-        \Log::info('OTP Verified Successfully', [
+        // Generate one-time login token
+        $loginToken = OneTimeLoginToken::create([
+            'token' => OneTimeLoginToken::generateToken(),
             'email' => $request->email,
-            'school_id' => $school ? $school->id : null
+            'user_type' => 'school',
+            'user_id' => $school->id,
+            'expires_at' => now()->addMinutes(10), // Token expires in 10 minutes
+            'used' => false
+        ]);
+
+        $loginUrl = url("/auth/login/{$loginToken->token}");
+
+        \Log::info('OTP Verified Successfully - One-time login token created', [
+            'email' => $request->email,
+            'school_id' => $school->id,
+            'token_id' => $loginToken->id
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'OTP verified successfully. Access your dashboard below.',
-            'dashboard_url' => 'https://laravelbackendchil.onrender.com/school-dashboard/'.$school->id,
+            'message' => 'OTP verified successfully. Use the login link to access your dashboard.',
+            'login_url' => $loginUrl,
             'school_id' => $school->id,
             'school_name' => $school->name
         ]);
@@ -358,16 +371,29 @@ class OtpController extends Controller
     
             // Get doctor details
             $doctor = Doctor::where('email', $request->email)->first();
+
+            // Generate one-time login token
+            $loginToken = OneTimeLoginToken::create([
+                'token' => OneTimeLoginToken::generateToken(),
+                'email' => $request->email,
+                'user_type' => 'doctor',
+                'user_id' => $doctor->id,
+                'expires_at' => now()->addMinutes(10),
+                'used' => false
+            ]);
+
+            $loginUrl = url("/auth/login/{$loginToken->token}");
     
-            \Log::info('Doctor OTP Verified Successfully', [
+            \Log::info('Doctor OTP Verified Successfully - One-time login token created', [
                 'doctor_id' => $doctor->id,
-                'email' => $request->email
+                'email' => $request->email,
+                'token_id' => $loginToken->id
             ]);
     
             return response()->json([
                 'success' => true,
-                'message' => 'OTP verified successfully',
-                'dashboard_url' => url("/doctor-dashboard/{$doctor->id}"),
+                'message' => 'OTP verified successfully. Use the login link to access your dashboard.',
+                'login_url' => $loginUrl,
                 'doctor_id' => $doctor->id,
                 'doctor_name' => $doctor->name
             ]);
@@ -453,15 +479,28 @@ class OtpController extends Controller
         // Get health facility details
         $healthFacility = HealthFacility::where('email', $request->email)->first();
 
-        \Log::info('Health Facility OTP Verified Successfully', [
+        // Generate one-time login token
+        $loginToken = OneTimeLoginToken::create([
+            'token' => OneTimeLoginToken::generateToken(),
+            'email' => $request->email,
+            'user_type' => 'health_facility',
+            'user_id' => $healthFacility->id,
+            'expires_at' => now()->addMinutes(10),
+            'used' => false
+        ]);
+
+        $loginUrl = url("/auth/login/{$loginToken->token}");
+
+        \Log::info('Health Facility OTP Verified Successfully - One-time login token created', [
             'health_facility_id' => $healthFacility->id,
-            'email' => $request->email
+            'email' => $request->email,
+            'token_id' => $loginToken->id
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'OTP verified successfully',
-            'dashboard_url' => url("/health-facility/dashboard/{$healthFacility->id}"),
+            'message' => 'OTP verified successfully. Use the login link to access your dashboard.',
+            'login_url' => $loginUrl,
             'health_facility_id' => $healthFacility->id,
             'health_facility_name' => $healthFacility->name
         ]);

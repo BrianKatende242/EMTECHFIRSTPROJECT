@@ -1,0 +1,530 @@
+/* Admin Doctors Custom Styles */
+
+/* Header gradient background */
+.doctors-header-gradient {
+    background: linear-gradient(135deg, #FF00F8 0%, #e000dc 100%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Search and filters card */
+.doctors-filters-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Form controls with custom border */
+.doctors-form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+/* Filter and clear buttons */
+.doctors-filter-btn {
+    border-radius: 10px;
+}
+
+.doctors-clear-btn {
+    border-radius: 10px;
+}
+
+/* Search field styling */
+#admin-search {
+    border-radius: 10px !important;
+    border: 2px solid #e9ecef !important;
+}
+
+/* Filter actions section */
+.doctors-filter-actions {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+/* Doctor cards */
+.doctor-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.doctor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.doctor-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Avatar circle */
+.doctor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Contact info sections */
+.doctor-contact-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+}
+
+.doctor-contact-section .fa {
+    width: 16px;
+}
+
+/* Affiliation sections */
+.doctor-school-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+.doctor-facility-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+.doctor-school-section .fa,
+.doctor-facility-section .fa {
+    width: 16px;
+}
+
+/* Meeting room section */
+.doctor-meeting-section {
+    background: rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+}
+
+/* Card footer buttons */
+.doctor-card-btn {
+    border-radius: 8px;
+}
+
+/* Status badge */
+.doctor-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Modal custom styles */
+.doctors-modal .modal-content {
+    border-radius: 15px;
+}
+
+.doctors-modal .modal-header {
+    border-radius: 15px 15px 0 0;
+}
+
+/* Copy button in meeting */
+.doctor-copy-btn {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+}
+
+/* Admin Appointments Custom Styles */
+
+/* Header gradient background */
+.appointments-header-gradient {
+    background: linear-gradient(135deg, #FF00F8 0%, #e000dc 100%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Search and filters card */
+.appointments-filters-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Form controls with custom border */
+.appointments-form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+/* Filter and clear buttons */
+.appointments-filter-btn {
+    border-radius: 10px;
+}
+
+.appointments-clear-btn {
+    border-radius: 10px;
+}
+
+/* Appointment cards */
+.appointment-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.appointment-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.appointment-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Patient info sections */
+.appointment-patient-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+}
+
+/* Doctor info sections */
+.appointment-doctor-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Details sections */
+.appointment-details-section {
+    background: rgba(0,0,0,0.05);
+    border-left: 3px solid #6c757d;
+}
+
+/* Institution sections */
+.appointment-institution-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+/* Payment sections */
+.appointment-payment-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+/* Card footer buttons */
+.appointment-card-btn {
+    border-radius: 8px;
+}
+
+/* Modal custom styles */
+.appointments-modal .modal-content {
+    border-radius: 15px;
+}
+
+.appointments-modal .modal-header {
+    border-radius: 15px 15px 0 0;
+}
+
+/* Bulk update modal */
+#bulkUpdateModal .form-check {
+    margin-bottom: 0.5rem;
+}
+
+#bulkUpdateModal .form-check-label {
+    font-size: 0.9rem;
+}
+
+/* Admin Payments Custom Styles */
+
+/* Payment cards */
+.payment-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.payment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.payment-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.payment-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Amount section */
+.payment-amount-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Details sections */
+.payment-details-section {
+    background: rgba(0,0,0,0.05);
+    border-left: 3px solid #6c757d;
+}
+
+/* Appointment sections */
+.payment-appointment-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+/* Card footer buttons */
+.payment-card-btn {
+    border-radius: 8px;
+}
+
+/* Admin Patients Custom Styles */
+
+/* Patient cards */
+.patient-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.patient-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.patient-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Gender badge */
+.patient-gender-badge {
+    font-size: 0.7rem;
+}
+
+/* Contact sections */
+.patient-contact-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+}
+
+.patient-contact-section .fa {
+    width: 16px;
+}
+
+/* Parent contact sections */
+.patient-parent-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+.patient-parent-section .fa {
+    width: 16px;
+}
+
+/* Affiliation sections */
+.patient-school-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+.patient-facility-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+.patient-school-section .fa,
+.patient-facility-section .fa {
+    width: 16px;
+}
+
+/* Appointments sections */
+.patient-appointments-section {
+    background: rgba(108, 117, 125, 0.05);
+    border-left: 3px solid #6c757d;
+}
+
+/* Birth sections */
+.patient-birth-section {
+    background: rgba(220, 53, 69, 0.05);
+    border-left: 3px solid #dc3545;
+}
+
+/* Card footer buttons */
+.patient-card-btn {
+    border-radius: 8px;
+}
+
+/* Avatar circle for patients table */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+    margin-right: 1.5rem !important;
+}
+
+/* Admin Schools Custom Styles */
+
+/* School cards */
+.school-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.school-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.school-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.school-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Contact sections */
+.school-contact-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+}
+
+.school-contact-section .fa {
+    width: 16px;
+}
+
+/* Statistics sections */
+.school-stats-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Address sections */
+.school-address-section {
+    background: rgba(23, 162, 184, 0.05);
+    border-left: 3px solid #17a2b8;
+}
+
+/* Card footer buttons */
+.school-card-btn {
+    border-radius: 8px;
+}
+
+/* Admin Doctor Availabilities Custom Styles */
+
+/* Header gradient background */
+.doctor-availabilities-header-gradient {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Search and filters card */
+.doctor-availabilities-filters-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Form controls with custom border */
+.doctor-availabilities-form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+/* Filter and clear buttons */
+.doctor-availabilities-filter-btn {
+    border-radius: 10px;
+}
+
+.doctor-availabilities-clear-btn {
+    border-radius: 10px;
+}
+
+/* Doctor availabilities cards */
+.doctor-availability-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.doctor-availability-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Card header gradient */
+.doctor-availability-card-header {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border: none;
+    padding: 1.5rem 1rem;
+}
+
+/* Status badge */
+.doctor-availability-status-badge {
+    font-size: 0.7rem;
+}
+
+/* Contact sections */
+.doctor-availability-contact-section {
+    background: rgba(0, 123, 255, 0.05);
+    border-left: 3px solid #007bff;
+}
+
+.doctor-availability-contact-section .mdi {
+    width: 16px;
+}
+
+/* Availability sections */
+.doctor-availability-schedule-section {
+    background: rgba(40, 167, 69, 0.05);
+    border-left: 3px solid #28a745;
+}
+
+/* Specialization sections */
+.doctor-availability-specialization-section {
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+.doctor-availability-specialization-section .mdi,
+.doctor-availability-schedule-section .mdi {
+    width: 16px;
+}
+
+/* Card footer buttons */
+.doctor-availability-card-btn {
+    border-radius: 8px;
+}
+
+/* Modal custom styles */
+.doctor-availabilities-modal .modal-content {
+    border-radius: 15px;
+}
+
+.doctor-availabilities-modal .modal-header {
+    border-radius: 15px 15px 0 0;
+}
