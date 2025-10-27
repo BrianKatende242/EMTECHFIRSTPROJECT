@@ -452,7 +452,7 @@ Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->nam
 // Add routes for other methods if not already defined
 
 
-Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
+Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard.show');
 
 // One-time login link consume route (public)
 Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
@@ -506,7 +506,9 @@ Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 
 
 // Health Facility section routes
 Route::get('/health-facility/{id}/patients', [HealthFacilityController::class, 'patients'])->name('health-facility.patients');
+Route::match(['post', 'delete'], '/health-facility/{id}/patients', [HealthFacilityController::class, 'destroyAllPatients'])->name('health-facility.patients.destroy-all');
 Route::get('/health-facility/{id}/patients/create', [HealthFacilityController::class, 'createPatient'])->name('health-facility.patients.create');
+Route::delete('/health-facility/{id}/patients/{patientId}', [HealthFacilityController::class, 'destroyPatient'])->name('health-facility.patients.destroy');
 Route::get('/health-facility/{id}/book-doctor', [HealthFacilityController::class, 'bookDoctor'])->name('health-facility.book-doctor');
 Route::get('/health-facility/{id}/lab-tests', [HealthFacilityController::class, 'labTests'])->name('health-facility.lab-tests');
 Route::get('/health-facility/{id}/transactions', [HealthFacilityController::class, 'transactions'])->name('health-facility.transactions');

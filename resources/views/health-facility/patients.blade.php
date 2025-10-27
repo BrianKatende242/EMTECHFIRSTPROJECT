@@ -43,14 +43,13 @@
                                 <a href="{{ route('patients.profile', ['patient' => $patient->id]) }}" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="mdi mdi-account"></i> Profile
                                 </a>
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-danger"
-                                        data-toggle="modal"
-                                        data-target="#confirmDeleteModal"
-                                        data-action="{{ route('patients.delete', ['patient' => $patient->id]) }}"
-                                        data-name="{{ $patient->name }}">
-                                    <i class="mdi mdi-delete"></i> Delete
-                                </button>
+                                <form method="POST" action="{{ route('health-facility.patients.destroy', ['id' => $healthFacility->id, 'patientId' => $patient->id]) }}" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete {{ $patient->name }}?')">
+                                        <i class="mdi mdi-delete"></i> Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach
@@ -148,84 +147,4 @@
         </div>
     </div>
 </div>
-
-        {{-- Confirm Delete Modal --}}
-        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-dark">
-                        Are you sure you want to delete <strong id="deletePatientName">this patient</strong>? This action cannot be undone.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
-                        <form id="deletePatientForm" method="POST" action="">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Patient type selection functionality
-    const newPatientRadio = document.getElementById('newPatient');
-    const existingPatientRadio = document.getElementById('existingPatient');
-    const newPatientSection = document.getElementById('newPatientSection');
-    const existingPatientSection = document.getElementById('existingPatientSection');
-    const patientForm = document.getElementById('patientForm');
-
-    function togglePatientSections() {
-        if (newPatientRadio && newPatientRadio.checked) {
-            if (newPatientSection) newPatientSection.classList.remove('d-none');
-            if (existingPatientSection) existingPatientSection.classList.add('d-none');
-            // Make new patient fields required
-            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
-                field.setAttribute('required', 'required');
-            });
-            // Remove required from existing patient fields
-            document.querySelectorAll('#existingPatientSection input[required]').forEach(field => {
-                field.removeAttribute('required');
-            });
-        } else if (existingPatientRadio && existingPatientRadio.checked) {
-            if (newPatientSection) newPatientSection.classList.add('d-none');
-            if (existingPatientSection) existingPatientSection.classList.remove('d-none');
-            // Make existing patient ID required
-            document.querySelector('#existingPatientSection input[name="patient_id"]').setAttribute('required', 'required');
-            // Remove required from new patient fields
-            document.querySelectorAll('#newPatientSection input[required], #newPatientSection select[required]').forEach(field => {
-                field.removeAttribute('required');
-            });
-        }
-    }
-
-    // Add event listeners with null checks
-    if (newPatientRadio) newPatientRadio.addEventListener('change', togglePatientSections);
-    if (existingPatientRadio) existingPatientRadio.addEventListener('change', togglePatientSections);
-
-    // Initialize on modal show
-    document.getElementById('addPatientModal').addEventListener('show.bs.modal', function() {
-        // Reset to new patient by default
-        if (newPatientRadio) newPatientRadio.checked = true;
-        togglePatientSections();
-    });
-
-    var modalEl = document.getElementById('confirmDeleteModal');
-    modalEl.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var action = button.getAttribute('data-action');
-        var name = button.getAttribute('data-name');
-        modalEl.querySelector('#deletePatientForm').setAttribute('action', action);
-        modalEl.querySelector('#deletePatientName').textContent = name || 'this patient';
-    });
-});
-</script>
-@endpush
 @endsection

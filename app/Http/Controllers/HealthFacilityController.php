@@ -196,6 +196,68 @@ class HealthFacilityController extends Controller
         return view('health-facility/patients', compact('healthFacility', 'patients'));
     }
 
+    public function destroyAllPatients(Request $request, $id)
+    {
+        $healthFacility = HealthFacility::findOrFail($id);
+        
+        // Check if a specific patient ID is provided
+        if ($request->has('patient_id')) {
+            $patient = Patient::findOrFail($request->patient_id);
+            
+            // Verify the patient belongs to the health facility
+            if ($patient->health_facility_id !== (int)$id) {
+                abort(403, 'Patient does not belong to this health facility');
+            }
+            
+            // Cascade appointments: delete child appointments before patient
+            $patient->appointments()->delete();
+            
+            $patient->delete();
+            
+            return redirect()
+                ->route('health-facility.patients', ['id' => $id])
+                ->with('success', 'Patient and their appointments deleted successfully.');
+        } else {
+            // Delete all patients for this health facility
+            $patients = Patient::forHealthFacility($id)->get();
+            
+            // Delete appointments for each patient first
+            foreach ($patients as $patient) {
+                $patient->appointments()->delete();
+            }
+            
+            // Delete all patients
+            Patient::forHealthFacility($id)->delete();
+            
+            return redirect()
+                ->route('health-facility.patients', ['id' => $id])
+                ->with('success', 'All patients and their appointments deleted successfully.');
+        }
+    }
+
+    public function destroyPatient($id, $patientId)
+    {
+        Log::info('Destroy patient called', ['health_facility_id' => $id, 'patient_id_param' => $patientId]);
+
+        $patient = Patient::findOrFail($patientId);
+        Log::info('Patient found', ['patient_id' => $patient->id, 'patient_health_facility_id' => $patient->health_facility_id]);
+
+        // Verify the patient belongs to the health facility
+        if ($patient->health_facility_id !== (int)$id) {
+            Log::warning('Patient does not belong to health facility', ['patient_health_facility_id' => $patient->health_facility_id, 'requested_id' => $id]);
+            abort(403, 'Patient does not belong to this health facility');
+        }
+
+        // Cascade appointments: delete child appointments before patient
+        $patient->appointments()->delete();
+
+        $patient->delete();
+
+        return redirect()
+            ->route('health-facility.patients', ['id' => $id])
+            ->with('success', 'Patient and their appointments deleted successfully.');
+    }
+
     public function createPatient($id)
     {
         $healthFacility = HealthFacility::findOrFail($id);
