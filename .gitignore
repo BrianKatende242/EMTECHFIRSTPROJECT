@@ -18,3 +18,4 @@ pollix template/
 MARZPAY_DOCUMENTATION.txt
 
 selenium_test.py
+sendgrid.env

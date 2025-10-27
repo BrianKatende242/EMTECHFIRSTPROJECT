@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -30,9 +31,8 @@ class AdminController extends Controller
 
         for ($month = 1; $month <= 12; $month++) {
             $monthName = date('M', mktime(0, 0, 0, $month, 1));
-            $startDate = date("$currentYear-$month-01");
-            $endDate = date("$currentYear-$month-t");
-
+            $startDate = Carbon::create($currentYear, $month, 1)->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::create($currentYear, $month, 1)->endOfMonth()->format('Y-m-d');
             // Count appointments for this month
             $appointmentsCount = \App\Models\Appointment::whereBetween('appointment_time', [$startDate, $endDate])->count();
 
