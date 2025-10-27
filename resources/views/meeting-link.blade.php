@@ -35,7 +35,7 @@
                         <i class="mdi mdi-play me-1"></i> Open Meeting Room
                     </a>
                     <span aria-hidden="true" class="mx-1 d-none d-sm-inline-block" style="width:1px; height:38px; background:#e9ecef; display:inline-block;"></span>
-                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendLinkModal">
+                    <button class="btn btn-info" data-toggle="modal" data-target="#sendLinkModal">
                         <i class="mdi mdi-email me-2"></i> Send Link to School/Health Facility
                     </button>
                 </div>
@@ -45,36 +45,6 @@
         </div>
 
     <div class="col-md-4">
-
-        <!-- Send Link Modal -->
-        <div class="modal fade" id="sendLinkModal" tabindex="-1" aria-labelledby="sendLinkModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form method="POST" action="{{ route('doctor.send-link', ['id' => $doctor->id]) }}" id="sendLinkForm">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="sendLinkModalLabel">Send Meeting Link</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="sendLinkAlert" class="mb-3"></div>
-                            <div class="mb-3">
-                                <label for="recipient_email" class="form-label">Recipient email</label>
-                                <input type="email" class="form-control" id="recipient_email" name="recipient_email" required placeholder="example@school.edu">
-                            </div>
-                            <div class="mb-3">
-                                <label for="message" class="form-label">Message (optional)</label>
-                                <textarea class="form-control" id="message" name="message" rows="3">Hi, here is my meeting link: {{ $meetingUrl }}</textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" id="sendLinkBtn">Send Link</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
 
         <div class="card">
             <div class="card-header bg-secondary text-white">
@@ -112,6 +82,38 @@
         </div>
     </div>
 </div>
+
+<!-- Send Link Modal -->
+<div class="modal fade" id="sendLinkModal" tabindex="-1" aria-labelledby="sendLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('doctor.send-link', ['id' => $doctor->id]) }}" id="sendLinkForm">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendLinkModalLabel">Send Meeting Link</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="sendLinkAlert" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="recipient_email" class="form-label">Recipient email</label>
+                        <input type="email" class="form-control" id="recipient_email" name="recipient_email" required placeholder="example@school.edu">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message (optional)</label>
+                        <textarea class="form-control" id="message" name="message" rows="3">Hi, here is my meeting link: {{ $meetingUrl }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="sendLinkBtn">Send Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -126,13 +128,13 @@ document.addEventListener('DOMContentLoaded', function(){
   
   function showInlineAlert(msg, type='success'){
     if(!alertBox) return;
-    alertBox.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+    alertBox.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>`;
     setTimeout(()=>{ const a = alertBox.querySelector('.alert'); if(a){ a.classList.remove('show'); a.addEventListener('transitionend', ()=> alertBox.innerHTML = ''); } }, 2500);
   }
   
   function showModalAlert(msg, type='success'){
     if(!sendLinkAlert) return;
-    sendLinkAlert.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+    sendLinkAlert.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>`;
   }
   
   if(copyBtn && input){
@@ -179,8 +181,7 @@ document.addEventListener('DOMContentLoaded', function(){
           showModalAlert(data.message || 'Meeting link sent successfully!', 'success');
           // Close modal after 2 seconds
           setTimeout(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('sendLinkModal'));
-            if(modal) modal.hide();
+            $('#sendLinkModal').modal('hide');
             // Clear form
             sendLinkForm.reset();
           }, 2000);
