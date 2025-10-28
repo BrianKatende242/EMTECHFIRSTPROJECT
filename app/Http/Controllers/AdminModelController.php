@@ -628,13 +628,30 @@ class AdminModelController extends Controller
 
     public function update(Request $request, $modelKey = null, $id = null)
     {
+        // Debug logging
+        \Log::info('AdminModelController::update called', [
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'route_name' => $request->route() ? $request->route()->getName() : 'no route',
+            'modelKey_param' => $modelKey,
+            'id_param' => $id,
+            'all_params' => $request->all(),
+            'headers' => [
+                'X-Requested-With' => $request->header('X-Requested-With'),
+                'X-CSRF-TOKEN' => $request->header('X-CSRF-TOKEN') ? 'present' : 'missing',
+            ]
+        ]);
+
         // If no modelKey provided, determine it from the route name
         if (!$modelKey) {
             $routeName = request()->route()->getName();
+            \Log::info('Determining modelKey from route name', ['route_name' => $routeName]);
             $modelKey = str_replace(['admin.', '.update'], '', $routeName);
+            \Log::info('Resolved modelKey', ['modelKey' => $modelKey]);
         }
 
         $modelClass = $this->modelFor($modelKey);
+        \Log::info('Resolved modelClass', ['modelClass' => $modelClass]);
         abort_unless($modelClass, 404);
 
         $item = $modelClass::findOrFail($id);
@@ -695,6 +712,26 @@ class AdminModelController extends Controller
                     'price' => 'required|integer|min:0|max:999999',
                     'is_active' => 'boolean',
                 ]);
+
+                // Check for uniqueness manually since the unique constraint is on the database
+                // Exclude the current item when checking for duplicates
+                $existing = \App\Models\Duration::where('minutes', $validated['minutes'])
+                    ->where('duration_type', $validated['duration_type'])
+                    ->where('id', '!=', $id)
+                    ->first();
+
+                if ($existing) {
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'A duration with these minutes and type already exists.',
+                            'errors' => [
+                                'minutes' => ['A duration with these minutes and type already exists.']
+                            ]
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors(['minutes' => 'A duration with these minutes and type already exists.'])->withInput();
+                }
 
                 $item->update($validated);
 

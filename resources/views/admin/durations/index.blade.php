@@ -65,8 +65,19 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fa fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-dismiss="alert"></button>
+            <i class="mdi mdi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="typcn typcn-times"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-alert-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="typcn typcn-times"></i>
+            </button>
         </div>
     @endif
 
