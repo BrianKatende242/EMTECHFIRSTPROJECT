@@ -156,8 +156,8 @@
                     </div>
 
                     @if($patient->medicalHistories->count() > 0)
-                    <div class="mt-3">
-                        <h5><i class="typcn typcn-time mr-2"></i>Medical History</h5>
+                    <div class="mt-4">
+                        <h5 class="mb-3"><i class="typcn typcn-time mr-2"></i>Medical History</h5>
                         <div class="timeline">
                             @foreach($patient->medicalHistories->sortByDesc('recorded_date') as $history)
                             <div class="timeline-item">
@@ -180,6 +180,15 @@
                                 </div>
                             </div>
                             @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="mt-4">
+                        <h5 class="mb-3"><i class="typcn typcn-time mr-2"></i>Medical History</h5>
+                        <div class="text-center py-4">
+                            <i class="typcn typcn-document-text fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No medical history records found for this patient.</p>
+                            <small class="text-muted">Medical history will appear here when doctors add notes during appointments.</small>
                         </div>
                     </div>
                     @endif
