@@ -53,6 +53,7 @@ Route::get('/finance-dashboard', [FinanceDashboardController::class, 'index'])->
 
 
 Route::get('/admin/contact-submissions', [ContactController::class, 'index'])
+     ->middleware('admin')
      ->name('admin.contact-submissions');
 
 
