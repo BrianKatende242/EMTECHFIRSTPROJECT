@@ -161,9 +161,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         
@@ -215,9 +214,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         
@@ -266,9 +264,8 @@ class MarzPayTest extends TestCase
 
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
 
@@ -348,9 +345,8 @@ class MarzPayTest extends TestCase
 
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
 
@@ -408,9 +404,8 @@ class MarzPayTest extends TestCase
 
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
 
@@ -519,9 +514,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         
