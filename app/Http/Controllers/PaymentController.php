@@ -526,7 +526,7 @@ class PaymentController extends Controller
 
                 // Update existing transaction or create new one for successful collection
                 $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
-                    ->where('status', 'pending')
+                    ->whereNotIn('status', ['successful', 'failed']) // Don't update already completed transactions
                     ->first();
 
                 if ($existingTransaction) {
@@ -607,13 +607,13 @@ class PaymentController extends Controller
                 // Don't update Payment record for failed collections - only successful payments are registered
             }
 
-            // Still create transaction record for failed collection
+            // Update existing transaction or create new one for failed collection
             $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
-                ->where('status', 'pending')
+                ->whereNotIn('status', ['successful', 'failed']) // Don't update already completed transactions
                 ->first();
 
             if ($existingTransaction) {
-                // Update existing pending transaction
+                // Update existing transaction to failed
                 $existingTransaction->update([
                     'status' => 'failed',
                     'webhook_event_type' => 'collection.failed',
@@ -621,7 +621,7 @@ class PaymentController extends Controller
                     'processed_at' => now(),
                 ]);
             } else {
-                // Create new transaction if no pending one exists
+                // Create new transaction if no existing one found or all existing are already final
                 \App\Models\Transaction::create([
                     'payment_id' => $payment?->id,
                     'reference_id' => $uuid ?? $reference,
@@ -691,7 +691,7 @@ class PaymentController extends Controller
 
             // Create or update transaction record for pending collection
             $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
-                ->where('status', 'pending')
+                ->whereNotIn('status', ['successful', 'failed']) // Don't update already completed transactions
                 ->first();
 
             if ($existingTransaction) {
@@ -701,7 +701,7 @@ class PaymentController extends Controller
                     'collection_data' => $transaction,
                 ]);
             } else {
-                // Create new transaction if none exists
+                // Create new transaction if none exists or all existing are already final
                 \App\Models\Transaction::create([
                     'payment_id' => $payment?->id,
                     'reference_id' => $uuid ?? $reference,
@@ -765,7 +765,7 @@ class PaymentController extends Controller
 
             // Create or update transaction record for cancelled collection
             $existingTransaction = \App\Models\Transaction::where('reference_id', $uuid ?? $reference)
-                ->where('status', 'pending')
+                ->whereNotIn('status', ['successful', 'failed']) // Don't update already completed transactions
                 ->first();
 
             if ($existingTransaction) {
