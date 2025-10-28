@@ -530,7 +530,9 @@ Route::get('/patients/{patient}/maternal', [PatientController::class, 'maternalD
     ->name('patient.maternal');
 
 Route::get('/patients/{patient}/profile', [PatientController::class, 'show'])->name('patients.profile');
+Route::get('/patients/{patient}/medical-history/{medicalHistory}', [PatientController::class, 'showMedicalHistory'])->name('patients.medical-history.show');
 Route::post('/patients/{patient}/medical-history', [PatientController::class, 'storeMedicalHistory'])->name('patients.medical-history.store');
+Route::put('/patients/{patient}/medical-history/{medicalHistory}', [PatientController::class, 'updateMedicalHistory'])->name('patients.medical-history.update');
     
 Route::post('/patients/create', function (Request $request) {
     try {
