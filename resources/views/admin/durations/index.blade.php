@@ -38,7 +38,7 @@
     <!-- Filters Section -->
     <div class="row mb-4">
         <div class="col-md-3 col-sm-12 mb-2">
-            <input type="text" id="admin-search" class="form-control" placeholder="Search by minutes or prices...">
+            <input type="text" id="admin-search" class="form-control" placeholder="Search by minutes, type or price...">
         </div>
         <div class="col-md-2 col-sm-12 mb-2">
             <select id="status-filter" class="form-select form-control">
@@ -52,10 +52,8 @@
                 <option value="">Sort by...</option>
                 <option value="minutes_asc">Minutes (Low to High)</option>
                 <option value="minutes_desc">Minutes (High to Low)</option>
-                <option value="general_price_asc">General Price (Low to High)</option>
-                <option value="general_price_desc">General Price (High to Low)</option>
-                <option value="specialist_price_asc">Specialist Price (Low to High)</option>
-                <option value="specialist_price_desc">Specialist Price (High to Low)</option>
+                <option value="price_asc">Price (Low to High)</option>
+                <option value="price_desc">Price (High to Low)</option>
                 <option value="created_at_desc">Newest First</option>
                 <option value="created_at_asc">Oldest First</option>
             </select>
@@ -86,8 +84,8 @@
                         <tr>
                             <th class="border-0">#</th>
                             <th class="border-0">Duration</th>
-                            <th class="border-0">General Price</th>
-                            <th class="border-0">Specialist Price</th>
+                            <th class="border-0">Type</th>
+                            <th class="border-0">Price</th>
                             <th class="border-0">Status</th>
                             <th class="border-0">Created</th>
                             <th class="border-0 text-center">Actions</th>
@@ -96,8 +94,8 @@
                     <tbody>
                         @forelse($items as $item)
                         <tr data-minutes="{{ $item->minutes }}"
-                            data-general-price="{{ $item->general_price }}"
-                            data-specialist-price="{{ $item->specialist_price }}"
+                            data-duration-type="{{ $item->duration_type }}"
+                            data-price="{{ $item->price }}"
                             data-is-active="{{ $item->is_active ? '1' : '0' }}">
                             <td>
                                 <strong>{{ $item->id }}</strong>
@@ -111,10 +109,12 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-success">UGX {{ number_format($item->general_price, 0) }}</div>
+                                <span class="badge bg-{{ $item->duration_type === 'general' ? 'info' : 'warning' }} text-white">
+                                    {{ ucfirst($item->duration_type) }}
+                                </span>
                             </td>
                             <td>
-                                <div class="fw-bold text-warning">UGX {{ number_format($item->specialist_price, 0) }}</div>
+                                <div class="fw-bold text-success">UGX {{ number_format($item->price, 0) }}</div>
                             </td>
                             <td>
                                 @if($item->is_active)
@@ -180,7 +180,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="modal_minutes">Minutes <span class="text-danger">*</span></label>
                                 <input type="number" name="minutes" id="modal_minutes" class="form-control @error('minutes') is-invalid @enderror"
@@ -190,36 +190,33 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modal_duration_type">Duration Type <span class="text-danger">*</span></label>
+                                <select name="duration_type" id="modal_duration_type" class="form-control @error('duration_type') is-invalid @enderror" required>
+                                    <option value="general" {{ old('duration_type', 'general') === 'general' ? 'selected' : '' }}>General</option>
+                                    <option value="specialist" {{ old('duration_type') === 'specialist' ? 'selected' : '' }}>Specialist</option>
+                                </select>
+                                @error('duration_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="modal_general_price">General Price (UGX) <span class="text-danger">*</span></label>
+                                <label for="modal_price">Price (UGX) <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">UGX</span>
                                     </div>
-                                    <input type="number" name="general_price" id="modal_general_price" class="form-control @error('general_price') is-invalid @enderror"
-                                           value="{{ old('general_price') }}" step="1" min="0" required>
+                                    <input type="number" name="price" id="modal_price" class="form-control @error('price') is-invalid @enderror"
+                                           value="{{ old('price') }}" step="0.01" min="0" required>
                                 </div>
-                                @error('general_price')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="modal_specialist_price">Specialist Price (UGX) <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">UGX</span>
-                                    </div>
-                                    <input type="number" name="specialist_price" id="modal_specialist_price" class="form-control @error('specialist_price') is-invalid @enderror"
-                                           value="{{ old('specialist_price') }}" step="1" min="0" required>
-                                </div>
-                                @error('specialist_price')
+                                @error('price')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -287,14 +284,14 @@ document.addEventListener('DOMContentLoaded', function(){
             if (row.querySelector('td[colspan]')) return;
 
             const minutes = row.getAttribute('data-minutes') || '';
-            const generalPrice = row.getAttribute('data-general-price') || '';
-            const specialistPrice = row.getAttribute('data-specialist-price') || '';
+            const durationType = row.getAttribute('data-duration-type') || '';
+            const price = row.getAttribute('data-price') || '';
             const isActive = row.getAttribute('data-is-active') || '';
 
             const matchesSearch = !q ||
                 minutes.includes(q) ||
-                generalPrice.includes(q) ||
-                specialistPrice.includes(q);
+                durationType.includes(q) ||
+                price.includes(q);
 
             const matchesStatus = !status || isActive === status;
 
@@ -321,21 +318,13 @@ document.addEventListener('DOMContentLoaded', function(){
                     aVal = parseInt(a.getAttribute('data-minutes') || '0');
                     bVal = parseInt(b.getAttribute('data-minutes') || '0');
                     return bVal - aVal;
-                case 'general_price_asc':
-                    aVal = parseFloat(a.getAttribute('data-general-price') || '0');
-                    bVal = parseFloat(b.getAttribute('data-general-price') || '0');
+                case 'price_asc':
+                    aVal = parseFloat(a.getAttribute('data-price') || '0');
+                    bVal = parseFloat(b.getAttribute('data-price') || '0');
                     return aVal - bVal;
-                case 'general_price_desc':
-                    aVal = parseFloat(a.getAttribute('data-general-price') || '0');
-                    bVal = parseFloat(b.getAttribute('data-general-price') || '0');
-                    return bVal - aVal;
-                case 'specialist_price_asc':
-                    aVal = parseFloat(a.getAttribute('data-specialist-price') || '0');
-                    bVal = parseFloat(b.getAttribute('data-specialist-price') || '0');
-                    return aVal - bVal;
-                case 'specialist_price_desc':
-                    aVal = parseFloat(a.getAttribute('data-specialist-price') || '0');
-                    bVal = parseFloat(b.getAttribute('data-specialist-price') || '0');
+                case 'price_desc':
+                    aVal = parseFloat(a.getAttribute('data-price') || '0');
+                    bVal = parseFloat(b.getAttribute('data-price') || '0');
                     return bVal - aVal;
                 case 'created_at_desc':
                     // For simplicity, assume newer items have higher IDs

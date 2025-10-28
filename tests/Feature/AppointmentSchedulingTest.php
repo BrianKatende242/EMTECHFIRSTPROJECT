@@ -32,9 +32,8 @@ class AppointmentSchedulingTest extends TestCase
         ]);
         $duration = \App\Models\Duration::create([
             'minutes' => 30,
-            'type' => 'general',
-            'general_price' => 50000,
-            'specialist_price' => 75000,
+            'duration_type' => 'general',
+            'price' => 50000,
             'is_active' => true,
         ]);
         $patient = Patient::create([
@@ -95,9 +94,8 @@ class AppointmentSchedulingTest extends TestCase
         ]);
         $duration = \App\Models\Duration::create([
             'minutes' => 45,
-            'type' => 'specialist',
-            'general_price' => 75000,
-            'specialist_price' => 100000,
+            'duration_type' => 'specialist',
+            'price' => 100000,
             'is_active' => true,
         ]);
         $patient = Patient::create([
@@ -188,9 +186,8 @@ class AppointmentSchedulingTest extends TestCase
         ]);
         $duration = \App\Models\Duration::create([
             'minutes' => 30,
-            'type' => 'general',
-            'general_price' => 50000,
-            'specialist_price' => 75000,
+            'duration_type' => 'general',
+            'price' => 50000,
             'is_active' => true,
         ]);
         $patient = Patient::create([

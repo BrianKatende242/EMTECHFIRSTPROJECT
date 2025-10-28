@@ -59,9 +59,8 @@ class PaymentConfirmationWorkflowTest extends TestCase
         // Create test duration
         $this->duration = Duration::create([
             'minutes' => 30,
-            'type' => 'general',
-            'general_price' => 50000,
-            'specialist_price' => 75000,
+            'duration_type' => 'general',
+            'price' => 50000,
             'is_active' => true
         ]);
 

@@ -454,7 +454,7 @@
                                 <select name="duration_id" id="duration_id" class="form-control" required>
                                     <option value="">Select Duration</option>
                                     @foreach(\App\Models\Duration::active()->get() as $duration)
-                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->type) }}: UGX {{ number_format($duration->getPrice(), 0) }}</option>
+                                        <option value="{{ $duration->id }}">{{ $duration->minutes }} minutes - {{ ucfirst($duration->duration_type) }}: UGX {{ number_format($duration->price, 0) }}</option>
                                     @endforeach
                                 </select>
                             </div>
