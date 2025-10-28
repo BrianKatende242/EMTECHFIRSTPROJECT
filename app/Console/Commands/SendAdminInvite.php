@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminInviteMail;
 use App\Models\AdminInvite;
+use App\User;
 
 class SendAdminInvite extends Command
 {
@@ -33,6 +34,13 @@ class SendAdminInvite extends Command
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error('Invalid email address provided.');
+            return 1;
+        }
+
+        // Check if an admin with this email already exists
+        $existingAdmin = User::where('email', $email)->where('is_admin', true)->first();
+        if ($existingAdmin) {
+            $this->error('An admin account with this email address already exists. Cannot send invitation.');
             return 1;
         }
 
