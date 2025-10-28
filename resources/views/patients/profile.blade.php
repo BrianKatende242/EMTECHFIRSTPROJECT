@@ -312,7 +312,15 @@
                         <tbody>
                             @foreach($patient->appointments->sortByDesc('appointment_date') as $appointment)
                             <tr>
-                                <td>{{ $appointment->appointment_date ? $appointment->appointment_date->format('M d, Y H:i') : 'N/A' }}</td>
+                                <td>
+                                    @if($appointment->appointment_date)
+                                        <div><strong>{{ $appointment->appointment_date->format('M d, Y') }}</strong></div>
+                                        <div class="text-muted small">{{ $appointment->appointment_date->format('H:i') }}</div>
+                                    @else
+                                        <div><strong>{{ $appointment->created_at->format('M d, Y') }}</strong></div>
+                                        <div class="text-muted small">{{ $appointment->created_at->format('H:i') }} (Created)</div>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($appointment->doctor)
                                         <strong>{{ $appointment->doctor->name }}</strong><br>
