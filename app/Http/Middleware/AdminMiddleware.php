@@ -18,6 +18,9 @@ class AdminMiddleware
     {
         // Check if user is authenticated and has admin privileges
         if (!auth()->check() || !auth()->user()->is_admin) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
             return redirect()->route('login')->with('error', 'Access denied. Admin privileges required.');
         }
 
@@ -31,6 +34,9 @@ class AdminMiddleware
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+                if ($request->ajax()) {
+                    return response()->json(['error' => 'Session expired'], 401);
+                }
                 return redirect()->route('login')->with('error', 'Your admin session has expired due to inactivity. Please log in again.');
             }
         }

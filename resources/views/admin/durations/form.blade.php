@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.base')
 
 @section('title', $item ? 'Edit Duration' : 'Create Duration')
 
@@ -79,12 +79,14 @@
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> {{ $item ? 'Update' : 'Create' }} Duration
-                        </button>
-                        <a href="{{ route('admin.durations.index') }}" class="btn btn-secondary ml-2">
-                            Cancel
-                        </a>
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ $item ? 'Update' : 'Create' }} Duration
+                            </button>
+                            <a href="{{ route('admin.durations.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
