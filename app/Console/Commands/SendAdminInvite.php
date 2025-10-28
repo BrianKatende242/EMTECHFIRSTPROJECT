@@ -15,7 +15,7 @@ class SendAdminInvite extends Command
      *
      * @var string
      */
-    protected $signature = 'admin:invite {email?}';
+    protected $signature = 'admin:invite {email?} {--force : Force resend even if an active invite exists}';
 
     /**
      * The console command description.
@@ -38,17 +38,25 @@ class SendAdminInvite extends Command
 
         // Check if an invite already exists for this email
         $existingInvite = AdminInvite::where('email', $email)->where('used', false)->first();
-        if ($existingInvite && !$existingInvite->isExpired()) {
-            $this->error('An active invite already exists for this email address.');
+        if ($existingInvite && !$existingInvite->isExpired() && !$this->option('force')) {
+            $this->error('An active invite already exists for this email address. Use --force to resend.');
             return 1;
         }
 
-        // Create a new invite record
-        $invite = AdminInvite::create([
-            'email' => $email,
-            'token' => AdminInvite::generateToken(),
-            'expires_at' => now()->addHours(24),
-        ]);
+        // If there's an existing invite, update it; otherwise create a new one
+        if ($existingInvite) {
+            $invite = $existingInvite;
+            $invite->update([
+                'token' => AdminInvite::generateToken(),
+                'expires_at' => now()->addHours(24),
+            ]);
+        } else {
+            $invite = AdminInvite::create([
+                'email' => $email,
+                'token' => AdminInvite::generateToken(),
+                'expires_at' => now()->addHours(24),
+            ]);
+        }
 
         // Generate the invite URL
         $inviteUrl = route('admin.register', ['token' => $invite->token]);
