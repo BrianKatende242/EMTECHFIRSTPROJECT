@@ -75,6 +75,30 @@ Route::post('/send-otp', [App\Http\Controllers\OtpController::class, 'sendOtp'])
 use App\Http\Controllers\SchoolController;
 
 Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
+    // Get current week data (Monday to Sunday)
+    $startOfWeek = now()->startOfWeek(); // Monday
+    $endOfWeek = now()->endOfWeek(); // Sunday
+
+    // Weekly appointments data
+    $weeklyAppointments = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->appointments()
+            ->whereDate('appointment_time', $date)
+            ->count();
+        $weeklyAppointments[] = $count;
+    }
+
+    // Weekly lab tests data
+    $weeklyLabTests = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = $startOfWeek->copy()->addDays($i);
+        $count = $school->labTests()
+            ->whereDate('created_at', $date)
+            ->count();
+        $weeklyLabTests[] = $count;
+    }
+
     return view('school-dashboard', [
         'school' => $school,
         'studentsCount' => $school->students()->count(),
@@ -84,7 +108,9 @@ Route::get('/school-dashboard/{school}', function (App\Models\School $school) {
         'students' => $school->students()->latest()->get(),
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'labTests' => $school->labTests()->with('patient')->latest()->get(),
-        'doctors' => Doctor::latest()->get()
+        'doctors' => Doctor::latest()->get(),
+        'weeklyAppointments' => $weeklyAppointments,
+        'weeklyLabTests' => $weeklyLabTests
     ]);
 })->name('school.dashboard');
 
@@ -406,7 +432,7 @@ Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeet
     ->name('doctor.update-meeting-link');
 
 // Web route to send meeting link to an email (school/health facility)
-Route::post('/doctor/send-link', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
+Route::post('/doctor/send-link/{id}', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
     ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)
@@ -426,7 +452,7 @@ Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->nam
 // Add routes for other methods if not already defined
 
 
-Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard');
+Route::get('/doctor-dashboard/{id}', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard.show');
 
 // One-time login link consume route (public)
 Route::get('/auth/login/{token}', [\App\Http\Controllers\OneTimeLoginController::class, 'consume'])->name('auth.login.token');
@@ -480,7 +506,9 @@ Route::get('/health-facility/dashboard/{id}', [HealthFacilityController::class, 
 
 // Health Facility section routes
 Route::get('/health-facility/{id}/patients', [HealthFacilityController::class, 'patients'])->name('health-facility.patients');
+Route::match(['post', 'delete'], '/health-facility/{id}/patients', [HealthFacilityController::class, 'destroyAllPatients'])->name('health-facility.patients.destroy-all');
 Route::get('/health-facility/{id}/patients/create', [HealthFacilityController::class, 'createPatient'])->name('health-facility.patients.create');
+Route::delete('/health-facility/{id}/patients/{patientId}', [HealthFacilityController::class, 'destroyPatient'])->name('health-facility.patients.destroy');
 Route::get('/health-facility/{id}/book-doctor', [HealthFacilityController::class, 'bookDoctor'])->name('health-facility.book-doctor');
 Route::get('/health-facility/{id}/lab-tests', [HealthFacilityController::class, 'labTests'])->name('health-facility.lab-tests');
 Route::get('/health-facility/{id}/transactions', [HealthFacilityController::class, 'transactions'])->name('health-facility.transactions');
@@ -565,7 +593,11 @@ Route::get('/appointment/pay/{appointment}', [PaymentController::class, 'showApp
 Route::post('/appointment/checkout', [PaymentController::class, 'createAppointmentCheckout'])->name('payment.appointment.checkout');
 
 Route::get('/appointment/success/{appointment}', [PaymentController::class, 'appointmentSuccess'])->name('payment.appointment.success');
+Route::get('/appointment/payment-status/{appointment}', [PaymentController::class, 'checkAppointmentPaymentStatus'])->name('payment.appointment.status');
 Route::get('/appointment/cancel/{appointment}', [PaymentController::class, 'appointmentCancel'])->name('payment.appointment.cancel');
+
+// Dummy payment confirmation route for testing
+Route::post('/payment/appointment/confirm-dummy/{appointment}', [PaymentController::class, 'confirmDummyPayment'])->name('payment.appointment.confirm-dummy');
 
 // MarzPay API Routes (public webhook endpoint)
 Route::post('/marzpay/webhook', [PaymentController::class, 'handleCallback'])->name('marzpay.webhook');

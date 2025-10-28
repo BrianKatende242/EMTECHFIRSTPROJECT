@@ -253,6 +253,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show/hide duration options based on doctor type
         durationOptions.forEach(option => {
+            // If no doctor is selected, show all options
+            if (!doctorSpecialization) {
+                option.style.display = 'block';
+                return;
+            }
+
             const optionType = option.getAttribute('data-type');
             const isGeneralDoctor = doctorSpecialization && doctorSpecialization.toLowerCase().includes('general practitioner');
 

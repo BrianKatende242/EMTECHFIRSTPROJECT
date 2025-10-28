@@ -446,6 +446,7 @@ $(document).ready(function() {
         // Build data object manually to ensure all days are included
         const data = {
             _token: csrfToken,
+            doctor_id: {{ $doctor->id }},
             days: {}
         };
 
@@ -460,7 +461,7 @@ $(document).ready(function() {
         });
 
         $.ajax({
-            url: '{{ route("doctor.update-availability", $doctor) }}',
+            url: '{{ route("doctor.update-availability") }}',
             method: 'POST',
             data: data,
             beforeSend: function() {

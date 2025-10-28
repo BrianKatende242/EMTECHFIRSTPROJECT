@@ -196,28 +196,52 @@
       .then(response => response.json())
       .then(data => {
         if(data.success){
-          // Show success message briefly before redirect
+          // Show success message with pending status
           modalTitle.textContent = 'Payment Request Sent!';
           modalBody.innerHTML = `
             <div class="text-success mb-3">
-              <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+              <i class="mdi mdi-check-circle" style="font-size: 3rem;"></i>
             </div>
-            <h5>Success!</h5>
-            <p class="text-muted mt-2">${data.message || 'Payment request sent successfully.'}</p>
+            <h5>Payment Request Sent!</h5>
+            <p class="text-muted mt-2">${data.message || 'Please check your phone and approve the payment request.'}</p>
+            <div class="alert alert-info mt-3">
+              <i class="mdi mdi-clock-outline me-2"></i>
+              <strong>Payment Status:</strong> Waiting for confirmation...<br>
+              <small>Your appointment will be confirmed once payment is completed.</small>
+            </div>
+            <p class="text-primary mt-3" id="countdownText">Redirecting in 30 seconds...</p>
+            <div class="mt-3 d-flex gap-2 justify-content-center">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
           `;
           modal.show();
-          
-          // Redirect after a short delay
-          setTimeout(() => {
-            modal.hide();
-            window.location.href = data.redirect || '{{ route("payment.appointment.success", $appointment->id) }}';
-          }, 2000);
+
+          // Start countdown
+          let countdown = 30;
+          const countdownText = document.getElementById('countdownText');
+
+          const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownText.textContent = `Redirecting in ${countdown} seconds...`;
+
+            if (countdown <= 0) {
+              clearInterval(countdownInterval);
+              // Redirect to appointments page
+              @if($appointment->school_id)
+                window.location.href = '{{ route("book-doctor", ["school" => $appointment->school_id]) }}';
+              @elseif($appointment->healthFacility)
+                window.location.href = '{{ route("health-facility.book-doctor", $appointment->healthFacility->id) }}';
+              @else
+                window.location.href = '/'; // fallback to home
+              @endif
+            }
+          }, 1000);
         } else {
           // Show error
           modalTitle.textContent = 'Payment Request Failed';
           modalBody.innerHTML = `
             <div class="text-danger mb-3">
-              <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+              <i class="mdi mdi-alert-circle" style="font-size: 3rem;"></i>
             </div>
             <h5>Error</h5>
             <p class="text-muted mt-2">${data.message || 'Payment request failed. Please try again.'}</p>
@@ -233,7 +257,7 @@
         modalTitle.textContent = 'Payment Request Failed';
         modalBody.innerHTML = `
           <div class="text-danger mb-3">
-            <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+            <i class="mdi mdi-alert-circle" style="font-size: 3rem;"></i>
           </div>
           <h5>Error</h5>
           <p class="text-muted mt-2">An error occurred. Please try again.</p>
@@ -250,7 +274,7 @@
       document.getElementById('successState').style.display = 'block';
 
       // Start countdown
-      let countdown = 10;
+      let countdown = 30;
       const countdownText = document.getElementById('countdownText');
 
       const countdownInterval = setInterval(() => {

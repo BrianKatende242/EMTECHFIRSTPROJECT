@@ -347,7 +347,7 @@ class PaymentController extends Controller
                     return response()->json([
                         'success' => true,
                         'message' => $message,
-                        'redirect' => route('payment.appointment.success', $appointment->id),
+                        'status' => 'pending',
                         'reference_id' => $appointment->payment_reference
                     ]);
                 }
@@ -370,17 +370,42 @@ class PaymentController extends Controller
         }
     }
 
-    // Mark appointment as paid (manual success landing)
+    // Check payment status for an appointment
+    public function checkAppointmentPaymentStatus(Appointment $appointment)
+    {
+        $payment = \App\Models\Payment::where('appointment_id', $appointment->id)->latest()->first();
+
+        $status = [
+            'appointment_status' => $appointment->status,
+            'payment_status' => $appointment->payment_status,
+            'payment_reference' => $appointment->payment_reference,
+        ];
+
+        if ($payment) {
+            $status['payment_record'] = [
+                'status' => $payment->status,
+                'reference_id' => $payment->reference_id,
+                'amount' => $payment->amount,
+                'created_at' => $payment->created_at,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'status' => $status
+        ]);
+    }
+
+    // Mark appointment as paid (manual success landing) - Only allow if payment is confirmed
     public function appointmentSuccess(Appointment $appointment)
     {
-        // Change status to confirmed and send email to doctor
-        $appointment->status = 'confirmed';
-        $appointment->save();
+        // Only allow confirmation if payment is actually completed
+        if ($appointment->status !== 'confirmed' || $appointment->payment_status !== 'completed') {
+            return redirect()->route('payment.appointment.pay', $appointment->id)
+                ->with('error', 'Payment has not been confirmed yet. Please check your payment status.');
+        }
 
-        // Send email notification to doctor
-        $this->sendAppointmentConfirmationEmail($appointment);
-
-        return redirect()->back()->with('success', 'Payment confirmed and appointment marked as confirmed.');
+        return redirect()->back()->with('success', 'Appointment is confirmed and payment completed.');
     }
 
 
@@ -412,6 +437,33 @@ class PaymentController extends Controller
         }
 
         return redirect('/')->with('error', 'Payment was canceled. You can try again.');
+    }
+
+    /**
+     * Confirm dummy payment for testing purposes
+     * This method simulates payment confirmation for testing the workflow
+     */
+    public function confirmDummyPayment(Appointment $appointment)
+    {
+        // Check if appointment is awaiting payment
+        if ($appointment->status !== 'awaiting_payment') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Appointment is not awaiting payment confirmation.'
+            ], 400);
+        }
+
+        // Change status to confirmed
+        $appointment->status = 'confirmed';
+        $appointment->save();
+
+        // Send confirmation email to doctor
+        $this->sendAppointmentConfirmationEmail($appointment);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment confirmed successfully. Doctor has been notified.'
+        ]);
     }
 
     /**

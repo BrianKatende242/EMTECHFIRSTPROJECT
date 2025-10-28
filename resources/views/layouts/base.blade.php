@@ -155,12 +155,13 @@
           <a href="javascript:;"><i class="typcn typcn-document-text"></i></a>
         </div>
       </div>
-      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end" style="background-color: magenta;">
+      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-start" style="background-color: magenta;">
         <ul class="navbar-nav mr-lg-2">
           <li class="nav-item ml-0">
             <h4 class="mb-0">{{ isset($pageTitle) ? $pageTitle : 'Dashboard' }}</h4>
           </li>
         </ul>
+        
       </div>
     </nav>
     <div class="container-fluid page-body-wrapper">

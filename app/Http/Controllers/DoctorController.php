@@ -408,28 +408,34 @@ public function uploadImage(Request $request, Doctor $doctor)
 }
 
 
-public function sendLink(Request $request, $id)
-{
-    // For insecure access, require doctor ID parameter
-    $doctor = Doctor::findOrFail($id);
+    public function sendLink(Request $request, $id)
+    {
+        // For insecure access, require doctor ID parameter
+        $doctor = Doctor::findOrFail($id);
 
-    $request->validate([
-        'recipient_email' => 'required|email',
-        'message' => 'nullable|string',
-    ]);
+        $request->validate([
+            'recipient_email' => 'required|email',
+            'message' => 'nullable|string',
+        ]);
 
-    // Use Jitsi Meet as the meeting provider
-    $link = 'https://meet.jit.si/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
-        $messageContent = $request->input('message') ?? "You have a meeting invitation. Click the button below to join.";
+        // Use Jitsi Meet as the meeting provider
+        $link = 'https://meet.jit.si/' . ($doctor->meeting_slug ?? 'dr-' . strtolower(str_replace(' ', '-', $doctor->name)));
+            $messageContent = $request->input('message') ?? "You have a meeting invitation. Click the button below to join.";
 
-        // Use a Mailable with a nice HTML template
-        Mail::to($request->recipient_email)
-            ->send(new MeetingLinkMail($doctor, $messageContent, $link));
+            // Use a Mailable with a nice HTML template
+            Mail::to($request->recipient_email)
+                ->send(new MeetingLinkMail($doctor, $messageContent, $link));
+
+        // Check if this is an AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Meeting link sent successfully!'
+            ]);
+        }
 
         return back()->with('success', 'Meeting link sent successfully.');
-}
-
-public function updateOnlineStatus(Request $request, Doctor $doctor)
+    }public function updateOnlineStatus(Request $request, Doctor $doctor)
 {
     // Validate the request data
     $request->validate([
