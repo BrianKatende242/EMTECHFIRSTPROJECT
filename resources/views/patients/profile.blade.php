@@ -272,7 +272,7 @@
                         <button class="btn btn-success mb-2" disabled>
                             <i class="typcn typcn-beaker mr-2"></i>Order Lab Test
                         </button>
-                        <button class="btn btn-info mb-2" disabled>
+                        <button class="btn btn-info mb-2" data-toggle="modal" data-target="#addMedicalNoteModal">
                             <i class="typcn typcn-document mr-2"></i>Add Medical Note
                         </button>
                         <button class="btn btn-warning mb-2" disabled>
@@ -565,6 +565,55 @@
     </div>
 </div>
 
+<!-- Add Medical Note Modal -->
+<div class="modal fade" id="addMedicalNoteModal" tabindex="-1" role="dialog" aria-labelledby="addMedicalNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMedicalNoteModalLabel">
+                    <i class="typcn typcn-document mr-2"></i>Add Medical Note for {{ $patient->name }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="medicalNoteForm">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="medical-note-content" class="form-label">
+                            <i class="typcn typcn-edit mr-1"></i>Medical Note <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="content" id="medical-note-content" class="form-control" rows="5" required
+                                  placeholder="Enter detailed medical notes, observations, diagnosis, treatment plan, or any other relevant medical information..."></textarea>
+                        <small class="form-text text-muted">Maximum 1000 characters</small>
+                    </div>
+
+                    <div class="form-group" style="display: none;">
+                        <input type="hidden" name="recorded_date" value="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <!-- Patient Info Summary -->
+                    <div class="alert alert-info text-dark">
+                        <h6><i class="typcn typcn-info mr-1"></i>Note Details</h6>
+                        <p class="mb-1"><strong>Patient:</strong> {{ $patient->name }} (ID: {{ $patient->patient_id }})</p>
+                        <p class="mb-1"><strong>Doctor:</strong> {{ auth()->user()->name ?? 'Unknown' }}</p>
+                        <p class="mb-0"><strong>Date:</strong> <span id="note-date-display">{{ date('M d, Y') }}</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="typcn typcn-times mr-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="typcn typcn-plus mr-1"></i>Save Medical Note
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
 /* Patient Avatar */
 .patient-avatar {
@@ -619,7 +668,7 @@
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-bottom: 1px solid #dee2e6;
     border-radius: 0.5rem 0.5rem 0 0 !important;
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1.25rem;
 }
 
 .card-title {
@@ -1046,6 +1095,85 @@ dl.row dd {
                 button.prop('disabled', false).html(originalHtml);
             }
         });
+    });
+
+    // Medical Note Form Submission
+    $('#medicalNoteForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const submitBtn = form.find('button[type="submit"]');
+        const originalText = submitBtn.html();
+
+        // Disable submit button and show loading
+        submitBtn.prop('disabled', true).html('<i class="typcn typcn-loading mr-1"></i> Saving...');
+
+        // Clear any previous alerts
+        $('.alert').not('.alert-info').remove();
+
+        $.ajax({
+            url: `{{ route('patients.medical-history.store', $patient) }}`,
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="typcn typcn-tick mr-1"></i>
+                            <strong>Success!</strong> Medical note added successfully.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    $('.container-fluid').prepend(successAlert);
+
+                    // Reset form
+                    form[0].reset();
+
+                    // Close modal after 2 seconds
+                    setTimeout(function() {
+                        $('#addMedicalNoteModal').modal('hide');
+                        // Reload page to show new medical note
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert('Failed to add medical note: ' + (response.message || 'Unknown error'));
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'An error occurred while saving the medical note.';
+
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errors = Object.values(xhr.responseJSON.errors).flat();
+                    errorMessage = errors.join('<br>');
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                // Show error message
+                const errorAlert = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="typcn typcn-warning mr-1"></i>
+                        <strong>Error!</strong> ${errorMessage}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+                form.closest('.modal-content').prepend(errorAlert);
+
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Reset form when modal is closed
+    $('#addMedicalNoteModal').on('hidden.bs.modal', function() {
+        $('#medicalNoteForm')[0].reset();
+        $('.alert').not('.alert-info').remove();
     });
 </script>
 @endsection

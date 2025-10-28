@@ -208,4 +208,58 @@ class PatientController extends Controller
 
         return view('patients.profile', $viewData);
     }
+
+    /**
+     * Store a medical history note for a patient.
+     *
+     * @param  \App\Models\Patient  $patient
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeMedicalHistory(Patient $patient, Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+            'recorded_date' => 'nullable|date',
+        ]);
+
+        // Get the current authenticated user (assuming it's a doctor)
+        $doctor = auth()->user();
+
+        if (!$doctor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must be logged in to add medical notes.'
+            ], 401);
+        }
+
+        // Check if the doctor exists in the doctors table
+        $doctorRecord = \App\Models\Doctor::where('user_id', $doctor->id)->first();
+
+        if (!$doctorRecord) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only doctors can add medical notes.'
+            ], 403);
+        }
+
+        try {
+            \App\Models\MedicalHistory::create([
+                'patient_id' => $patient->id,
+                'doctor_id' => $doctorRecord->id,
+                'content' => $request->content,
+                'recorded_date' => $request->recorded_date ?: now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Medical note added successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add medical note: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
