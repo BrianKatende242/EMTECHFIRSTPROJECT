@@ -237,6 +237,21 @@
                     </table>
                 </div>
             </div>
+            @else
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="typcn typcn-beaker mr-2"></i>Lab Test History
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <i class="typcn typcn-beaker fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No lab tests found for this patient.</p>
+                        <small class="text-muted">Lab test results will appear here when tests are ordered and completed.</small>
+                    </div>
+                </div>
+            </div>
             @endif
         </div>
 
@@ -414,6 +429,25 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="typcn typcn-beaker mr-2"></i>Lab Test History
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <i class="typcn typcn-beaker fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No lab tests found for this patient.</p>
+                        <small class="text-muted">Lab test results will appear here when tests are ordered and completed.</small>
+                    </div>
                 </div>
             </div>
         </div>
