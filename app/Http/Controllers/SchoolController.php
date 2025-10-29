@@ -97,26 +97,26 @@ class SchoolController extends Controller
         ]);
     }
 
-    
-public function showDashboard($id)
-{
-    $school = School::findOrFail($id);
+    public function showDashboard(Request $request)
+    {
+        $authenticatedUser = $request->current_user;
+        $school = School::findOrFail($authenticatedUser['id']);
 
-    $students = $school->students()->latest()->get();
-    $labTests = $school->labTests()->with('patient')->latest()->get();
-    $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
-    $doctors = $school->doctors()->latest()->get();
+        $students = $school->students()->latest()->get();
+        $labTests = $school->labTests()->with('patient')->latest()->get();
+        $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
+        $doctors = $school->doctors()->latest()->get();
 
-    return view('school-dashboard', [
-        'school' => $school,
-        'students' => $students,
-        'labTests' => $labTests,
-        'appointments' => $appointments,
-        'doctors' => $doctors,
-        'studentsCount' => $students->count(),
-        'appointmentsCount' => $appointments->count(),
-        'labTestsCount' => $labTests->count(),
-        'doctorsCount' => $doctors->count(),
-    ]);
-}
+        return view('school-dashboard', [
+            'school' => $school,
+            'students' => $students,
+            'labTests' => $labTests,
+            'appointments' => $appointments,
+            'doctors' => $doctors,
+            'studentsCount' => $students->count(),
+            'appointmentsCount' => $appointments->count(),
+            'labTestsCount' => $labTests->count(),
+            'doctorsCount' => $doctors->count(),
+        ]);
+    }
 }

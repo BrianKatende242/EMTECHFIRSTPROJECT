@@ -225,11 +225,11 @@ class DoctorController extends Controller
 }
 
 
-    public function showDoctorDashboard($id)
+    public function showDoctorDashboard(Request $request)
     {
         try {
-            // For insecure access, allow viewing dashboard by doctor ID
-            $doctor = Doctor::findOrFail($id);
+            $authenticatedUser = $request->current_user;
+            $doctor = Doctor::findOrFail($authenticatedUser['id']);
 
             // Fetch appointments with related data (exclude cancelled)
             $appointments = Appointment::where('doctor_id', $doctor->id)
@@ -452,9 +452,10 @@ public function uploadImage(Request $request, Doctor $doctor)
     /**
      * Show availability management page for a specific doctor
      */
-    public function availability($id)
+    public function availability(Request $request)
     {
-        $doctor = Doctor::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         return view('doctor-availability', [

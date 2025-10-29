@@ -29,10 +29,15 @@ class Cors
             $response = response()->json([], 204);
         } else {
             $response = $next($request);
+            
+            // Ensure we have a valid Response object
+            if (!$response instanceof Response) {
+                $response = response($response);
+            }
         }
 
-        // Apply CORS headers
-        if (in_array($origin, $allowedOrigins)) {
+        // Apply CORS headers only if we have a valid response
+        if ($response instanceof Response && in_array($origin, $allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
             $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
             $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, x-amz-acl');

@@ -155,7 +155,7 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->is('doctor-dashboard/availability*') ? 'active' : '' }}" href="{{ route('doctor.availability', $doctor->id) }}">
+        <a class="nav-link {{ request()->is('doctor-dashboard/availability*') ? 'active' : '' }}" href="{{ route('doctor.availability') }}">
             <i class="mdi mdi-calendar-clock menu-icon"></i>
             <span class="menu-title">My Availability</span>
         </a>
