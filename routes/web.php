@@ -539,7 +539,9 @@ Route::get('password/reset/{token}', 'App\Http\Controllers\Auth\ResetPasswordCon
 Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController@reset')->name('password.update');
 
 // Simple admin area (protected)
-Route::prefix('admin')->middleware('admin')->group(function(){
+// Ensure the 'web' middleware is applied so session/cookie middleware run
+// (EncryptCookies, StartSession, ShareErrorsFromSession, VerifyCsrfToken)
+Route::prefix('admin')->middleware(['web', 'admin'])->group(function(){
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
 
     // Individual model routes

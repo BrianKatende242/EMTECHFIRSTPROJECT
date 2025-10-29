@@ -15,7 +15,8 @@ class Doctor extends Authenticatable
         'specialization',
         'email', 
         'health_facility_id',
-        'contact'
+        'contact',
+        'meeting_slug'
     ];
 
     public function school(): BelongsTo

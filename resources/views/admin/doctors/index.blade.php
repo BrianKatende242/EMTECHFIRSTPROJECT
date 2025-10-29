@@ -32,16 +32,9 @@
             <input type="text" id="admin-search" class="form-control" placeholder="Search by name, email, or specialization...">
         </div>
         <div class="col-md-4 col-sm-12 mb-2">
-            @php
-                $specializations = \App\Models\Doctor::select('specialization')
-                    ->distinct()
-                    ->whereNotNull('specialization')
-                    ->pluck('specialization')
-                    ->sort();
-            @endphp
             <select id="specialization-filter" class="form-select form-control">
                 <option value="">All Specializations</option>
-                @foreach($specializations as $specialization)
+                @foreach($specializations->sort() as $specialization)
                     <option value="{{ strtolower($specialization) }}">{{ $specialization }}</option>
                 @endforeach
             </select>
@@ -125,13 +118,13 @@
                                 @if($doctor->school)
                                     <div class="mb-1">
                                         <i class="fa fa-school text-info me-1"></i>
-                                        <span class="badge bg-info text-white">{{ Str::limit($doctor->school->name, 20) }}</span>
+                                        <span class="badge bg-info text-white">{{ substr($doctor->school->name, 0, 20) }}</span>
                                     </div>
                                 @endif
                                 @if($doctor->healthFacility)
                                     <div>
                                         <i class="fa fa-hospital text-warning me-1"></i>
-                                        <span class="badge bg-warning text-dark">{{ Str::limit($doctor->healthFacility->name, 20) }}</span>
+                                        <span class="badge bg-warning text-dark">{{ substr($doctor->healthFacility->name, 0, 20) }}</span>
                                     </div>
                                 @endif
                                 @if(!$doctor->school && !$doctor->healthFacility)
@@ -226,7 +219,7 @@
             <form method="POST" action="{{ route('admin.model.store', 'doctors') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
-                    @if($errors->any())
+                    @if(isset($errors) && $errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">
                                 @foreach($errors->all() as $err)
@@ -259,7 +252,6 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">School</label>
-                            @php $schools = \App\Models\School::pluck('name','id'); @endphp
                             <select name="school_id" class="form-select">
                                 <option value="">-- none --</option>
                                 @foreach($schools as $id => $label)
@@ -269,7 +261,6 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Health Facility</label>
-                            @php $hfs = \App\Models\HealthFacility::pluck('name','id'); @endphp
                             <select name="health_facility_id" class="form-select">
                                 <option value="">-- none --</option>
                                 @foreach($hfs as $id => $label)

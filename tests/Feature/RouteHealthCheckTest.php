@@ -21,6 +21,32 @@ class RouteHealthCheckTest extends TestCase
     {
         parent::setUp();
         $this->createTestDurations();
+
+        // Create test data needed for admin routes
+        $school = School::create([
+            'name' => 'Test School',
+            'email' => 'test@school.com',
+            'contact' => '+256700000000',
+        ]);
+
+        $healthFacility = HealthFacility::create([
+            'name' => 'Test Health Facility',
+            'email' => 'test@facility.com',
+            'contact_number' => '+256711111111',
+            'contact' => '+256711111111',
+            'location' => 'Test Location',
+            'type' => 'hospital',
+        ]);
+
+        $doctor = Doctor::create([
+            'name' => 'Dr. Test',
+            'email' => 'dr@test.com',
+            'specialization' => 'General',
+            'contact' => '+256700000001',
+            'school_id' => $school->id,
+            'health_facility_id' => $healthFacility->id,
+            'meeting_slug' => 'keti-123456'
+        ]);
     }
 
     protected function mockAuthenticatedSchool(School $school)
@@ -94,8 +120,8 @@ class RouteHealthCheckTest extends TestCase
     public function school_authenticated_routes_work_with_mock_session()
     {
         $school = School::create([
-            'name' => 'Test School',
-            'email' => 'test@school.com',
+            'name' => 'Auth Test School',
+            'email' => 'auth-test@school.com',
             'contact' => '+256700000000',
         ]);
 
@@ -122,8 +148,8 @@ class RouteHealthCheckTest extends TestCase
     public function health_facility_authenticated_routes_work_with_mock_session()
     {
         $healthFacility = HealthFacility::create([
-            'name' => 'Test Health Facility',
-            'email' => 'test@facility.com',
+            'name' => 'Auth Test Health Facility',
+            'email' => 'auth-test@facility.com',
             'contact_number' => '+256711111111',
             'contact' => '+256711111111',
             'location' => 'Test Location',
@@ -186,14 +212,14 @@ class RouteHealthCheckTest extends TestCase
     {
         // Create test data for parameterized routes
         $school = School::create([
-            'name' => 'Test School',
-            'email' => 'test@school.com',
+            'name' => 'Param Test School',
+            'email' => 'param-test@school.com',
             'contact' => '+256700000000',
         ]);
 
         $healthFacility = HealthFacility::create([
             'name' => 'Test Health Facility',
-            'email' => 'test@facility.com',
+            'email' => 'param-test@facility.com',
             'contact_number' => '+256711111111',
             'contact' => '+256711111111',
             'location' => 'Test Location',
@@ -259,6 +285,30 @@ class RouteHealthCheckTest extends TestCase
     /** @test */
     public function admin_routes_work_with_admin_middleware_bypassed()
     {
+        // Create sample data that views might need
+        $doctor = \App\Models\Doctor::create([
+            'name' => 'Admin Test Doctor',
+            'email' => 'admin-test-dr@test.com',
+            'specialization' => 'General',
+            'contact' => '+256700000009',
+            'meeting_slug' => 'keti-123789'
+        ]);
+        
+        $school = \App\Models\School::create([
+            'name' => 'Admin Test School',
+            'email' => 'admin-test@school.com',
+            'contact' => '+256700000008',
+        ]);
+        
+        $healthFacility = \App\Models\HealthFacility::create([
+            'name' => 'Admin Test Health Facility',
+            'email' => 'admin-test@facility.com',
+            'contact' => '+256711111119',
+            'contact_number' => '+256711111119',
+            'location' => 'Test Location',
+            'type' => 'hospital',
+        ]);
+
         // Test some admin routes by bypassing middleware
         $adminRoutes = [
             ['method' => 'GET', 'uri' => '/admin'],
