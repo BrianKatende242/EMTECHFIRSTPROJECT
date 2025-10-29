@@ -5,13 +5,13 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm bg-primary text-white">
-                <div class="card-body p-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-primary p-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <img src="{{ $doctor->file_url ?? asset('images/doctor.png') }}"
                                  alt="doctor"
-                                 class="rounded-circle me-4 border border-white border-3"
+                                 class="rounded-circle me-5 border border-white border-3"
                                  style="width: 80px; height: 80px; object-fit: cover;">
                             <div>
                                 <h1 class="h3 mb-1 fw-bold">{{ $doctor->name }}</h1>
@@ -36,8 +36,8 @@
                                     <i class="mdi mdi-video me-2"></i>Start Meeting
                                 </a>
                             @endif
-                            <a href="{{ route('doctor.appointments') }}" class="btn btn-outline-light btn-sm">
-                                <i class="mdi mdi-calendar me-2"></i>Appointments
+                            <a href="{{ route('doctor.edit-profile') }}" class="btn btn-outline-light btn-sm">
+                                <i class="mdi mdi-account-edit me-2"></i>Edit Profile
                             </a>
                         </div>
                     </div>
@@ -48,8 +48,8 @@
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card h-100">
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
                 <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
                         <div class="stat-label mb-2">Total Appointments</div>
@@ -59,8 +59,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card h-100">
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
                 <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
                         <div class="stat-label mb-2">Completed</div>
@@ -70,8 +70,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card h-100">
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
                 <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
                         <div class="stat-label mb-2">Upcoming</div>
@@ -81,8 +81,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card h-100">
+        <div class="col-lg-3 col-sm-6 mb-2">
+            <div class="card">
                 <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
                     <div>
                         <div class="stat-label mb-2">Cancelled</div>
@@ -95,22 +95,22 @@
     </div>    <div class="row">
         <!-- Profile Information -->
         <div class="col-lg-4 mb-4">
-            <div class="card">
-                <div class="card-header">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
                         <i class="mdi mdi-account me-2"></i>Profile Information
                     </h5>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
-                        <dt class="col-sm-4 text-muted">Name</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Name</dt>
                         <dd class="col-sm-8">{{ $doctor->name }}</dd>
 
-                        <dt class="col-sm-4 text-muted">Specialization</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Specialization</dt>
                         <dd class="col-sm-8">{{ $doctor->specialization ?? 'Not specified' }}</dd>
 
                         @if($doctor->email)
-                        <dt class="col-sm-4 text-muted">Email</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Email</dt>
                         <dd class="col-sm-8">
                             <a href="mailto:{{ $doctor->email }}" class="text-decoration-none">
                                 {{ $doctor->email }}
@@ -119,7 +119,7 @@
                         @endif
 
                         @if($doctor->contact)
-                        <dt class="col-sm-4 text-muted">Contact</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Contact</dt>
                         <dd class="col-sm-8">
                             <a href="tel:{{ $doctor->contact }}" class="text-decoration-none">
                                 {{ $doctor->contact }}
@@ -128,23 +128,23 @@
                         @endif
 
                         @if($doctor->school)
-                        <dt class="col-sm-4 text-muted">School</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">School</dt>
                         <dd class="col-sm-8">{{ $doctor->school->name }}</dd>
                         @endif
 
                         @if($doctor->healthFacility)
-                        <dt class="col-sm-4 text-muted">Health Facility</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Health Facility</dt>
                         <dd class="col-sm-8">{{ $doctor->healthFacility->name }}</dd>
                         @endif
 
                         @if($doctor->meeting_slug)
-                        <dt class="col-sm-4 text-muted">Meeting Room</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Meeting Room</dt>
                         <dd class="col-sm-8">
                             <code class="small">{{ $doctor->meeting_slug }}</code>
                         </dd>
                         @endif
 
-                        <dt class="col-sm-4 text-muted">Joined</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Joined</dt>
                         <dd class="col-sm-8">{{ $doctor->created_at->format('M j, Y') }}</dd>
                     </dl>
                 </div>
@@ -152,8 +152,8 @@
 
             <!-- Availability Summary -->
             @if(isset($availabilitySummary))
-            <div class="card mt-3">
-                <div class="card-header">
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
                         <i class="mdi mdi-calendar-week me-2"></i>Weekly Availability
                     </h5>
@@ -185,8 +185,8 @@
 
         <!-- Recent Appointments -->
         <div class="col-lg-8 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="mdi mdi-calendar me-2"></i>Recent Appointments
                     </h5>
@@ -200,10 +200,10 @@
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="border-0">Patient</th>
-                                        <th class="border-0">Date & Time</th>
-                                        <th class="border-0">Status</th>
-                                        <th class="border-0">Reason</th>
+                                        <th class="border-0 fw-semibold">Patient</th>
+                                        <th class="border-0 fw-semibold">Date & Time</th>
+                                        <th class="border-0 fw-semibold">Status</th>
+                                        <th class="border-0 fw-semibold">Reason</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -211,7 +211,8 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar-circle bg-secondary text-white me-2 small">
+                                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2 fw-bold"
+                                                     style="width: 40px; height: 40px; font-size: 1rem;">
                                                     {{ strtoupper(substr($appointment->patient->name ?? 'P', 0, 1)) }}
                                                 </div>
                                                 <div>
@@ -236,7 +237,7 @@
                                                 ];
                                                 $statusClass = $statusClasses[$appointment->status] ?? 'bg-secondary';
                                             @endphp
-                                            <span class="badge {{ $statusClass }} text-white">
+                                            <span class="badge {{ $statusClass }}">
                                                 {{ ucfirst($appointment->status) }}
                                             </span>
                                         </td>
@@ -252,7 +253,7 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="mdi mdi-calendar-blank fa-3x text-muted mb-3"></i>
+                            <i class="mdi mdi-calendar-blank display-1 text-muted mb-3"></i>
                             <h5 class="text-muted">No appointments yet</h5>
                             <p class="text-muted">Appointments will appear here once scheduled.</p>
                         </div>
@@ -263,77 +264,3 @@
     </div>
 </div>
 @endsection
-
-@push('styles')
-<style>
-.card {
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    border: none;
-}
-.card-header {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-bottom: none;
-    border-radius: 15px 15px 0 0 !important;
-}
-
-.avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-.avatar-circle.small {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-}
-
-.table th {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.5rem;
-}
-
-.btn-group .btn {
-    margin-right: 0.25rem;
-}
-
-.btn-group .btn:last-child {
-    margin-right: 0;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .avatar-circle {
-        width: 35px;
-        height: 35px;
-        font-size: 0.9rem;
-    }
-
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-
-    .d-flex.gap-3 {
-        gap: 1rem !important;
-    }
-}
-</style>
-@endpush

@@ -199,7 +199,7 @@ class AdminModelController extends Controller
             $items = $q->paginate(20)->appends(request()->query());
 
         } elseif ($modelKey === 'health-facilities') {
-            $q = $modelClass::with(['patients', 'doctors']);
+            $q = $modelClass::query();
 
             if (request()->filled('q')) {
                 $term = '%' . request('q') . '%';

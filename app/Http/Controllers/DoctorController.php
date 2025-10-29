@@ -40,23 +40,61 @@ class DoctorController extends Controller
             $error = 'Error: ' . $e->getMessage();
         }
 
-        return view('api-dashboard-doctors', [
+        return view('api.api-dashboard-doctors', [
             'doctors' => $doctors,
             'error' => $error
         ]);
     }
 
     /**
-     * Authenticated doctor dashboard (uses doctor guard)
+     * Authenticated doctor dashboard (uses session auth)
      */
-    public function authDashboard()
+    public function authDashboard(Request $request)
     {
-        $doctor = Auth::guard('doctor')->user();
-        if (!$doctor) {
-            return redirect()->route('login');
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
+
+        // Fetch appointments with related data (exclude cancelled)
+        $appointments = Appointment::where('doctor_id', $doctor->id)
+            ->where('status', '!=', 'cancelled')
+            ->with(['patient', 'duration'])
+            ->get();
+
+        // Get upcoming appointments (next 7 days, exclude cancelled)
+        $upcomingAppointments = Appointment::where('doctor_id', $doctor->id)
+            ->where('status', '!=', 'cancelled')
+            ->with(['patient'])
+            ->where('appointment_time', '>', now())
+            ->where('appointment_time', '<=', now()->addDays(7))
+            ->orderBy('appointment_time')
+            ->get();
+
+        // Calculate stats
+        $totalAppointments = $appointments->count();
+        $completedAppointments = $appointments->where('status', 'completed')->count();
+        $uniquePatients = $appointments->pluck('patient')->filter()->unique('id')->count();
+
+        // Calculate revenue
+        $revenue = 0;
+        foreach ($appointments as $appt) {
+            if ($appt->status === 'completed' && $appt->duration) {
+                $revenue += $appt->duration->getPrice();
+            }
         }
 
-        return $this->showDoctorDashboard($doctor->id);
+        $stats = [
+            'total_appointments' => $totalAppointments,
+            'completed_appointments' => $completedAppointments,
+            'patients' => $uniquePatients,
+            'revenue' => $revenue
+        ];
+
+        return view('doctor.doctor-dashboard', [
+            'doctor' => $doctor,
+            'appointments' => $appointments,
+            'upcomingAppointments' => $upcomingAppointments,
+            'stats' => $stats
+        ]);
     }
 
     /**
@@ -93,19 +131,20 @@ class DoctorController extends Controller
     }
 
     /**
-     * Get all appointments for a doctor (API endpoint)
+     * Get all appointments for a doctor (session-authenticated)
      */
-    public function getDoctorAppointments(Request $request, $id)
+    public function getDoctorAppointments(Request $request)
     {
-        // For insecure access, allow viewing appointments by doctor ID
-        $doctor = Doctor::findOrFail($id);
-        $appointments = Appointment::where('doctor_id', $id)
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
+
+        $appointments = Appointment::where('doctor_id', $doctor->id)
             ->where('status', '!=', 'cancelled') // Exclude cancelled appointments
             ->with(['patient', 'school', 'healthFacility', 'duration'])
             ->latest()
             ->paginate(10);
 
-        return view('doctor-appointments', [
+        return view('doctor.doctor-appointments', [
             'appointments' => $appointments,
             'doctor' => $doctor
         ]);
@@ -219,7 +258,7 @@ class DoctorController extends Controller
 {
     $doctor = Doctor::findOrFail($id); // fetch doctor by ID
 
-    return view('doctor-dashboard', [
+    return view('doctor.doctor-dashboard', [
         'doctor' => $doctor
     ]);
 }
@@ -266,7 +305,7 @@ class DoctorController extends Controller
                 'revenue' => $revenue
             ];
 
-            return view('doctor-dashboard', [
+            return view('doctor.doctor-dashboard', [
                 'doctor' => $doctor,
                 'appointments' => $appointments,
                 'upcomingAppointments' => $upcomingAppointments,
@@ -299,7 +338,7 @@ class DoctorController extends Controller
 
         $doctors = $query->paginate(10);
 
-        return view('doctor-availabilities', [
+        return view('doctor.doctor-availabilities', [
             'doctors' => $doctors,
             'filters' => $request->only(['specialization', 'name', 'day'])
         ]);
@@ -321,10 +360,10 @@ public function update(Request $request, Doctor $doctor)
 
 
 
-public function updateMeetingLink(Request $request, $id)
+public function updateMeetingLink(Request $request)
 {
-    // For insecure access, require doctor ID parameter
-    $doctor = Doctor::findOrFail($id);
+    $authenticatedUser = $request->current_user;
+    $doctor = Doctor::findOrFail($authenticatedUser['id']);
 
     $request->validate([
         'meeting_slug' => 'required|string|alpha_dash|unique:doctors,meeting_slug,' . $doctor->id,
@@ -408,10 +447,10 @@ public function uploadImage(Request $request, Doctor $doctor)
 }
 
 
-    public function sendLink(Request $request, $id)
+    public function sendLink(Request $request)
     {
-        // For insecure access, require doctor ID parameter
-        $doctor = Doctor::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
 
         $request->validate([
             'recipient_email' => 'required|email',
@@ -458,10 +497,70 @@ public function uploadImage(Request $request, Doctor $doctor)
         $doctor = Doctor::findOrFail($authenticatedUser['id']);
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-        return view('doctor-availability', [
+        return view('doctor.doctor-availability', [
             'doctor' => $doctor,
             'days' => $days
         ]);
+    }
+
+    /**
+     * Show meeting link management page for a specific doctor
+     */
+    public function meetingLink(Request $request)
+    {
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
+
+        return view('doctor.meeting-link', [
+            'doctor' => $doctor
+        ]);
+    }
+
+    /**
+     * Show edit profile page for a specific doctor
+     */
+    public function editProfile(Request $request)
+    {
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
+
+        return view('doctor.doctor-edit-profile', [
+            'doctor' => $doctor
+        ]);
+    }
+
+    /**
+     * Update doctor profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $authenticatedUser = $request->current_user;
+        $doctor = Doctor::findOrFail($authenticatedUser['id']);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'contact' => 'nullable|string|max:20',
+            'specialization' => 'nullable|string|max:255',
+            'meeting_slug' => 'nullable|string|alpha_dash|unique:doctors,meeting_slug,' . $doctor->id,
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            // Delete old image if exists
+            if ($doctor->file_url && Storage::exists('public/profile_images/' . basename($doctor->file_url))) {
+                Storage::delete('public/profile_images/' . basename($doctor->file_url));
+            }
+
+            // Store new image
+            $imagePath = $request->file('profile_image')->store('public/profile_images');
+            $validated['file_url'] = asset('storage/' . basename($imagePath));
+        }
+
+        $doctor->update($validated);
+
+        return redirect()->route('doctor.profile')->with('success', 'Profile updated successfully!');
     }
 
 }

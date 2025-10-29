@@ -53,7 +53,7 @@ class PatientController extends Controller
         $documents = $patient->maternalDocuments()->orderBy('created_at', 'desc')->get();
         $groupedDocuments = $documents->groupBy('document_type');
         
-        return view('maternal-documents', [
+        return view('maternal.maternal-documents', [
             'patient' => $patient,
             'groupedDocuments' => $groupedDocuments,
             'healthFacility' => $patient->healthFacility // Get facility from patient instead

@@ -90,11 +90,18 @@ class OneTimeLoginController extends Controller
                 // ignore
             }
 
-            // Log the doctor in using the doctor guard
-            Auth::guard('doctor')->loginUsingId($user->id);
+            // Store doctor info in session for session-based auth
+            $request->session()->put('authenticated_user', [
+                'type' => $record->user_type,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $record->email
+            ]);
+
+            // Set session lifetime to 12 hours (720 minutes) for one-time login users
+            $request->session()->put('_session_lifetime', 720);
         } else {
-            // For schools and health facilities, we might need to implement session-based auth
-            // For now, store user info in session
+            // For schools and health facilities, store user info in session
             $request->session()->put('authenticated_user', [
                 'type' => $record->user_type,
                 'id' => $user->id,

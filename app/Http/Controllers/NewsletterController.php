@@ -101,7 +101,7 @@ class NewsletterController extends Controller
 
         if (!$subscriber) {
             if (!$request->wantsJson()) {
-                return response()->view('newsletter-verify', [
+                return response()->view('newsletter.newsletter-verify', [
                     'status' => 'invalid',
                     'email' => null,
                 ], 400);
@@ -114,7 +114,7 @@ class NewsletterController extends Controller
 
         if ($subscriber->isVerified()) {
             if (!$request->wantsJson()) {
-                return response()->view('newsletter-verify', [
+                return response()->view('newsletter.newsletter-verify', [
                     'status' => 'already',
                     'email' => $subscriber->email,
                 ]);
@@ -128,7 +128,7 @@ class NewsletterController extends Controller
         $subscriber->verify();
 
         if (!$request->wantsJson()) {
-            return response()->view('newsletter-verify', [
+            return response()->view('newsletter.newsletter-verify', [
                 'status' => 'success',
                 'email' => $subscriber->email,
             ]);
@@ -156,7 +156,7 @@ class NewsletterController extends Controller
 
         // Respond with HTML page if not requesting JSON (e.g., clicked from email link)
         if (!$request->wantsJson()) {
-            return response()->view('newsletter-unsubscribed', [
+            return response()->view('newsletter.newsletter-unsubscribed', [
                 'email' => $email,
             ]);
         }

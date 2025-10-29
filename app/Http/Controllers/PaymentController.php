@@ -19,6 +19,11 @@ class PaymentController extends Controller
         $this->marzPayService = $marzPayService;
     }
 
+    public function index()
+    {
+        return view('payment');
+    }
+
     // Show pay page for an appointment
     public function showAppointmentPayForm(Appointment $appointment)
     {

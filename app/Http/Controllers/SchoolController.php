@@ -107,7 +107,7 @@ class SchoolController extends Controller
         $appointments = $school->appointments()->with(['patient', 'doctor'])->latest()->get();
         $doctors = $school->doctors()->latest()->get();
 
-        return view('school-dashboard', [
+        return view('school.school-dashboard', [
             'school' => $school,
             'students' => $students,
             'labTests' => $labTests,

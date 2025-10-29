@@ -25,9 +25,18 @@ class ContactController extends Controller
         ], 201);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $submissions = ContactSubmission::latest()->get();
+        
+        // Check if this is an API request
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $submissions
+            ]);
+        }
+        
         return view('contact-us', ['submissions' => $submissions]);
     }
 }

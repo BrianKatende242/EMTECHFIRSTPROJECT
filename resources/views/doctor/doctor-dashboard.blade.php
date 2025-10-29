@@ -114,14 +114,14 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Appointments and Revenue (Annual)</h5>
                     <div class="text-muted small">Year: {{ now()->year }}</div>
                 </div>
-                <div class="card-body" style="min-height:220px;">
-                    <canvas id="appointmentsChart" height="160"></canvas>
+                <div class="card-body" style="min-height:280px;">
+                    <canvas id="appointmentsChart" height="200"></canvas>
                 </div>
             </div>
 
@@ -144,7 +144,7 @@
                                     </div>
                                     <div class="d-flex gap-2">
                                         <a href="{{ $meetingLink }}" target="_blank" class="btn btn-sm btn-success">Start</a>
-                                        <a href="{{ route('doctor.appointments', ['id' => $doctor->id]) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                                        <a href="{{ route('doctor.appointments') }}" class="btn btn-sm btn-outline-secondary">View</a>
                                     </div>
                                 </li>
                             @endforeach
@@ -156,7 +156,7 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Quick Actions</h5>
@@ -215,7 +215,7 @@
             }
 
             new Chart(ctx.getContext('2d'), {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{

@@ -41,7 +41,7 @@ class VoiceFlowSimulation extends Command
      */
     public function handle()
     {
-        $this->info('🎤 VoiceFlow Login Simulation');
+        $this->info('🎤 VoiceFlow Simulation');
         $this->info('==============================');
 
         // Check if server is running

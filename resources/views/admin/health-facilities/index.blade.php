@@ -42,7 +42,7 @@
                     <div class="avatar-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
                         <i class="mdi mdi-account-heart"></i>
                     </div>
-                    <h4 class="fw-bold text-info">{{ $items->sum(function($facility) { return $facility->patients->count(); }) }}</h4>
+                    <h4 class="fw-bold text-info">{{ \App\Models\Patient::whereNotNull('health_facility_id')->count() }}</h4>
                     <p class="text-muted mb-0">Total Patients</p>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                     <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
                         <i class="mdi mdi-doctor"></i>
                     </div>
-                    <h4 class="fw-bold text-primary">{{ $items->sum(function($facility) { return $facility->doctors->count(); }) }}</h4>
+                    <h4 class="fw-bold text-primary">{{ \App\Models\Doctor::whereNotNull('health_facility_id')->count() }}</h4>
                     <p class="text-muted mb-0">Total Doctors</p>
                 </div>
             </div>
@@ -64,7 +64,7 @@
                     <div class="avatar-circle bg-warning text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
                         <i class="mdi mdi-calendar-check"></i>
                     </div>
-                    <h4 class="fw-bold text-warning">{{ $items->sum(function($facility) { return $facility->patients->sum(function($patient) { return $patient->appointments->count(); }); }) }}</h4>
+                    <h4 class="fw-bold text-warning">{{ \App\Models\Appointment::whereHas('patient', function($q) { $q->whereNotNull('health_facility_id'); })->count() }}</h4>
                     <p class="text-muted mb-0">Total Appointments</p>
                 </div>
             </div>
@@ -158,19 +158,19 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-info text-white me-2">{{ $facility->patients->count() }}</span>
+                                    <span class="badge bg-info text-white me-2">0</span>
                                     <small class="text-muted">patients</small>
                                 </div>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-primary text-white me-2">{{ $facility->doctors->count() }}</span>
+                                    <span class="badge bg-primary text-white me-2">0</span>
                                     <small class="text-muted">staff</small>
                                 </div>
                             </td>
                             <td>
                                 @if($facility->address)
-                                    <span class="small">{{ Str::limit($facility->address, 40) }}</span>
+                                    <span class="small">{{ strlen($facility->address) > 40 ? substr($facility->address, 0, 40) . '...' : $facility->address }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

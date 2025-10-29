@@ -32,13 +32,6 @@ class SessionAuthMiddleware
             return redirect('/')->with('error', 'Unauthorized access.');
         }
 
-        // For doctors, also check the doctor guard
-        if ($authenticatedUser['type'] === 'doctor') {
-            if (!Auth::guard('doctor')->check()) {
-                return redirect('/')->with('error', 'Doctor authentication required.');
-            }
-        }
-
         // Add the authenticated user to the request for easy access
         $request->merge(['current_user' => $authenticatedUser]);
 

@@ -103,7 +103,7 @@ Route::middleware('session.auth:school')->group(function () {
             $weeklyLabTests[] = $count;
         }
 
-        return view('school-dashboard', [
+        return view('school.school-dashboard', [
             'school' => $school,
             'studentsCount' => $school->students()->count(),
             'appointmentsCount' => $school->appointments()->count(),
@@ -149,7 +149,7 @@ Route::middleware('session.auth:school')->group(function () {
 
         $students = $query->latest()->paginate(15);
 
-        return view('students', [
+        return view('school.students', [
             'school' => $school,
             'students' => $students
         ]);
@@ -246,7 +246,7 @@ Route::middleware('session.auth:school')->group(function () {
         // Paginate lab tests for the school (15 per page)
         $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
 
-        return view('lab-tests', [
+        return view('lab.lab-tests', [
             'school' => $school,
             'labTests' => $labTests,
             'students' => $school->students()->latest()->get()
@@ -304,7 +304,7 @@ Route::middleware('session.auth:school')->group(function () {
         $authenticatedUser = $request->current_user;
         $school = \App\Models\School::findOrFail($authenticatedUser['id']);
 
-        return view('book-doctor', [
+        return view('booking.book-doctor', [
             'school' => $school,
             'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
             'patients' => $school->students()->latest()->get(),
@@ -319,7 +319,7 @@ Route::middleware('session.auth:school')->group(function () {
         // Get transactions/payments related to this school
         // For now, we'll show appointments with payment status
         $appointments = $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->paginate(15);
-        return view('school-transactions', compact('school', 'appointments'));
+        return view('school.school-transactions', compact('school', 'appointments'));
     })->name('school.transactions');
 });
 
@@ -353,7 +353,7 @@ Route::get('/students/{school}', function (Request $request, App\Models\School $
 
     $students = $query->latest()->paginate(15);
 
-    return view('students', [
+    return view('school.students', [
         'school' => $school,
         'students' => $students
     ]);
@@ -448,7 +448,7 @@ Route::get('/lab-tests/{school}', function (App\Models\School $school) {
     // Paginate lab tests for the school (15 per page)
     $labTests = $school->labTests()->with('patient')->latest()->paginate(15);
 
-    return view('lab-tests', [
+    return view('lab.lab-tests', [
         'school' => $school,
         'labTests' => $labTests,
         'students' => $school->students()->latest()->get()
@@ -498,7 +498,7 @@ Route::post('/lab-tests/{school}/{labTest}/complete', function (App\Models\Schoo
 
 
 Route::get('/book-doctor/{school}', function (App\Models\School $school) {
-    return view('book-doctor', [
+    return view('booking.book-doctor', [
         'school' => $school,
         'appointments' => $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->get(),
         'patients' => $school->students()->latest()->get(),
@@ -510,11 +510,10 @@ Route::get('/transactions/{school}', function (App\Models\School $school) {
     // Get transactions/payments related to this school
     // For now, we'll show appointments with payment status
     $appointments = $school->appointments()->with(['patient', 'doctor', 'duration'])->latest()->paginate(15);
-    return view('school-transactions', compact('school', 'appointments'));
+    return view('school.school-transactions', compact('school', 'appointments'));
 })->name('school.transactions');
 
 
-Route::get('/doctor/{id}/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
 // Appointment actions
 Route::post('/appointments/validate', [\App\Http\Controllers\AppointmentController::class, 'validateAppointment'])->name('appointments.validate');
 Route::patch('/appointments/{appointment}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
@@ -627,23 +626,9 @@ Route::prefix('admin')->middleware('admin')->group(function(){
     Route::put('/{modelKey}/{id}', [AdminModelController::class, 'update'])->name('admin.model.update');
     Route::delete('/{modelKey}/{id}', [AdminModelController::class, 'destroy'])->name('admin.model.destroy');
 });
-Route::get('doctor/{id}/meeting-link/', function (Request $request) {
-    $doctorId = $request->route('id');
-
-    $doctor = \App\Models\Doctor::findOrFail($doctorId);
-
-    return view('meeting-link', [
-        'doctor' => $doctor
-    ]);
-})->name('doctor.meeting-link');
-
 // Web route to update a doctor's meeting link from the web form (keeps session & CSRF)
 Route::post('/doctor/update-meeting-link', [DoctorController::class, 'updateMeetingLink'])
     ->name('doctor.update-meeting-link');
-
-// Web route to send meeting link to an email (school/health facility)
-Route::post('/doctor/send-link/{id}', [\App\Http\Controllers\DoctorController::class, 'sendLink'])
-    ->name('doctor.send-link');
 
 // Web route to update doctor availability (form submissions)
 Route::post('/doctor/availability', [\App\Http\Controllers\DoctorAvailabilityController::class, 'update'])
@@ -656,13 +641,15 @@ Route::get('/doctor-availabilities', [DoctorController::class, 'allAvailabilitie
 Route::get('/doctors-dashboard', [DoctorController::class, 'dashboard']);
 
 
-Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
-// Add routes for other methods if not already defined
-
-
 Route::middleware('session.auth:doctor')->group(function () {
-    Route::get('/doctor-dashboard', [DoctorController::class, 'showDoctorDashboard'])->name('doctor.dashboard.show');
-    Route::get('/doctor-dashboard/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
+    Route::get('/doctor/dashboard', [DoctorController::class, 'authDashboard'])->name('doctor.dashboard');
+    Route::get('/doctor/availability', [DoctorController::class, 'availability'])->name('doctor.availability');
+    Route::get('/doctor/appointments', [DoctorController::class, 'getDoctorAppointments'])->name('doctor.appointments');
+    Route::get('/doctor/meeting-link', [DoctorController::class, 'meetingLink'])->name('doctor.meeting-link');
+    Route::get('/doctor/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('doctor.profile');
+    Route::get('/doctor/edit-profile', [DoctorController::class, 'editProfile'])->name('doctor.edit-profile');
+    Route::put('/doctor/update-profile', [DoctorController::class, 'updateProfile'])->name('doctor.update-profile');
+    Route::post('/doctor/send-link', [DoctorController::class, 'sendLink'])->name('doctor.send-link');
 });
 
 // One-time login link consume route (public)
@@ -674,9 +661,7 @@ Route::get('/doctors/{doctor}', [App\Http\Controllers\ProfileController::class, 
 // Current user profile route
 Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('user.profile');
 
-
 // In your web.php routes file, add this route
-
 Route::get('/health-facilities-dashboard', function () {
     try {
         // Fetch data from the API endpoint
@@ -706,7 +691,7 @@ Route::get('/health-facilities-dashboard', function () {
     }
     
     // Pass the data to the view
-    return view('health_facilities', [
+    return view('health-facility.health_facilities', [
         'healthFacilities' => $healthFacilities ?? [],
         'error' => $error ?? null
     ]);
@@ -797,7 +782,7 @@ Route::post('/patients/create', function (Request $request) {
                 'health_facility_id' => $validated['health_facility_id'],
             ]);
 
-            return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
+            return redirect()->route('health-facility.patients')
                 ->with('success', 'Existing patient associated with health facility successfully.');
         } else {
             // Handle new patient
@@ -812,7 +797,7 @@ Route::post('/patients/create', function (Request $request) {
                 'health_facility_id' => $validated['health_facility_id']
             ]));
 
-            return redirect()->route('health-facility.patients', ['id' => $validated['health_facility_id']])
+            return redirect()->route('health-facility.patients')
                 ->with('success', 'Patient created successfully.');
         }
     } catch (\Illuminate\Validation\ValidationException $e) {

@@ -10,7 +10,7 @@ class HealthFacility extends Model
 {
 
     use HasFactory;
-     protected $fillable = ['name', 'email', 'contact', 'file_url'];
+     protected $fillable = ['name', 'email', 'contact', 'file_url', 'address'];
 
 
      public function patients()

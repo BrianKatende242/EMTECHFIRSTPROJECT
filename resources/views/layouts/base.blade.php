@@ -61,7 +61,7 @@
               </span>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-              <a class="dropdown-item" href="{{ route('user.profile') }}">
+              <a class="dropdown-item" href="{{ isset($doctor) ? route('doctor.profile') : route('user.profile') }}">
                 <i class="typcn typcn-user-outline"></i>
                 Profile
               </a>
