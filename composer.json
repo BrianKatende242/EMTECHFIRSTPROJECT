@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
         "ramsey/uuid": "^4.7",
+        "s-ichikawa/laravel-sendgrid-driver": "^4.0",
         "sendgrid/sendgrid": "~7",
         "stripe/stripe-php": "^17.3"
     },
