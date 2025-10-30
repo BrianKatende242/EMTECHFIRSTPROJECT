@@ -22,8 +22,10 @@
     <link rel="stylesheet" href="{{ asset('pollix/vendors/typicons/typicons.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('pollix/vendors/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('pollix/css/vertical-layout-light/style.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="shortcut icon" href="{{ asset('images/ketiai-logo.svg') }}" />
 
     {{-- Allow pages to push additional styles (icons, page-level CSS) --}}
@@ -192,11 +194,13 @@
   <script src="{{ asset('pollix/vendors/js/vendor.bundle.base.js') }}"></script>
   <script src="{{ asset('pollix/vendors/chart.js/Chart.min.js') }}"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ asset('pollix/vendors/select2/select2.min.js') }}"></script>
   <script src="{{ asset('pollix/js/off-canvas.js') }}"></script>
   <script src="{{ asset('pollix/js/hoverable-collapse.js') }}"></script>
   <script src="{{ asset('pollix/js/template.js') }}"></script>
   <script src="{{ asset('pollix/js/settings.js') }}"></script>
   <script src="{{ asset('pollix/js/todolist.js') }}"></script>
+  <script src="{{ asset('pollix/js/select2.js') }}"></script>
   <script src="{{ asset('pollix/js/dashboard.js') }}"></script>
 
   <script>
