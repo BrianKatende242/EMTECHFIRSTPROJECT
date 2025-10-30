@@ -433,7 +433,7 @@
                                 <label for="doctor_id" class="form-label">
                                     <i class="typcn typcn-user mr-1"></i>Doctor <span class="text-danger">*</span>
                                 </label>
-                                <select name="doctor_id" id="doctor_id" class="form-control" required>
+                                <select name="doctor_id" id="doctor_id" class="js-example-basic-single w-100 form-control" required>
                                     <option value="">Select Doctor</option>
                                     @php
                                         $doctors = \App\Models\Doctor::all();
