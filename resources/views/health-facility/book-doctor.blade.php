@@ -100,7 +100,7 @@
                     @csrf
                     <input type="hidden" name="health_facility_id" value="{{ $healthFacility->id }}">
                     <div class="modal-body">
-                        <div class="row g-3">
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Patient</label>
                                 <select name="patient_id" class="form-select form-control" required>
@@ -114,29 +114,31 @@
                                 <label class="form-label">Date & Time</label>
                                 <input type="datetime-local" id="appointment_time" name="appointment_time" class="form-control" required>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Doctor</label>
-                                <select id="doctor_id" name="doctor_id" class="form-select form-control" required>
-                                    <option value="">Select Doctor</option>
-                                    @foreach($doctors as $doc)
-                                        <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Duration</label>
-                                <select name="duration_id" class="form-select form-control" required>
-                                    <option value="">Select Duration</option>
-                                    @foreach(\App\Models\Duration::active()->get() as $duration)
-                                        <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="general" data-price="{{ $duration->general_price }}">
-                                            {{ $duration->minutes }} minutes - General: UGX {{ number_format($duration->general_price, 0) }}
-                                        </option>
-                                        <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="specialist" data-price="{{ $duration->specialist_price }}">
-                                            {{ $duration->minutes }} minutes - Specialist: UGX {{ number_format($duration->specialist_price, 0) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Duration</label>
+                            <select name="duration_id" class="form-select form-control w-100" required style="width: 100% !important;">
+                                <option value="">Select Duration</option>
+                                @foreach(\App\Models\Duration::active()->get() as $duration)
+                                    <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="general" data-price="{{ $duration->general_price }}">
+                                        {{ $duration->minutes }} minutes - General: UGX {{ number_format($duration->general_price, 0) }}
+                                    </option>
+                                    <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="specialist" data-price="{{ $duration->specialist_price }}">
+                                        {{ $duration->minutes }} minutes - Specialist: UGX {{ number_format($duration->specialist_price, 0) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Doctor</label>
+                            <select id="doctor_id" name="doctor_id" class="js-example-basic-single w-100 form-control" required style="width: 100% !important;">
+                                <option value="">Select Doctor</option>
+                                @foreach($doctors as $doc)
+                                    <option value="{{ $doc->id }}" data-specialization="{{ $doc->specialization }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="row">
                             <div class="col-md-12">
                                 <label class="form-label">Reason</label>
                                 <input type="text" name="reason" class="form-control" required>
@@ -225,6 +227,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('bookDoctorModal');
     const modalBody = modal.querySelector('.modal-body');
     let appointmentToDelete = null;
+
+    // Initialize Select2 when modal opens
+    $('#bookDoctorModal').on('shown.bs.modal', function () {
+        $("#doctor_id").select2({
+            width: '100%',
+            dropdownParent: $('#bookDoctorModal'),
+            placeholder: 'Select a doctor',
+            allowClear: true
+        });
+    });
+
+    // Destroy Select2 when modal closes to prevent duplicates
+    $('#bookDoctorModal').on('hidden.bs.modal', function () {
+        $("#doctor_id").select2('destroy');
+    });
 
     // Duration filtering code...
 
