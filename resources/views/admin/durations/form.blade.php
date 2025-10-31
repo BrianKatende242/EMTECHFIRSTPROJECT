@@ -37,12 +37,12 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="type">Type</label>
-                                    <select name="type" id="type" class="form-control @error('type') is-invalid @enderror">
-                                        <option value="general" {{ old('type', $item->type ?? 'general') === 'general' ? 'selected' : '' }}>General</option>
-                                        <option value="specialist" {{ old('type', $item->type ?? '') === 'specialist' ? 'selected' : '' }}>Specialist</option>
+                                    <label for="duration_type">Duration Type <span class="text-danger">*</span></label>
+                                    <select name="duration_type" id="duration_type" class="form-control @error('duration_type') is-invalid @enderror" required>
+                                        <option value="general" {{ old('duration_type', $item->duration_type ?? 'general') === 'general' ? 'selected' : '' }}>General</option>
+                                        <option value="specialist" {{ old('duration_type', $item->duration_type ?? '') === 'specialist' ? 'selected' : '' }}>Specialist</option>
                                     </select>
-                                    @error('type')
+                                    @error('duration_type')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -52,31 +52,15 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="general_price">General Price (UGX) <span class="text-danger">*</span></label>
+                                    <label for="price">Price (UGX) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">UGX</span>
                                         </div>
-                                        <input type="number" name="general_price" id="general_price" class="form-control @error('general_price') is-invalid @enderror"
-                                               value="{{ old('general_price', $item->general_price ?? '') }}" step="1" min="0" required>
+                                        <input type="number" name="price" id="price" class="form-control @error('price') is-invalid @enderror"
+                                               value="{{ old('price', $item->price ?? '') }}" step="0.01" min="0" required>
                                     </div>
-                                    @error('general_price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="specialist_price">Specialist Price (UGX) <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">UGX</span>
-                                        </div>
-                                        <input type="number" name="specialist_price" id="specialist_price" class="form-control @error('specialist_price') is-invalid @enderror"
-                                               value="{{ old('specialist_price', $item->specialist_price ?? '') }}" step="1" min="0" required>
-                                    </div>
-                                    @error('specialist_price')
+                                    @error('price')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

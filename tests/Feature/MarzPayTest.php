@@ -161,9 +161,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         
@@ -215,9 +214,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         
@@ -248,6 +246,229 @@ class MarzPayTest extends TestCase
 
         $appointment->refresh();
         $this->assertEquals('failed', $appointment->payment_status);
+    }
+
+    public function test_handles_failed_collection_updates_existing_transaction()
+    {
+        $school = School::factory()->create();
+        $patient = Patient::factory()->create(['school_id' => $school->id]);
+
+        // Create required related records
+        $doctor = Doctor::create([
+            'school_id' => $school->id,
+            'name' => 'Test Doctor',
+            'specialization' => 'General',
+            'email' => 'doctor@test.com',
+            'contact' => '+256700000000'
+        ]);
+
+        $duration = Duration::create([
+            'minutes' => 30,
+            'duration_type' => 'general',
+            'price' => 1000,
+            'is_active' => true
+        ]);
+
+        $appointment = Appointment::create([
+            'school_id' => $school->id,
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'duration_id' => $duration->id,
+            'appointment_time' => now()->addDays(1),
+            'reason' => 'Test appointment',
+            'status' => 'awaiting_payment',
+            'payment_reference' => 'test-uuid'
+        ]);
+
+        // Create an existing transaction with pending status
+        $payment = \App\Models\Payment::create([
+            'appointment_id' => $appointment->id,
+            'amount' => 1000,
+            'phone_number' => '+256700000000',
+            'reference_id' => 'test-uuid',
+            'status' => 'pending',
+        ]);
+
+        $existingTransaction = \App\Models\Transaction::create([
+            'payment_id' => $payment->id,
+            'reference_id' => 'test-uuid',
+            'amount' => 1000,
+            'status' => 'pending',
+            'transaction_id' => 'test-uuid',
+            'provider' => 'marzpay',
+            'provider_reference' => 'test-uuid',
+            'marzpay_uuid' => 'test-uuid',
+            'country' => 'UG',
+            'description' => 'Appointment payment pending',
+            'transaction_type' => 'collection',
+            'webhook_event_type' => 'collection.pending',
+        ]);
+
+        $webhookPayload = [
+            'event_type' => 'collection.failed',
+            'transaction' => [
+                'uuid' => 'test-uuid',
+                'reference' => 'appointment-' . $appointment->id . '-123',
+                'status' => 'failed',
+                'amount' => 1000
+            ]
+        ];
+
+        $response = $this->postJson('/marzpay/webhook', $webhookPayload);
+
+        $response->assertStatus(200);
+
+        $appointment->refresh();
+        $this->assertEquals('failed', $appointment->payment_status);
+
+        // Verify the existing transaction was updated, not a new one created
+        $updatedTransaction = \App\Models\Transaction::where('reference_id', 'test-uuid')->first();
+        $this->assertEquals(1, \App\Models\Transaction::where('reference_id', 'test-uuid')->count());
+        $this->assertEquals('failed', $updatedTransaction->status);
+        $this->assertEquals('collection.failed', $updatedTransaction->webhook_event_type);
+        $this->assertNotNull($updatedTransaction->processed_at);
+    }
+
+    public function test_handles_failed_collection_creates_new_when_no_existing()
+    {
+        $school = School::factory()->create();
+        $patient = Patient::factory()->create(['school_id' => $school->id]);
+
+        // Create required related records
+        $doctor = Doctor::create([
+            'school_id' => $school->id,
+            'name' => 'Test Doctor',
+            'specialization' => 'General',
+            'email' => 'doctor@test.com',
+            'contact' => '+256700000000'
+        ]);
+
+        $duration = Duration::create([
+            'minutes' => 30,
+            'duration_type' => 'general',
+            'price' => 1000,
+            'is_active' => true
+        ]);
+
+        $appointment = Appointment::create([
+            'school_id' => $school->id,
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'duration_id' => $duration->id,
+            'appointment_time' => now()->addDays(1),
+            'reason' => 'Test appointment',
+            'status' => 'awaiting_payment',
+            'payment_reference' => 'test-uuid-new'
+        ]);
+
+        // Debug: Check if appointment was created
+        $this->assertNotNull($appointment);
+        $this->assertEquals('test-uuid-new', $appointment->payment_reference);
+
+        $webhookPayload = [
+            'event_type' => 'collection.failed',
+            'transaction' => [
+                'uuid' => 'test-uuid-new',
+                'reference' => 'appointment-' . $appointment->id . '-123',
+                'status' => 'failed',
+                'amount' => 1000
+            ]
+        ];
+
+        $response = $this->postJson('/marzpay/webhook', $webhookPayload);
+
+        $response->assertStatus(200);
+
+        $appointment->refresh();
+        $this->assertEquals('failed', $appointment->payment_status);
+
+        // When no Payment record exists, no transaction should be created
+        // (transactions are only created when payments are initiated)
+        $transaction = \App\Models\Transaction::where('reference_id', 'test-uuid-new')->first();
+        $this->assertNull($transaction);
+    }
+
+    public function test_handles_failed_collection_does_not_update_successful_transaction()
+    {
+        $school = School::factory()->create();
+        $patient = Patient::factory()->create(['school_id' => $school->id]);
+
+        // Create required related records
+        $doctor = Doctor::create([
+            'school_id' => $school->id,
+            'name' => 'Test Doctor',
+            'specialization' => 'General',
+            'email' => 'doctor@test.com',
+            'contact' => '+256700000000'
+        ]);
+
+        $duration = Duration::create([
+            'minutes' => 30,
+            'duration_type' => 'general',
+            'price' => 1000,
+            'is_active' => true
+        ]);
+
+        $appointment = Appointment::create([
+            'school_id' => $school->id,
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'duration_id' => $duration->id,
+            'appointment_time' => now()->addDays(1),
+            'reason' => 'Test appointment',
+            'status' => 'awaiting_payment',
+            'payment_reference' => 'test-uuid-successful'
+        ]);
+
+        // Create an existing transaction with successful status
+        $payment = \App\Models\Payment::create([
+            'appointment_id' => $appointment->id,
+            'amount' => 1000,
+            'phone_number' => '+256700000000',
+            'reference_id' => 'test-uuid-successful',
+            'status' => 'completed',
+        ]);
+
+        $existingTransaction = \App\Models\Transaction::create([
+            'payment_id' => $payment->id,
+            'reference_id' => 'test-uuid-successful',
+            'amount' => 1000,
+            'status' => 'successful',
+            'transaction_id' => 'test-uuid-successful',
+            'provider' => 'marzpay',
+            'provider_reference' => 'test-uuid-successful',
+            'marzpay_uuid' => 'test-uuid-successful',
+            'country' => 'UG',
+            'description' => 'Appointment payment successful',
+            'transaction_type' => 'collection',
+            'webhook_event_type' => 'collection.completed',
+            'processed_at' => now(),
+        ]);
+
+        $webhookPayload = [
+            'event_type' => 'collection.failed',
+            'transaction' => [
+                'uuid' => 'test-uuid-successful',
+                'reference' => 'appointment-' . $appointment->id . '-123',
+                'status' => 'failed',
+                'amount' => 1000
+            ]
+        ];
+
+        $response = $this->postJson('/marzpay/webhook', $webhookPayload);
+
+        $response->assertStatus(200);
+
+        // Verify the existing successful transaction was not updated
+        $transaction = \App\Models\Transaction::where('reference_id', 'test-uuid-successful')->first();
+        $this->assertEquals('successful', $transaction->status);
+        $this->assertEquals('collection.completed', $transaction->webhook_event_type);
+
+        // A new failed transaction should be created
+        $failedTransactions = \App\Models\Transaction::where('reference_id', 'test-uuid-successful')
+            ->where('status', 'failed')
+            ->get();
+        $this->assertCount(1, $failedTransactions);
     }
 
     public function test_handles_invalid_webhook_payload()
@@ -293,9 +514,8 @@ class MarzPayTest extends TestCase
         
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 1000,
-            'specialist_price' => 1500,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 1000,
             'is_active' => true
         ]);
         

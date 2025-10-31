@@ -114,17 +114,15 @@
                                 <label class="form-label">Date & Time</label>
                                 <input type="datetime-local" id="appointment_time" name="appointment_time" class="form-control" required>
                             </div>
+<<<<<<< HEAD
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Duration</label>
                             <select name="duration_id" class="form-select form-control w-100" required style="width: 100% !important;">
                                 <option value="">Select Duration</option>
                                 @foreach(\App\Models\Duration::active()->get() as $duration)
-                                    <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="general" data-price="{{ $duration->general_price }}">
-                                        {{ $duration->minutes }} minutes - General: UGX {{ number_format($duration->general_price, 0) }}
-                                    </option>
-                                    <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="specialist" data-price="{{ $duration->specialist_price }}">
-                                        {{ $duration->minutes }} minutes - Specialist: UGX {{ number_format($duration->specialist_price, 0) }}
+                                    <option value="{{ $duration->id }}" data-duration-id="{{ $duration->id }}" data-type="{{ $duration->duration_type }}" data-price="{{ $duration->price }}">
+                                        {{ $duration->minutes }} minutes - {{ ucfirst($duration->duration_type) }}: UGX {{ number_format($duration->price, 0) }}
                                     </option>
                                 @endforeach
                             </select>
