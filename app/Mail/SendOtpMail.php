@@ -15,11 +15,13 @@ class SendOtpMail extends Mailable
 
     public string $otp;
     public string $userType;
+    public int $expiryMinutes;
 
-    public function __construct(string $otp, string $userType = 'school')
+    public function __construct(string $otp, string $userType = 'school', int $expiryMinutes = 1440)
     {
         $this->otp = $otp;
         $this->userType = $userType;
+        $this->expiryMinutes = $expiryMinutes;
     }
 
     public function envelope()
@@ -43,6 +45,7 @@ class SendOtpMail extends Mailable
             with: [
                 'otp' => $this->otp,
                 'userType' => $this->userType,
+                'expiryMinutes' => $this->expiryMinutes,
             ],
         );
     }
@@ -60,6 +63,7 @@ class SendOtpMail extends Mailable
             ->with([
                 'otp' => $this->otp,
                 'userType' => $this->userType,
+                'expiryMinutes' => $this->expiryMinutes,
             ])
             ->subject($subject);
     }
