@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SchoolOtpMail;
+use App\Mail\SendOtpMail;
 use App\Models\OneTimeLoginToken;
 use App\Models\School;
 use App\Models\Doctor;
@@ -75,7 +75,7 @@ class OtpController extends Controller
             ]);
             
             // Send OTP email immediately (bypass queue for testing)
-            Mail::to($request->email)->send(new SchoolOtpMail($otp, 'school'));
+            Mail::to($request->email)->send(new SendOtpMail($otp, 'school'));
 
             
             // Verify no failures occurred
@@ -189,7 +189,7 @@ class OtpController extends Controller
                 throw new \Exception('Email not associated with any entity'); 
             }
 
-            Mail::to($request->email)->send(new SchoolOtpMail($otp, $userType));
+            Mail::to($request->email)->send(new SendOtpMail($otp, $userType));
 
             return response()->json(['success' => true]);
 
