@@ -627,3 +627,67 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function createMedicalNote() {
+    // Reset form for new note
+    $('#medical_note_form')[0].reset();
+    $('#medical-note-id').val('');
+    $('#medical-note-method').val('POST');
+    $('#modal-title-text').text('Add Medical Note');
+    $('#submit-btn-text').text('Save Medical Note');
+    $('#medicalNoteModal').modal('show');
+}
+
+function editMedicalNote(id) {
+    // Load existing note data for editing
+    $.ajax({
+        url: '{{ route("patients.medical-history.show", [$patient->id, ":id"]) }}'.replace(':id', id),
+        type: 'GET',
+        success: function(data) {
+            $('#medical_note_content').val(data.content);
+            $('#medical-note-id').val(data.id);
+            $('#medical-note-method').val('PUT');
+            $('#modal-title-text').text('Edit Medical Note');
+            $('#submit-btn-text').text('Update Medical Note');
+            $('#medicalNoteModal').modal('show');
+        },
+        error: function() {
+            alert('Error loading medical note data.');
+        }
+    });
+}
+
+$(document).ready(function() {
+    // Handle medical note form submission
+    $('#medical_note_form').on('submit', function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        var method = $('#medical-note-method').val();
+        var url = method === 'PUT'
+            ? '{{ route("patients.medical-history.update", [$patient->id, ":id"]) }}'.replace(':id', $('#medical-note-id').val())
+            : '{{ route("patients.medical-history.store", $patient->id) }}';
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-HTTP-Method-Override': method
+            },
+            success: function(response) {
+                $('#medicalNoteModal').modal('hide');
+                location.reload(); // Reload page to show updated data
+            },
+            error: function(xhr) {
+                alert('Error saving medical note: ' + xhr.responseJSON?.message || 'Unknown error');
+            }
+        });
+    });
+});
+</script>
+@endpush
