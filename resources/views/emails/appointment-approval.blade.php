@@ -6,7 +6,7 @@
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #FF00F8, #000000); color: white; padding: 20px; text-align: center; }
+        .header { background: linear-gradient(135deg, #FF00F8, #800080); color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .appointment-details { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #FF00F8; }
         .approve-button { background: #28a745; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }

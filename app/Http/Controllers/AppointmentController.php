@@ -428,6 +428,9 @@ class AppointmentController extends Controller
         $appointment->status = 'completed';
         $appointment->save();
 
+        // Send notification to doctor
+        $this->sendApprovalNotificationToDoctor($appointment);
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'status' => 'completed']);
         }
@@ -480,6 +483,24 @@ class AppointmentController extends Controller
                 \Log::error('Failed to send approval notification email', [
                     'appointment_id' => $appointment->id,
                     'institution_email' => $institution->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+    }
+
+    protected function sendApprovalNotificationToDoctor(Appointment $appointment)
+    {
+        $doctor = $appointment->doctor;
+        $institution = $appointment->school ?? $appointment->healthFacility;
+
+        if ($doctor && $doctor->email) {
+            try {
+                \Mail::to($doctor->email)->send(new \App\Mail\AppointmentApprovedMail($appointment));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send approval notification email to doctor', [
+                    'appointment_id' => $appointment->id,
+                    'doctor_email' => $doctor->email,
                     'error' => $e->getMessage()
                 ]);
             }
