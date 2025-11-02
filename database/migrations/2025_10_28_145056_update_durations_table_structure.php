@@ -12,6 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $driver = DB::getDriverName();
+
         // 1. Add price column if it doesn't exist
         Schema::table('durations', function (Blueprint $table) {
             if (!Schema::hasColumn('durations', 'price')) {
@@ -52,11 +54,39 @@ return new class extends Migration
             }
         });
 
-        // 5. Add unique constraint if it doesn't exist
-        $driver = DB::getDriverName();
+        // 5. Remove duplicate (minutes, duration_type) pairs if any
+        if (Schema::hasTable('durations')) {
+            if ($driver === 'pgsql') {
+                // ✅ PostgreSQL version (native SQL)
+                DB::statement("
+                    DELETE FROM durations
+                    WHERE id NOT IN (
+                        SELECT MIN(id)
+                        FROM durations
+                        GROUP BY minutes, duration_type
+                    );
+                ");
+            } else {
+                // 🚫 SQLite fallback — handle duplicates manually
+                $duplicates = DB::table('durations')
+                    ->select('minutes', 'duration_type', DB::raw('MIN(id) as keep_id'))
+                    ->groupBy('minutes', 'duration_type')
+                    ->havingRaw('COUNT(*) > 1')
+                    ->get();
 
+                foreach ($duplicates as $dup) {
+                    DB::table('durations')
+                        ->where('minutes', $dup->minutes)
+                        ->where('duration_type', $dup->duration_type)
+                        ->where('id', '!=', $dup->keep_id)
+                        ->delete();
+                }
+            }
+        }
+
+        // 6. Add unique constraint if it doesn't exist
         if ($driver === 'pgsql') {
-            // ✅ PostgreSQL: run the original DO $$ block
+            // ✅ PostgreSQL - use DO block
             DB::statement("
                 DO $$
                 BEGIN
@@ -72,14 +102,14 @@ return new class extends Migration
                 END$$;
             ");
         } else {
-            // 🚫 SQLite/MySQL: use Schema Builder fallback
+            // 🚫 SQLite/MySQL - add safe constraint via Schema builder
             if (Schema::hasTable('durations')) {
                 Schema::table('durations', function (Blueprint $table) {
                     if (Schema::hasColumn('durations', 'minutes') && Schema::hasColumn('durations', 'duration_type')) {
                         try {
                             $table->unique(['minutes', 'duration_type'], 'durations_minutes_duration_type_unique');
                         } catch (\Exception $e) {
-                            // ignore if already exists
+                            // Ignore if constraint already exists
                         }
                     }
                 });
@@ -113,7 +143,7 @@ return new class extends Migration
                     try {
                         $table->dropUnique('durations_minutes_duration_type_unique');
                     } catch (\Exception $e) {
-                        // ignore if doesn't exist
+                        // Ignore if constraint doesn't exist
                     }
                 });
             }
