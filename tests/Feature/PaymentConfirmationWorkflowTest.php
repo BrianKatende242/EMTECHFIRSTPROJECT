@@ -157,7 +157,7 @@ class PaymentConfirmationWorkflowTest extends TestCase
     public function doctor_only_sees_confirmed_appointments_in_dashboard()
     {
         // Initially, doctor should not see any appointments (both are awaiting_payment)
-        $response = $this->get(route('doctor.dashboard.show', $this->doctor->id));
+        $response = $this->get(route('doctor.dashboard'));
 
         // The appointments should not be visible in the dashboard
         // (This would need to be checked by examining the view data or HTML content)
@@ -167,7 +167,7 @@ class PaymentConfirmationWorkflowTest extends TestCase
         $this->postJson(route('payment.appointment.confirm-dummy', $this->schoolAppointment));
 
         // Now doctor should see one confirmed appointment
-        $response = $this->get(route('doctor.dashboard.show', $this->doctor->id));
+        $response = $this->get(route('doctor.dashboard'));
 
         // Check that the confirmed appointment is included in the response
         // (This would depend on how the dashboard renders the data)

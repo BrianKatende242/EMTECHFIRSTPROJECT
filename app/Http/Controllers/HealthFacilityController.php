@@ -108,39 +108,40 @@ class HealthFacilityController extends Controller
         ]);
     }
 
-    public function showDashboard($id)
+    public function showDashboard(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
     
         $notifications = collect(); 
     
         $allDoctors = Doctor::all(); // <-- fetch all doctors in the DB
     
-        $unreadMessages = Message::where('health_facility_id', $id)
+        $unreadMessages = Message::where('health_facility_id', $healthFacility->id)
                                  ->where('is_read', false)
                                  ->count();
     
-        $appointments = Appointment::where('health_facility_id', $id)
+        $appointments = Appointment::where('health_facility_id', $healthFacility->id)
                                    ->latest()
                                    ->take(10)
                                    ->get();
     
-        $availableDoctors = Doctor::where('health_facility_id', $id)
+        $availableDoctors = Doctor::where('health_facility_id', $healthFacility->id)
                                   ->whereHas('availabilities', function ($query) {
                                       $query->where('available', true);
                                   })
                                   ->get();
     
-        $messages = Message::where('health_facility_id', $id)
+        $messages = Message::where('health_facility_id', $healthFacility->id)
                            ->orderBy('created_at', 'desc')
                            ->get();
     
-        $patients = Patient::forHealthFacility($id)->get();
+        $patients = Patient::forHealthFacility($healthFacility->id)->get();
 
         // Metrics
         $patientsCount = $patients->count();
-        $appointmentsCount = Appointment::where('health_facility_id', $id)->count();
-        $availableDoctorsCount = Doctor::where('health_facility_id', $id)
+        $appointmentsCount = Appointment::where('health_facility_id', $healthFacility->id)->count();
+        $availableDoctorsCount = Doctor::where('health_facility_id', $healthFacility->id)
             ->whereHas('availabilities', function ($query) {
                 $query->where('available', true);
             })->count();
@@ -154,17 +155,17 @@ class HealthFacilityController extends Controller
             $labels[] = $day->format('D');
             $dayStart = (clone $day)->startOfDay();
             $dayEnd = (clone $day)->endOfDay();
-            $countForDay = Appointment::where('health_facility_id', $id)
+            $countForDay = Appointment::where('health_facility_id', $healthFacility->id)
                 ->whereBetween('appointment_time', [$dayStart, $dayEnd])
                 ->count();
             $series[] = $countForDay;
         }
 
         // Doughnut: Patients by gender
-        $maleCount = Patient::forHealthFacility($id)->where('gender', 'male')->count();
-        $femaleCount = Patient::forHealthFacility($id)->where('gender', 'female')->count();
-        $otherCount = Patient::forHealthFacility($id)->where('gender', 'other')->count();
-        $unknownCount = Patient::forHealthFacility($id)->whereNull('gender')->orWhere('gender','')->count();
+        $maleCount = Patient::forHealthFacility($healthFacility->id)->where('gender', 'male')->count();
+        $femaleCount = Patient::forHealthFacility($healthFacility->id)->where('gender', 'female')->count();
+        $otherCount = Patient::forHealthFacility($healthFacility->id)->where('gender', 'other')->count();
+        $unknownCount = Patient::forHealthFacility($healthFacility->id)->whereNull('gender')->orWhere('gender','')->count();
         $genderLabels = ['Male', 'Female', 'Other', 'Unspecified'];
         $genderData = [$maleCount, $femaleCount, $otherCount, $unknownCount];
     
@@ -189,23 +190,25 @@ class HealthFacilityController extends Controller
         ]);
     }
 
-    public function patients($id)
+    public function patients(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
-        $patients = Patient::forHealthFacility($id)->latest()->get();
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
+        $patients = Patient::forHealthFacility($healthFacility->id)->latest()->get();
         return view('health-facility/patients', compact('healthFacility', 'patients'));
     }
 
-    public function destroyAllPatients(Request $request, $id)
+    public function destroyAllPatients(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
         
         // Check if a specific patient ID is provided
         if ($request->has('patient_id')) {
             $patient = Patient::findOrFail($request->patient_id);
             
             // Verify the patient belongs to the health facility
-            if ($patient->health_facility_id !== (int)$id) {
+            if ($patient->health_facility_id !== $healthFacility->id) {
                 abort(403, 'Patient does not belong to this health facility');
             }
             
@@ -215,11 +218,11 @@ class HealthFacilityController extends Controller
             $patient->delete();
             
             return redirect()
-                ->route('health-facility.patients', ['id' => $id])
+                ->route('health-facility.patients')
                 ->with('success', 'Patient and their appointments deleted successfully.');
         } else {
             // Delete all patients for this health facility
-            $patients = Patient::forHealthFacility($id)->get();
+            $patients = Patient::forHealthFacility($healthFacility->id)->get();
             
             // Delete appointments for each patient first
             foreach ($patients as $patient) {
@@ -227,24 +230,27 @@ class HealthFacilityController extends Controller
             }
             
             // Delete all patients
-            Patient::forHealthFacility($id)->delete();
+            Patient::forHealthFacility($healthFacility->id)->delete();
             
             return redirect()
-                ->route('health-facility.patients', ['id' => $id])
+                ->route('health-facility.patients')
                 ->with('success', 'All patients and their appointments deleted successfully.');
         }
     }
 
-    public function destroyPatient($id, $patientId)
+    public function destroyPatient(Request $request, $patientId)
     {
-        Log::info('Destroy patient called', ['health_facility_id' => $id, 'patient_id_param' => $patientId]);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
+
+        Log::info('Destroy patient called', ['health_facility_id' => $healthFacility->id, 'patient_id_param' => $patientId]);
 
         $patient = Patient::findOrFail($patientId);
         Log::info('Patient found', ['patient_id' => $patient->id, 'patient_health_facility_id' => $patient->health_facility_id]);
 
         // Verify the patient belongs to the health facility
-        if ($patient->health_facility_id !== (int)$id) {
-            Log::warning('Patient does not belong to health facility', ['patient_health_facility_id' => $patient->health_facility_id, 'requested_id' => $id]);
+        if ($patient->health_facility_id !== $healthFacility->id) {
+            Log::warning('Patient does not belong to health facility', ['patient_health_facility_id' => $patient->health_facility_id, 'requested_id' => $healthFacility->id]);
             abort(403, 'Patient does not belong to this health facility');
         }
 
@@ -254,53 +260,58 @@ class HealthFacilityController extends Controller
         $patient->delete();
 
         return redirect()
-            ->route('health-facility.patients', ['id' => $id])
+            ->route('health-facility.patients')
             ->with('success', 'Patient and their appointments deleted successfully.');
     }
 
-    public function createPatient($id)
+    public function createPatient(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
         return view('health-facility/patients-create', compact('healthFacility'));
     }
 
-    public function bookDoctor($id)
+    public function bookDoctor(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
-        $patients = Patient::forHealthFacility($id)->latest()->get();
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
+        $patients = Patient::forHealthFacility($healthFacility->id)->latest()->get();
         $doctors = Doctor::latest()->get();
-        $appointments = Appointment::where('health_facility_id', $id)
+        $appointments = Appointment::where('health_facility_id', $healthFacility->id)
             ->with(['patient', 'doctor', 'duration'])
             ->latest()
             ->get();
         return view('health-facility/book-doctor', compact('healthFacility', 'patients', 'doctors', 'appointments'));
     }
 
-    public function labTests($id)
+    public function labTests(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
         // Placeholder: if LabTest supports health_facility_id, filter; else show empty list
         $labTests = collect();
         return view('health-facility/lab-tests', compact('healthFacility', 'labTests'));
     }
 
-    public function transactions($id)
+    public function transactions(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
         // Get transactions/payments related to this health facility
         // For now, we'll show appointments with payment status
-        $appointments = Appointment::where('health_facility_id', $id)
+        $appointments = Appointment::where('health_facility_id', $healthFacility->id)
             ->with(['patient', 'doctor', 'duration'])
             ->latest()
             ->paginate(15);
         return view('health-facility/transactions', compact('healthFacility', 'appointments'));
     }
 
-    public function staff($id)
+    public function staff(Request $request)
     {
-        $healthFacility = HealthFacility::findOrFail($id);
+        $authenticatedUser = $request->current_user;
+        $healthFacility = HealthFacility::findOrFail($authenticatedUser['id']);
         // Get doctors associated with this health facility
-        $doctors = Doctor::where('health_facility_id', $id)->latest()->get();
+        $doctors = Doctor::where('health_facility_id', $healthFacility->id)->latest()->get();
         return view('health-facility/staff', compact('healthFacility', 'doctors'));
     }
 

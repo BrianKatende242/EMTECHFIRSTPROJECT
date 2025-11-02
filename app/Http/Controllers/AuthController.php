@@ -53,11 +53,15 @@ class AuthController extends Controller
             // ignore
         }
 
+        // Clear session-based authentication for entities (schools, health facilities)
+        $request->session()->forget('authenticated_user');
+        $request->session()->forget('_session_lifetime');
+
         // Invalidate session and regenerate CSRF token
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Redirect to login page after logout
-        return redirect()->route('login');
+        // Show logout page with countdown instead of redirecting to login
+        return view('auth.logout');
     }
 }

@@ -212,6 +212,19 @@
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modal_duration_type">Duration Type <span class="text-danger">*</span></label>
+                                <select name="duration_type" id="modal_duration_type" class="form-control @error('duration_type') is-invalid @enderror" required>
+                                    <option value="general" {{ old('duration_type', 'general') === 'general' ? 'selected' : '' }}>General</option>
+                                    <option value="specialist" {{ old('duration_type') === 'specialist' ? 'selected' : '' }}>Specialist</option>
+                                </select>
+                                @error('duration_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -222,9 +235,18 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">UGX</span>
                                     </div>
+<<<<<<< HEAD
+                                    <input type="number" name="price" id="modal_price" class="form-control @error('price') is-invalid @enderror"
+                                           value="{{ old('price') }}" step="0.01" min="0" required>
+                                </div>
+                                @error('price')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+=======
                                     <input type="number" name="price" id="modal_price" class="form-control" step="0.01" min="0" required>
                                 </div>
                                 <div class="invalid-feedback"></div>
+>>>>>>> 5574e2083b71cb54484a5dd6692cf825691a4835
                             </div>
                         </div>
                     </div>

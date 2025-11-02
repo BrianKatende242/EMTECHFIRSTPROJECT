@@ -1,0 +1,21 @@
+/* Custom styles to fix active state in sidebar */
+.sidebar .nav .nav-item .nav-link.active {
+    background: #f7f8fc !important;
+    color: #12253f !important;
+}
+
+.sidebar .nav .nav-item .nav-link.active i,
+.sidebar .nav .nav-item .nav-link.active .menu-title {
+    color: #12253f !important;
+}
+
+/* Dark theme support */
+.sidebar-dark .sidebar .nav .nav-item .nav-link.active {
+    background: #3b424c !important;
+    color: #ffffff !important;
+}
+
+.sidebar-dark .sidebar .nav .nav-item .nav-link.active i,
+.sidebar-dark .sidebar .nav .nav-item .nav-link.active .menu-title {
+    color: #ffffff !important;
+}

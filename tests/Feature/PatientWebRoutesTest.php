@@ -27,10 +27,28 @@ class PatientWebRoutesTest extends TestCase
 
     protected function mockAuthenticatedSchool(School $school)
     {
-        // Mock the getAuthenticatedSchool function to return our test school
-        $this->app->bind('getAuthenticatedSchool', function () use ($school) {
-            return $school;
-        });
+        // Mock the session to have an authenticated school user
+        $this->withSession([
+            'authenticated_user' => [
+                'id' => $school->id,
+                'type' => 'school',
+                'name' => $school->name,
+                'email' => $school->email,
+            ]
+        ]);
+    }
+
+    protected function mockAuthenticatedHealthFacility(HealthFacility $healthFacility)
+    {
+        // Mock the session to have an authenticated health facility user
+        $this->withSession([
+            'authenticated_user' => [
+                'id' => $healthFacility->id,
+                'type' => 'health_facility',
+                'name' => $healthFacility->name,
+                'email' => $healthFacility->email,
+            ]
+        ]);
     }
 
     /** @test */
@@ -63,7 +81,7 @@ class PatientWebRoutesTest extends TestCase
         $response = $this->get("/students/{$school->id}");
 
         $response->assertStatus(200)
-                ->assertViewIs('students')
+                ->assertViewIs('school.students')
                 ->assertViewHas('school', $school)
                 ->assertViewHas('students');
 
@@ -271,7 +289,9 @@ class PatientWebRoutesTest extends TestCase
             'status' => 'completed',
         ]);
 
-        $response = $this->get("/school-dashboard/{$school->id}");
+        $this->mockAuthenticatedSchool($school);
+
+        $response = $this->get("/school-dashboard");
 
         $response->assertStatus(200)
                 ->assertViewHas('school', $school)
@@ -404,7 +424,9 @@ class PatientWebRoutesTest extends TestCase
             'medical_history' => 'Diabetes',
         ]);
 
-        $response = $this->get("/health-facility/{$healthFacility->id}/patients");
+        $this->mockAuthenticatedHealthFacility($healthFacility);
+
+        $response = $this->get("/health-facility/patients");
 
         $response->assertStatus(200)
                 ->assertViewHas('healthFacility', $healthFacility)
@@ -437,7 +459,7 @@ class PatientWebRoutesTest extends TestCase
 
         $response = $this->withoutMiddleware()->post('/patients/create', $data);
 
-        $response->assertRedirect("/health-facility/{$healthFacility->id}/patients");
+        $response->assertRedirect("/health-facility/patients");
 
         $this->assertDatabaseHas('patients', [
             'name' => 'Web HF Patient',

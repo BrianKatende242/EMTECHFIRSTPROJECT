@@ -138,7 +138,7 @@
 
     <div class="mb-3">
         <label for="doctor_id" class="form-label">Doctor</label>
-        <select id="doctor_id" class="form-control form-select" name="doctor_id" required>
+        <select id="doctor_id" class="js-example-basic-single w-100 form-control" name="doctor_id" required>
             <option value="">Select Doctor</option>
             @foreach($doctors ?? [] as $doc)
                 <option value="{{ $doc->id }}">Dr. {{ $doc->name }} ({{ $doc->specialization }})</option>

@@ -75,7 +75,6 @@ class OtpController extends Controller
             ]);
             
             // Send OTP email immediately (bypass queue for testing)
-           // Mail::to($request->email)->send(new SendOtpMail($otp, $userType));
             Mail::to($request->email)->send(new SendOtpMail($otp, $expiresAt->diffInMinutes(now())));
 
             
@@ -190,8 +189,7 @@ class OtpController extends Controller
                 throw new \Exception('Email not associated with any entity'); 
             }
 
-            //Mail::to($request->email)->send(new SendOtpMail($otp, $userType));
-            Mail::to($request->email)->send(new SendOtpMail($otp, $expiresAt->diffInMinutes(now())));
+            Mail::to($request->email)->send(new SendOtpMail($otp, $userType, $expiresAt->diffInMinutes(now())));
 
             return response()->json(['success' => true]);
 

@@ -601,7 +601,17 @@ class UnifiedPatientManagementTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->get("/school-dashboard/{$school->id}");
+        // Mock authenticated school session
+        $this->withSession([
+            'authenticated_user' => [
+                'id' => $school->id,
+                'type' => 'school',
+                'name' => $school->name,
+                'email' => $school->email,
+            ]
+        ]);
+
+        $response = $this->get("/school-dashboard");
 
         $response->assertStatus(200)
                 ->assertViewHas('school', $school)
@@ -671,7 +681,7 @@ class UnifiedPatientManagementTest extends TestCase
             'health_facility_id' => $healthFacility->id,
         ]);
 
-        $response->assertRedirect("/health-facility/{$healthFacility->id}/patients");
+        $response->assertRedirect("/health-facility/patients");
 
         // Check that the patient is now associated with the health facility
         $existingPatient->refresh();

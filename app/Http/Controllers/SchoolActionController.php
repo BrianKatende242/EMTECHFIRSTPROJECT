@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SchoolOTPMail;
+use App\Mail\SendOtpMail;
 use App\Mail\SchoolRejectionMail;
 use App\Mail\SchoolQueryMail;
 use Illuminate\Support\Facades\Log;
@@ -59,7 +59,7 @@ class SchoolActionController extends Controller
         // School::where('id', $schoolId)->update(['otp' => $otp, 'otp_expires_at' => now()->addHours(24)]);
         
         // Send OTP email
-        Mail::to($email)->send(new SchoolOTPMail($otp));
+        Mail::to($email)->send(new SendOtpMail($otp, 'school'));
 
         return response()->json([
             'success' => true,

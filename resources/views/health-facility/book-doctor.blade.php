@@ -100,7 +100,7 @@
                     @csrf
                     <input type="hidden" name="health_facility_id" value="{{ $healthFacility->id }}">
                     <div class="modal-body">
-                        <div class="row g-3">
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Patient</label>
                                 <select name="patient_id" class="form-select form-control" required>
@@ -222,6 +222,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('bookDoctorModal');
     const modalBody = modal.querySelector('.modal-body');
     let appointmentToDelete = null;
+
+    // Initialize Select2 when modal opens
+    $('#bookDoctorModal').on('shown.bs.modal', function () {
+        $("#doctor_id").select2({
+            width: '100%',
+            dropdownParent: $('#bookDoctorModal'),
+            placeholder: 'Select a doctor',
+            allowClear: true
+        });
+    });
+
+    // Destroy Select2 when modal closes to prevent duplicates
+    $('#bookDoctorModal').on('hidden.bs.modal', function () {
+        $("#doctor_id").select2('destroy');
+    });
 
     // Duration filtering code...
 
