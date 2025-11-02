@@ -53,20 +53,38 @@ return new class extends Migration
         });
 
         // 5. Add unique constraint if it doesn't exist
-        DB::statement("
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 
-                    FROM pg_constraint 
-                    WHERE conname = 'durations_minutes_duration_type_unique'
-                ) THEN
-                    ALTER TABLE durations 
-                    ADD CONSTRAINT durations_minutes_duration_type_unique 
-                    UNIQUE (minutes, duration_type);
-                END IF;
-            END$$;
-        ");
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            // ✅ PostgreSQL: run the original DO $$ block
+            DB::statement("
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 
+                        FROM pg_constraint 
+                        WHERE conname = 'durations_minutes_duration_type_unique'
+                    ) THEN
+                        ALTER TABLE durations 
+                        ADD CONSTRAINT durations_minutes_duration_type_unique 
+                        UNIQUE (minutes, duration_type);
+                    END IF;
+                END$$;
+            ");
+        } else {
+            // 🚫 SQLite/MySQL: use Schema Builder fallback
+            if (Schema::hasTable('durations')) {
+                Schema::table('durations', function (Blueprint $table) {
+                    if (Schema::hasColumn('durations', 'minutes') && Schema::hasColumn('durations', 'duration_type')) {
+                        try {
+                            $table->unique(['minutes', 'duration_type'], 'durations_minutes_duration_type_unique');
+                        } catch (\Exception $e) {
+                            // ignore if already exists
+                        }
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -74,18 +92,32 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $driver = DB::getDriverName();
+
         // 1. Drop unique constraint if exists
-        DB::statement("
-            DO $$
-            BEGIN
-                IF EXISTS (
-                    SELECT 1 FROM pg_constraint 
-                    WHERE conname = 'durations_minutes_duration_type_unique'
-                ) THEN
-                    ALTER TABLE durations DROP CONSTRAINT durations_minutes_duration_type_unique;
-                END IF;
-            END$$;
-        ");
+        if ($driver === 'pgsql') {
+            DB::statement("
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_constraint 
+                        WHERE conname = 'durations_minutes_duration_type_unique'
+                    ) THEN
+                        ALTER TABLE durations DROP CONSTRAINT durations_minutes_duration_type_unique;
+                    END IF;
+                END$$;
+            ");
+        } else {
+            if (Schema::hasTable('durations')) {
+                Schema::table('durations', function (Blueprint $table) {
+                    try {
+                        $table->dropUnique('durations_minutes_duration_type_unique');
+                    } catch (\Exception $e) {
+                        // ignore if doesn't exist
+                    }
+                });
+            }
+        }
 
         // 2. Rename 'duration_type' back to 'type' if exists
         if (Schema::hasColumn('durations', 'duration_type')) {
