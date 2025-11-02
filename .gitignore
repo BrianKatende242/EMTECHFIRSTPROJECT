@@ -23,3 +23,9 @@ sendgrid.env
 # Temporary helper scripts
 apply-docker-to-branches.sh
 APPLY_DOCKER_GUIDE.md
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
