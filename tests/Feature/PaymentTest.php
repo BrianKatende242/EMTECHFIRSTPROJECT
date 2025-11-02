@@ -51,9 +51,8 @@ class PaymentTest extends TestCase
 
         $duration = Duration::create([
             'minutes' => 30,
-            'general_price' => 50000.00,
-            'specialist_price' => 0,
-            'type' => 'general',
+            'duration_type' => 'general',
+            'price' => 50000.00,
             'is_active' => true
         ]);
 

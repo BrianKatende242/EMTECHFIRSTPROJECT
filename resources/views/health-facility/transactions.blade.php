@@ -43,7 +43,7 @@ use Illuminate\Support\Str;
                             <td>{{ $appointment->patient->name ?? 'N/A' }}</td>
                             <td>{{ $appointment->doctor->name ?? 'N/A' }}</td>
                             <td>{{ $appointment->appointment_time ? $appointment->appointment_time->format('M d, Y H:i') : 'N/A' }}</td>
-                            <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins ' . ucfirst($appointment->duration->type) : 'N/A' }}</td>
+                            <td>{{ $appointment->duration ? $appointment->duration->minutes . ' mins ' . ucfirst($appointment->duration->duration_type) : 'N/A' }}</td>
                             <td>
                                 <span class="badge bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'cancelled' ? 'danger' : 'warning') }}">
                                     {{ ucfirst(str_replace('_', ' ', $appointment->status ?? 'pending')) }}

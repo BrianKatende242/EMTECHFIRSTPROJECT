@@ -11,21 +11,17 @@ trait CreatesTestDurations
     {
         // Use firstOrCreate to ensure durations exist
         Duration::firstOrCreate(
-            ['type' => 'general'],
+            ['minutes' => 15, 'duration_type' => 'general'],
             [
-                'minutes' => 15,
-                'general_price' => 50000,
-                'specialist_price' => 75000,
+                'price' => 50000,
                 'is_active' => true,
             ]
         );
 
         Duration::firstOrCreate(
-            ['type' => 'specialist'],
+            ['minutes' => 30, 'duration_type' => 'specialist'],
             [
-                'minutes' => 30,
-                'general_price' => 75000,
-                'specialist_price' => 100000,
+                'price' => 100000,
                 'is_active' => true,
             ]
         );
@@ -34,13 +30,13 @@ trait CreatesTestDurations
     protected function getGeneralDurationId()
     {
         $this->createTestDurations(); // Ensure durations exist
-        return Duration::where('type', 'general')->first()->id;
+        return Duration::where('duration_type', 'general')->first()->id;
     }
 
     protected function getSpecialistDurationId()
     {
         $this->createTestDurations(); // Ensure durations exist
-        return Duration::where('type', 'specialist')->first()->id;
+        return Duration::where('duration_type', 'specialist')->first()->id;
     }
 
     protected function createAppointment(array $data)

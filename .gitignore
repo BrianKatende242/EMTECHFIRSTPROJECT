@@ -19,3 +19,9 @@ MARZPAY_DOCUMENTATION.txt
 
 selenium_test.py
 sendgrid.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
