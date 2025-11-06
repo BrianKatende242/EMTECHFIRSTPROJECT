@@ -55,7 +55,7 @@
                         <td class="appt-time">{{ $appointment->appointment_time->format('M d, Y h:i A') }}</td>
                         <td class="appt-patient">
                             @if($appointment->patient)
-                                <a href="{{ route('patients.profile', ['patient' => $appointment->patient->id]) }}" class="text-decoration-none" target="_blank">
+                                <a href="{{ route('patients.profile', ['patient' => $appointment->patient->id]) }}" class="text-decoration-none">
                                     {{ $appointment->patient->name }}
                                 </a>
                             @else
