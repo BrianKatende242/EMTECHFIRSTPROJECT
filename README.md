@@ -1,4 +1,4 @@
-# Comprehensive Healthcare & Education Management System
+# Comprehensive Healthcare & Education Telemedicine Management System
 
 ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
@@ -24,13 +24,13 @@ A robust backend system built with Laravel 11, Docker, and PostgreSQL, providing
 ![School Dashboard](https://laravelbackendchil.onrender.com/images/SchoolAPIDashboard.jpeg)
 
 ### Doctor Administration Portal
+
 ![Doctor Dashboard](https://laravelbackendchil.onrender.com/images/DoctorAppointments.jpeg)
 
 ## 🚀 Live Deployment
 
 The system is currently deployed on Render:  
 [![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://laravelbackendchil.onrender.com)
-
 
 ## 🔍 Core API Endpoints
 
@@ -41,7 +41,7 @@ The system is currently deployed on Render:
 - `GET /schools` - Retrieve all schools
 - `POST /students` - Student creation
 - `POST /lab-tests` - Student health tests
-</details>
+  </details>
 
 <details>
 <summary>🏥 Healthcare Services</summary>
@@ -50,7 +50,7 @@ The system is currently deployed on Render:
 - `POST /appointments` - Appointment booking
 - `GET /patients/{healthFacility}` - Patient records
 - `POST /maternal-documents` - Pregnancy documentation
-</details>
+  </details>
 
 ## 🛠️ Technical Stack
 
@@ -80,3 +80,4 @@ docker-compose exec app php artisan migrate
 # Install dependencies
 docker-compose exec app composer install
 docker-compose exec app npm install
+```
