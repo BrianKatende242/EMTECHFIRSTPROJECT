@@ -15,7 +15,6 @@ A robust backend system built with Laravel 11, Docker, and PostgreSQL, providing
 - **Payment Integration**: Mobile money (MOMO) processing system(To Be Changed To Stripe Integration)
 - **Document Management**: Secure file uploads and storage
 - **OTP Authentication**: Secure verification system for users
-- **Appointment Scheduling**: Doctor booking system with meeting links for our different clients Schools, HealthFacilities and Laboratories.
 
 ## 📸 Dashboard Previews
 
@@ -41,7 +40,7 @@ The system is currently deployed on Render:
 - `GET /schools` - Retrieve all schools
 - `POST /students` - Student creation
 - `POST /lab-tests` - Student health tests
-  </details>
+      </details>
 
 <details>
 <summary>🏥 Healthcare Services</summary>
@@ -50,7 +49,7 @@ The system is currently deployed on Render:
 - `POST /appointments` - Appointment booking
 - `GET /patients/{healthFacility}` - Patient records
 - `POST /maternal-documents` - Pregnancy documentation
-  </details>
+      </details>
 
 ## 🛠️ Technical Stack
 
